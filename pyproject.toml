@@ -18,6 +18,8 @@ qiskit-machine-learning = "^0.7.2"
 qiskit-algorithms = "^0.3.1"
 torch = "^2.5.1"
 numpy = "^2.1.2"
+matplotlib = "^3.9.2"
+pylatexenc = "^2.10"
 
 [tool.poetry.scripts]
 run_example = "src.example_package.example:main"
