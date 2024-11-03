@@ -20,3 +20,5 @@ class SingleQubitUnitaryLayer(BaseLearnableLayer):
         pattern = qiskit.QuantumCircuit(1)
         pattern.ry(params[0], 0)
         pattern.rz(params[1], 0)
+
+        return pattern
