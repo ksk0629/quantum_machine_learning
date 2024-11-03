@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from src.bases.base_layer import BaseLayer
+from src.layers.base_layer import BaseLayer
 
 
 class BaseLearnableLayer(ABC, BaseLayer):
