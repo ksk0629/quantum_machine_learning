@@ -12,3 +12,7 @@ class BaseLayer(ABC):
     @abstractmethod
     def get_circuit(self) -> qiskit.QuantumCircuit:
         pass
+
+    @abstractmethod
+    def get(self) -> qiskit.QuantumCircuit:
+        pass
