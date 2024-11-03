@@ -18,7 +18,7 @@ class DualQubitUnitaryLayer(BaseLearnableLayer):
         :return qiskit.QuantumCircuit: dual qubit unitary layer pattern
         """
         pattern = qiskit.QuantumCircuit(2)
-        pattern.rry(params[0], 0, 1)
-        pattern.rrz(params[1], 0, 1)
+        pattern.ryy(params[0], 0, 1)
+        pattern.rzz(params[1], 0, 1)
 
         return pattern
