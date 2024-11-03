@@ -30,7 +30,7 @@ class TestSingleQubitUnitaryLayer:
             Check if
             - the number of parameters equals to double of the number of elements of applied_qubits.
             - the number of gates equals to double of the number of elements of applied_qubits.
-            - each gate is either ry or ry.
+            - each gate is either ry or rz.
             - the number of ry gates eqauls to the number of elements of applied_qubits.
         """
         maximal_applied_qubit = max(applied_qubits)
