@@ -70,23 +70,3 @@ class SingleQubitUnitaryLayer(BaseLearnableLayer):
         circuit.append(circuit_inst, list(range(self.num_qubits)))
 
         return circuit
-
-    @classmethod
-    def get(
-        cls,
-        param_prefix: str,
-        num_qubits: int,
-        applied_qubits: list[int],
-    ) -> qiskit.QuantumCircuit:
-        """Call get_circuit as a class method.
-
-        :param str param_prefix: prefix of parameter name
-        :param int num_qubits: number of qubits
-        :param list[int] applied_qubits: list of qubits to which single qubit unitary is applied
-        :return qiskit.QuantumCircuit: single qubit unitary layer circuit
-        """
-        single_qubit_unitary_layer = cls(param_prefix=param_prefix)
-        circuit = single_qubit_unitary_layer.get_circuit(
-            num_qubits=num_qubits, applied_qubits=applied_qubits
-        )
-        return circuit

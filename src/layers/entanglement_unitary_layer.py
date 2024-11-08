@@ -75,23 +75,3 @@ class EntanglementUnitaryLayer(BaseLearnableLayer):
         circuit.append(circuit_inst, list(range(self.num_qubits)))
 
         return circuit
-
-    @classmethod
-    def get(
-        cls,
-        param_prefix: str,
-        num_qubits: int,
-        applied_qubit_pairs: list[tuple[int, int]],
-    ) -> qiskit.QuantumCircuit:
-        """Call get_circuit as a class method.
-
-        :param str param_prefix: prefix of parameter name
-        :param int num_qubits: number of qubits
-        :param list[int] applied_qubit_pairs: list of qubit pairs, (control qubit, target qubit), to which entanglement unitary is applied
-        :return qiskit.QuantumCircuit: entanglement unitary layer circuit
-        """
-        entanglement_unitary_layer = cls(param_prefix=param_prefix)
-        circuit = entanglement_unitary_layer.get_circuit(
-            num_qubits=num_qubits, applied_qubit_pairs=applied_qubit_pairs
-        )
-        return circuit
