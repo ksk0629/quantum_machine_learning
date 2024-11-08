@@ -21,7 +21,7 @@ class YZEncoder(BaseEncoder):
         # Get parameters.
         params = qiskit.circuit.ParameterVector("x", length=self.num_params)
 
-        circuit = qiskit.QuantumCircuit(self.num_qubits)
+        circuit = qiskit.QuantumCircuit(self.num_qubits, name="YZEncoder")
         for index_qubit in range(self.num_qubits):
             index_first_param = index_qubit * 2
             circuit.ry(params[index_first_param], index_qubit)
