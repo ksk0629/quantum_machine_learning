@@ -13,6 +13,9 @@ class BaseLayer(ABC):
     def get_circuit(self) -> qiskit.QuantumCircuit:
         pass
 
+    def __call__(self) -> qiskit.QuantumCircuit:
+        return self.get_circuit()
+
     @classmethod
     def get(cls, *args) -> qiskit.QuantumCircuit:
         layer = cls(*args)
