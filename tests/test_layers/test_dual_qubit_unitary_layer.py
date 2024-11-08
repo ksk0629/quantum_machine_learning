@@ -7,16 +7,33 @@ from src.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
 class TestDualQubitUnitaryLayer:
     @classmethod
     def setup_class(cls):
+        cls.num_qubits = 4
+        cls.applied_qubit_pairs = [(0, 1), (0, 3)]
         cls.param_prefix = "test_dual_qubit_unitary"
         cls.dual_qubit_unitary_layer = DualQubitUnitaryLayer(
-            param_prefix=cls.param_prefix
+            num_qubits=cls.num_qubits,
+            applied_qubit_pairs=cls.applied_qubit_pairs,
+            param_prefix=cls.param_prefix,
         )
 
     def test_init(self):
         """Normal test
-        Check if the class that was prepared in setup_class has param_prefix as same as self.param_prefix.
+        Check if the class that was prepared in setup_class has
+        - num_qubits as same as self.num_qubits.
+        - applied_qubit_pairs as same as self.applied_qubit_pairs.
+        - param_prefix as same as self.param_prefix.
+        - num_params as double as the number of sell.applied_qubit_pairs.
         """
+        assert self.dual_qubit_unitary_layer.num_qubits == self.num_qubits
+        assert (
+            self.dual_qubit_unitary_layer.applied_qubit_pairs
+            == self.applied_qubit_pairs
+        )
         assert self.dual_qubit_unitary_layer.param_prefix == self.param_prefix
+        assert (
+            self.dual_qubit_unitary_layer.num_params
+            == len(self.applied_qubit_pairs) * 2
+        )
 
     @pytest.mark.parametrize("num_qubits", [2, 5, 8])
     @pytest.mark.parametrize(
@@ -42,15 +59,17 @@ class TestDualQubitUnitaryLayer:
             applied_qubits.append(applied_qubit_pair[1])
         maximal_applied_qubit = max(applied_qubits)
 
+        dual_qubit_unitary_layer = DualQubitUnitaryLayer(
+            num_qubits=num_qubits,
+            applied_qubit_pairs=applied_qubit_pairs,
+            param_prefix=self.param_prefix,
+        )
+
         if maximal_applied_qubit > num_qubits - 1:
             with pytest.raises(qiskit.circuit.exceptions.CircuitError):
-                self.dual_qubit_unitary_layer.get_circuit(
-                    num_qubits=num_qubits, applied_qubit_pairs=applied_qubit_pairs
-                )
+                dual_qubit_unitary_layer.get_circuit()
         else:
-            circuit = self.dual_qubit_unitary_layer.get_circuit(
-                num_qubits=num_qubits, applied_qubit_pairs=applied_qubit_pairs
-            )
+            circuit = dual_qubit_unitary_layer.get_circuit()
             # Check the number of the parameters.
             correct_num_parameters = 2 * len(applied_qubit_pairs)
             assert len(circuit.parameters) == correct_num_parameters
