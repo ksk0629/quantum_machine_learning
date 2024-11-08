@@ -7,16 +7,29 @@ from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
 class TestSingleQubitUnitaryLayer:
     @classmethod
     def setup_class(cls):
+        cls.num_qubits = 4
+        cls.applied_qubits = [0, 1, 2, 3]
         cls.param_prefix = "test_single_qubit_unitary"
         cls.single_qubit_unitary_layer = SingleQubitUnitaryLayer(
-            param_prefix=cls.param_prefix
+            num_qubits=cls.num_qubits,
+            applied_qubits=cls.applied_qubits,
+            param_prefix=cls.param_prefix,
         )
 
     def test_init(self):
         """Normal test
-        Check if the class that was prepared in setup_class has param_prefix as same as self.param_prefix.
+        Check if the class that was prepared in setup_class has
+        - num_qubits as same as self.num_qubits.
+        - applied_qubits as same as self.applied_qubits.
+        - param_prefix as same as self.param_prefix.
+        - num_params as double as the number of self.applied_qubits.
         """
+        assert self.single_qubit_unitary_layer.num_qubits == self.num_qubits
+        assert self.single_qubit_unitary_layer.applied_qubits == self.applied_qubits
         assert self.single_qubit_unitary_layer.param_prefix == self.param_prefix
+        assert (
+            self.single_qubit_unitary_layer.num_params == len(self.applied_qubits) * 2
+        )
 
     @pytest.mark.parametrize("num_qubits", [2, 5, 8])
     @pytest.mark.parametrize("applied_qubits", [[0, 1], [1], [0, 2, 4], [1, 3, 5, 7]])
@@ -35,15 +48,17 @@ class TestSingleQubitUnitaryLayer:
         """
         maximal_applied_qubit = max(applied_qubits)
 
+        single_qubit_unitary_layer = SingleQubitUnitaryLayer(
+            num_qubits=num_qubits,
+            applied_qubits=applied_qubits,
+            param_prefix=self.param_prefix,
+        )
+
         if maximal_applied_qubit > num_qubits - 1:
             with pytest.raises(qiskit.circuit.exceptions.CircuitError):
-                self.single_qubit_unitary_layer.get_circuit(
-                    num_qubits=num_qubits, applied_qubits=applied_qubits
-                )
+                single_qubit_unitary_layer.get_circuit()
         else:
-            circuit = self.single_qubit_unitary_layer.get_circuit(
-                num_qubits=num_qubits, applied_qubits=applied_qubits
-            )
+            circuit = single_qubit_unitary_layer.get_circuit()
             # Check the number of the parameters.
             correct_num_parameters = 2 * len(applied_qubits)
             assert len(circuit.parameters) == correct_num_parameters
