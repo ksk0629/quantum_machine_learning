@@ -6,16 +6,16 @@ from src.layers.base_learnable_layer import BaseLearnableLayer
 class SingleQubitUnitaryLayer(BaseLearnableLayer):
     """SingleQubitUnitaryLayer class, suggested in https://arxiv.org/pdf/2103.11307"""
 
-    def __init__(self, param_prefix: str, num_qubits: int, applied_qubits: list[int]):
+    def __init__(self, num_qubits: int, applied_qubits: list[int], param_prefix: str):
         """initialise the layer.
 
-        :param str param_prefix: parameter prefix
         :param int num_qubits: number of qubits
         :param list[int] applied_qubits: list of qubits to which single qubit unitary is applied
+        :param str param_prefix: parameter prefix
         """
-        super().__init__(param_prefix=param_prefix)
         self.num_qubits = num_qubits
         self.applied_qubits = applied_qubits
+        super().__init__(param_prefix=param_prefix)
 
     @property
     def num_params(self) -> int:
