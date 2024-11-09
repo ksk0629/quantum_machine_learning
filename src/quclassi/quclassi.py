@@ -1,5 +1,9 @@
+import os
+import pickle
+
 import numpy as np
 import qiskit
+from qiskit import qpy
 
 from src.encoders.yz_encoder import YZEncoder
 from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
@@ -162,10 +166,34 @@ class QuClassi:
         :param str model_dir_path: path to the output directory.
         """
         # Create the directory specified by the argument output_dir_path.
+        os.makedirs(model_dir_path)
+
+        # Save the basic information of this QuClassi.
+        basic_info = {
+            "classical_data_size": self.classical_data_size,
+            "labels": self.labels,
+        }
+        basic_info_path = os.path.join(model_dir_path, "basic_info.pkl")
+        with open(basic_info_path, "wb") as pkl_file:
+            pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
+        circuit_path = os.path.join(model_dir_path, "circuit.qpy")
+        with open(circuit_path, "wb") as qpy_file:
+            qpy.dump(self.circuit, qpy_file)
 
         # Save the parameters.
+        trainable_parameters_path = os.path.join(
+            model_dir_path, "trainable_parameters.pkl"
+        )
+        with open(trainable_parameters_path, "wb") as pkl_file:
+            pickle.dump(self.trainable_parameters, pkl_file)
+        data_parameters_path = os.path.join(model_dir_path, "data_parameters.pkl")
+        with open(data_parameters_path, "wb") as pkl_file:
+            pickle.dump(self.data_parameters, pkl_file)
+        trained_parameters_path = os.path.join(model_dir_path, "trained_parameters.pkl")
+        with open(trained_parameters_path, "wb") as pkl_file:
+            pickle.dump(self.trained_parameters, pkl_file)
         pass
 
     @classmethod

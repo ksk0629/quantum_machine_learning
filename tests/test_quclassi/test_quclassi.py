@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import qiskit
 import pytest
@@ -10,6 +12,8 @@ class TestQuClassi:
     def setup_class(cls):
         cls.classical_data_size = 5
         cls.labels = ["A", "B", "C"]
+        cls.structure = "s"
+        cls.model_dir_path = "./test/"
         cls.quclassi = QuClassi(
             classical_data_size=cls.classical_data_size, labels=cls.labels
         )
@@ -90,3 +94,46 @@ class TestQuClassi:
         """
         with pytest.raises(ValueError):
             self.quclassi.build(structure)
+
+    def test_save(self):
+        """Normal test;
+        Run save function.
+
+        Check if
+        - there is basic_info.pkl.
+        - there is circuit.qpy.
+        - there is trainable_parameters.pkl.
+        - there is data_parameters.pkl.
+        - there is trained_parameters.pkl.
+        - save does not work if there is the existing directory.
+        """
+        self.quclassi.build(self.structure)
+        self.quclassi.save(self.model_dir_path)
+
+        basic_info_path = os.path.join(self.model_dir_path, "basic_info.pkl")
+        assert os.path.isfile(basic_info_path)
+        os.remove(basic_info_path)
+
+        circuit_path = os.path.join(self.model_dir_path, "circuit.qpy")
+        assert os.path.isfile(circuit_path)
+        os.remove(circuit_path)
+
+        trainable_parameters_path = os.path.join(
+            self.model_dir_path, "trainable_parameters.pkl"
+        )
+        assert os.path.isfile(trainable_parameters_path)
+        os.remove(trainable_parameters_path)
+
+        data_parameters_path = os.path.join(self.model_dir_path, "data_parameters.pkl")
+        assert os.path.isfile(data_parameters_path)
+        os.remove(data_parameters_path)
+        trained_parameters_path = os.path.join(
+            self.model_dir_path, "trained_parameters.pkl"
+        )
+        assert os.path.isfile(trained_parameters_path)
+        os.remove(trained_parameters_path)
+
+        with pytest.raises(OSError):
+            self.quclassi.save(self.model_dir_path)
+
+        os.rmdir(self.model_dir_path)
