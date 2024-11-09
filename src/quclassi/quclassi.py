@@ -51,6 +51,41 @@ class QuClassi:
         """
         return self.num_data_qubits + self.num_train_qubits + 1
 
+    def get_basic_info_path(self, model_dir_path: str):
+        """Get basic_info.pkl path.
+
+        :param str model_dir_path: path to directory
+        """
+        return os.path.join(model_dir_path, "basic_info.pkl")
+
+    def get_circuit_path(self, model_dir_path: str):
+        """Get circuit.qpy path.
+
+        :param str model_dir_path: path to directory
+        """
+        return os.path.join(model_dir_path, "circuit.qpy")
+
+    def get_trainable_parameters_path(self, model_dir_path: str):
+        """Get trainable_parameters.pkl path.
+
+        :param str model_dir_path: path to directory
+        """
+        return os.path.join(model_dir_path, "trainable_parameters.pkl")
+
+    def get_data_parameters_path(self, model_dir_path: str):
+        """Get data_parameters.pkl path.
+
+        :param str model_dir_path: path to directory
+        """
+        return os.path.join(model_dir_path, "data_parameters.pkl")
+
+    def get_trained_parameters_path(self, model_dir_path: str):
+        """Get trained_parameters.pkl path.
+
+        :param str model_dir_path: path to directory
+        """
+        return os.path.join(model_dir_path, "trained_parameters.pkl")
+
     def __call__(self, data: np.ndarray) -> str:
         """Call the classify function.
 
@@ -173,25 +208,23 @@ class QuClassi:
             "classical_data_size": self.classical_data_size,
             "labels": self.labels,
         }
-        basic_info_path = os.path.join(model_dir_path, "basic_info.pkl")
+        basic_info_path = self.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "wb") as pkl_file:
             pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
-        circuit_path = os.path.join(model_dir_path, "circuit.qpy")
+        circuit_path = self.get_circuit_path(model_dir_path)
         with open(circuit_path, "wb") as qpy_file:
             qpy.dump(self.circuit, qpy_file)
 
         # Save the parameters.
-        trainable_parameters_path = os.path.join(
-            model_dir_path, "trainable_parameters.pkl"
-        )
+        trainable_parameters_path = self.get_trainable_parameters_path(model_dir_path)
         with open(trainable_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trainable_parameters, pkl_file)
-        data_parameters_path = os.path.join(model_dir_path, "data_parameters.pkl")
+        data_parameters_path = self.get_data_parameters_path(model_dir_path)
         with open(data_parameters_path, "wb") as pkl_file:
             pickle.dump(self.data_parameters, pkl_file)
-        trained_parameters_path = os.path.join(model_dir_path, "trained_parameters.pkl")
+        trained_parameters_path = self.get_trained_parameters_path(model_dir_path)
         with open(trained_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trained_parameters, pkl_file)
         pass
