@@ -120,6 +120,7 @@ class QuClassi:
 
         ansatz_qubits = range(1, self.num_train_qubits + 1)
         circuit.compose(ansatz, ansatz_qubits, inplace=True)
+        self.trainable_parameters = ansatz.parameters
         circuit.barrier()
 
         feature_map_qubits = range(
@@ -127,6 +128,7 @@ class QuClassi:
             self.num_data_qubits + self.num_train_qubits + 1,
         )
         circuit.compose(feature_map, feature_map_qubits, inplace=True)
+        self.data_parameters = feature_map.parameters
         circuit.barrier()
 
         for ansatz_qubit, feature_map_qubit in zip(ansatz_qubits, feature_map_qubits):
