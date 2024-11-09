@@ -243,9 +243,7 @@ class QuClassi:
         basic_info_path = cls.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "rb") as pkl_file:
             basic_info = pickle.load(pkl_file)
-        print(basic_info)
         loaded_quclassi = cls(**basic_info)
-        print(loaded_quclassi)
 
         # Load the circuit.
         circuit_path = cls.get_circuit_path(model_dir_path)
