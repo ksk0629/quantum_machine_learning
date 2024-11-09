@@ -18,6 +18,10 @@ class QuClassi:
         """
         self.classical_data_size = classical_data_size
         self.labels = labels
+        self.circuit = None
+        self.trainable_parameters = None
+        self.data_parameters = None
+        self.trained_parameters = None
 
     @property
     def num_data_qubits(self) -> int:
@@ -141,9 +145,16 @@ class QuClassi:
         """Classify the input data into one of self.labels.
 
         :param np.ndarray data: inut data
+        :raises ValueError: if self.trained_parameters was not set.
         :return str: predicted label
         """
-        pass
+        if self.trained_parameters is None:
+            msg = "There is not trained_parameters set."
+            raise ValueError(msg)
+
+        for label, parameters in self.trainable_parameters.items:
+            # Run the circuit with those parameters.
+            pass
 
     def save(self, model_dir_path: str):
         """Save the circuit and parameters to the directory specified by the given model_dir_path.
