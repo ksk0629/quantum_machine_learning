@@ -187,3 +187,41 @@ class TestQuClassi:
             self.quclassi.save(self.model_dir_path)
 
         os.rmdir(self.model_dir_path)
+
+    def test_load(self):
+        """Normal test;
+        Run load.
+
+        Check if the loaded QuClassi instance is the same as the quclassi that is saved.
+        """
+        self.quclassi.build(self.structure)
+        self.quclassi.save(self.model_dir_path)
+
+        loaded_quclassi = QuClassi.load(self.model_dir_path)
+        assert self.quclassi.classical_data_size == loaded_quclassi.classical_data_size
+        assert self.quclassi.labels == loaded_quclassi.labels
+        assert self.quclassi.circuit == loaded_quclassi.circuit
+        assert (
+            self.quclassi.trainable_parameters == loaded_quclassi.trainable_parameters
+        )
+        assert self.quclassi.data_parameters == loaded_quclassi.data_parameters
+        assert self.quclassi.trained_parameters == loaded_quclassi.trained_parameters
+
+        basic_info_path = os.path.join(self.model_dir_path, "basic_info.pkl")
+        os.remove(basic_info_path)
+
+        circuit_path = os.path.join(self.model_dir_path, "circuit.qpy")
+        os.remove(circuit_path)
+
+        trainable_parameters_path = os.path.join(
+            self.model_dir_path, "trainable_parameters.pkl"
+        )
+        os.remove(trainable_parameters_path)
+
+        data_parameters_path = os.path.join(self.model_dir_path, "data_parameters.pkl")
+        os.remove(data_parameters_path)
+        trained_parameters_path = os.path.join(
+            self.model_dir_path, "trained_parameters.pkl"
+        )
+        os.remove(trained_parameters_path)
+        os.rmdir(self.model_dir_path)

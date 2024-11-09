@@ -239,7 +239,28 @@ class QuClassi:
 
         :param str model_dir_path: path to the input directory.
         """
+        # Load the basic information.
+        basic_info_path = cls.get_basic_info_path(model_dir_path)
+        with open(basic_info_path, "rb") as pkl_file:
+            basic_info = pickle.load(pkl_file)
+        print(basic_info)
+        loaded_quclassi = cls(**basic_info)
+        print(loaded_quclassi)
+
         # Load the circuit.
+        circuit_path = cls.get_circuit_path(model_dir_path)
+        with open(circuit_path, "rb") as qpy_file:
+            loaded_quclassi.circuit = qpy.load(qpy_file)[0]
 
         # Load the parameters.
-        pass
+        trainable_parameters_path = cls.get_trainable_parameters_path(model_dir_path)
+        with open(trainable_parameters_path, "rb") as pkl_file:
+            loaded_quclassi.trainable_parameters = pickle.load(pkl_file)
+        data_parameters_path = cls.get_data_parameters_path(model_dir_path)
+        with open(data_parameters_path, "rb") as pkl_file:
+            loaded_quclassi.data_parameters = pickle.load(pkl_file)
+        trained_parameters_path = cls.get_trained_parameters_path(model_dir_path)
+        with open(trained_parameters_path, "rb") as pkl_file:
+            loaded_quclassi.trained_parameters = pickle.load(pkl_file)
+
+        return loaded_quclassi
