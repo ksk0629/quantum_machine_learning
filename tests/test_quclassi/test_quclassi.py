@@ -242,7 +242,7 @@ class TestQuClassi:
         with pytest.raises(ValueError):
             self.quclassi.classify(self.data)
 
-    def test_classify_without_trained_parameters(self):
+    def test_classify_with_trained_parameters(self):
         """Normal test;
         Run classify function after setting the trained_parameters.
 
