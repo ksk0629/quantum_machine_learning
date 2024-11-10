@@ -12,11 +12,11 @@ class TestQuClassi:
     def setup_class(cls):
         cls.classical_data_size = 5
         cls.labels = ["A", "B", "C"]
-        cls.trained_parameters = {
-            cls.labels[0]: np.arange((cls.classical_data_size // 2 + 1) * 2),
-            cls.labels[1]: np.arange((cls.classical_data_size // 2 + 1) * 2) * 2,
-            cls.labels[2]: np.arange((cls.classical_data_size // 2 + 1) * 2) * 3,
-        }
+        cls.trained_parameters = [
+            np.arange((cls.classical_data_size // 2 + 1) * 2),
+            np.arange((cls.classical_data_size // 2 + 1) * 2) * 2,
+            np.arange((cls.classical_data_size // 2 + 1) * 2) * 3,
+        ]
 
         cls.data = np.arange((cls.classical_data_size // 2 + 1) * 4)
         cls.structure = "s"
