@@ -236,6 +236,8 @@ class QuClassi:
 
         # Run the sampler.
         job = sampler.run(pubs, shots=shots)
+
+        # Calculate the fidelities.
         fidelities = {}
         results = job.result()
         for result, label in zip(results, self.labels):
