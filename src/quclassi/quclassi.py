@@ -190,6 +190,7 @@ class QuClassi:
 
         for ansatz_qubit, feature_map_qubit in zip(ansatz_qubits, feature_map_qubits):
             circuit.cswap(0, ansatz_qubit, feature_map_qubit)
+        circuit.h(0)
 
         circuit.measure(0, 0)
         # <<< Whole circuit creation <<<
