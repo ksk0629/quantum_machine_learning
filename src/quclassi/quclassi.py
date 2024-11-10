@@ -162,7 +162,7 @@ class QuClassi:
         # <<< Train qubits creation <<<
 
         # >>> Whole circuit creation >>>
-        circuit = qiskit.QuantumCircuit(self.num_qubits, name="QuClassi")
+        circuit = qiskit.QuantumCircuit(self.num_qubits, 1, name="QuClassi")
         circuit.h(0)
         circuit.barrier()
 
@@ -181,6 +181,8 @@ class QuClassi:
 
         for ansatz_qubit, feature_map_qubit in zip(ansatz_qubits, feature_map_qubits):
             circuit.cswap(0, ansatz_qubit, feature_map_qubit)
+
+        circuit.measure(0, 0)
         # <<< Whole circuit creation <<<
 
         self.circuit = circuit
