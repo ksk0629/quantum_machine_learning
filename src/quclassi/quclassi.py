@@ -91,13 +91,22 @@ class QuClassi:
         """
         return os.path.join(model_dir_path, "trained_parameters.pkl")
 
-    def __call__(self, data: np.ndarray) -> str:
+    def __call__(
+        self,
+        data: np.ndarray,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 1024,
+    ) -> str:
         """Call the classify function.
 
-        :param np.ndarray data: input data
+        :param np.ndarray data: input data, which is preprocessed if needed
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
         :return str: predicted label
         """
-        return self.classify(data=data)
+        return self.classify(data=data, sampler=sampler, shots=shots)
 
     def build(self, structure: str):
         """Build the circuit according to the given structure.
@@ -201,7 +210,7 @@ class QuClassi:
         :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
         :param int shots: number of shots
         :raises ValueError: if self.trained_parameters was not set.
-        :return str: _description_
+        :return str: predicted label
         """
         if self.trained_parameters is None:
             msg = "There is not trained_parameters set."
