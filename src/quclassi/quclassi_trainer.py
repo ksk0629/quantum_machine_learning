@@ -14,6 +14,7 @@ class QuClassiTrainer:
         epochs: int = 25,
         learning_rate: float = 0.01,
         batch_size: int = 1,
+        shuffle: bool = True,
         initial_weights: dict[str, np.ndarray] | None = None,
     ):
         """Initialise this trainer.
@@ -22,6 +23,7 @@ class QuClassiTrainer:
         :param int epochs: number of epochs, defaults to 25
         :param float learning_rate: learning rate, defaults to 0.01
         :param int batch_size: batch size, defaults to 1
+        :param bool shuffle: whether dataset is shuffled or not, defaults to True
         :param dict[str, np.ndarray] | None initial_weights: initial weights, defaults to None
         :raises ValueError: if quclassi.labels and initial_weights.keys() do not match
         """
@@ -35,6 +37,7 @@ class QuClassiTrainer:
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
+        self.shuffle = shuffle
         self.initial_weights = initial_weights
 
     def train(self, data: np.ndarray):
