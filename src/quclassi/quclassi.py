@@ -3,7 +3,7 @@ import pickle
 
 import numpy as np
 import qiskit
-from qiskit import qpy
+from qiskit import qpy, primitives
 
 from src.encoders.yz_encoder import YZEncoder
 from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
@@ -187,20 +187,56 @@ class QuClassi:
 
         self.circuit = circuit
 
-    def classify(self, data: np.ndarray) -> str:
+    def classify(
+        self,
+        data: np.ndarray,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 1024,
+    ) -> str:
         """Classify the input data into one of self.labels.
 
-        :param np.ndarray data: inut data
+        :param np.ndarray data: input data, which is preprocessed if needed
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
         :raises ValueError: if self.trained_parameters was not set.
-        :return str: predicted label
+        :return str: _description_
         """
         if self.trained_parameters is None:
             msg = "There is not trained_parameters set."
             raise ValueError(msg)
 
-        for label, parameters in self.trainable_parameters.items:
-            # Run the circuit with those parameters.
-            pass
+        # Set data as the data_parameters.
+        data_parameters = {
+            data_parameter: _d for data_parameter, _d in zip(self.data_parameters, data)
+        }
+
+        # Create the combination of the circuit and parameters to run the circuits.
+        pubs = []
+        for trained_parameters in self.trained_parameters.values():
+            parameters = {
+                trainable_parameter: trained_parameter
+                for trainable_parameter, trained_parameter in zip(
+                    self.trainable_parameters, trained_parameters
+                )
+            }
+            parameters = {**parameters, **data_parameters}
+            pubs.append((self.circuit, parameters))
+
+        # Run the sampler.
+        job = sampler.run(pubs, shots=shots)
+
+        # Get the probability of "0".
+        zero_emprical_probabilities = []
+        results = job.result()
+        for result in results:
+            zero_emprical_probabilities.append(result.data.c.get_counts()["0"] / shots)
+
+        # Find the maximum probability, which is fidelity.
+        label_index_classified = np.argmax(zero_emprical_probabilities)
+
+        return self.labels[label_index_classified]
 
     def save(self, model_dir_path: str):
         """Save the circuit and parameters to the directory specified by the given model_dir_path.

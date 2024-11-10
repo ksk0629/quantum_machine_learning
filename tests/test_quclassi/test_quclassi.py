@@ -12,6 +12,13 @@ class TestQuClassi:
     def setup_class(cls):
         cls.classical_data_size = 5
         cls.labels = ["A", "B", "C"]
+        cls.trained_parameters = {
+            cls.labels[0]: np.arange((cls.classical_data_size // 2 + 1) * 2),
+            cls.labels[1]: np.arange((cls.classical_data_size // 2 + 1) * 2) * 2,
+            cls.labels[2]: np.arange((cls.classical_data_size // 2 + 1) * 2) * 3,
+        }
+
+        cls.data = np.arange((cls.classical_data_size // 2 + 1) * 4)
         cls.structure = "s"
         cls.model_dir_path = "./test/"
         cls.quclassi = QuClassi(
@@ -225,3 +232,22 @@ class TestQuClassi:
         )
         os.remove(trained_parameters_path)
         os.rmdir(self.model_dir_path)
+
+    def test_classify_without_trained_parameters(self):
+        """Abnormal test;
+        Run classify function without setting the trained parameters.
+
+        Check if ValueError happens.
+        """
+        with pytest.raises(ValueError):
+            self.quclassi.classify(self.data)
+
+    def test_classify_without_trained_parameters(self):
+        """Normal test;
+        Run classify function after setting the trained_parameters.
+
+        Check if the returned value is in self.labels.
+        """
+        self.quclassi.trained_parameters = self.trained_parameters
+        label_classified = self.quclassi.classify(self.data)
+        assert label_classified in self.labels
