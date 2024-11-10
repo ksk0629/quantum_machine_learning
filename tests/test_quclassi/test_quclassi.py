@@ -233,12 +233,45 @@ class TestQuClassi:
         os.remove(trained_parameters_path)
         os.rmdir(self.model_dir_path)
 
+    def test_get_fidelities_without_trained_parameters(self):
+        """Abnormal test;
+        Run get_fidelities function without setting the trained parameters.
+
+        Check if ValueError happens.
+        """
+        if self.quclassi.trained_parameters is not None:
+            self.quclassi.trained_parameters = None
+        with pytest.raises(ValueError):
+            self.quclassi.get_fidelities(self.data)
+
+    def test_get_fidelities_with_trained_parameters(self):
+        """Normal test;
+        Run get_fidelities function after setting the trained_parameters.
+
+        Check if
+        - the type of the return value is dict.
+        - the return value's keys coincide with self.quclassi.labels.
+        - the return value's values are between 0 and 1.
+        """
+        self.quclassi.trained_parameters = self.trained_parameters
+        fidelities = self.quclassi.get_fidelities(self.data)
+        # Check the type of fidelieis.
+        assert isinstance(fidelities, dict)
+        # Check the keys of fidelities concide with self.quclassi.labels.
+        assert set(self.quclassi.labels) == set(fidelities.keys())
+        assert len(self.quclassi.labels) == len(fidelities.keys())
+        # Check the values of fidelities are between 0 and 1.
+        for fidelity in fidelities.values():
+            assert 0 <= fidelity <= 1
+
     def test_classify_without_trained_parameters(self):
         """Abnormal test;
         Run classify function without setting the trained parameters.
 
         Check if ValueError happens.
         """
+        if self.quclassi.trained_parameters is not None:
+            self.quclassi.trained_parameters = None
         with pytest.raises(ValueError):
             self.quclassi.classify(self.data)
 
