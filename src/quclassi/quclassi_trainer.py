@@ -48,15 +48,19 @@ class QuClassiTrainer:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.parameters_history = []
         if initial_paramters is not None:
-            self.current_parameters = initial_paramters
+            self.parameters_history.append(initial_paramters)
         else:
-            self.current_parameters = (
-                np.random.rand(
-                    len(self.quclassi.trainable_parameters) * len(self.quclassi.labels)
-                )
-                * np.pi
-            ).reshape((len(quclassi.labels), -1))
+            self.parameters_history.append(
+                (
+                    np.random.rand(
+                        len(self.quclassi.trainable_parameters)
+                        * len(self.quclassi.labels)
+                    )
+                    * np.pi
+                ).reshape((len(quclassi.labels), -1))
+            )
         self.sampler = sampler
         self.shots = shots
 
@@ -64,12 +68,21 @@ class QuClassiTrainer:
         self.train_accuracies = []
         self.val_accuracies = []
 
+    @property
+    def current_parameters(self) -> np.ndarray:
+        """Get the lates parameters.
+
+        :return np.ndarray: latest parameters
+        """
+        return self.parameters_history[-1]
+
     def train(
         self,
         train_data: np.ndarray,
         train_labels: np.ndarray,
         val_data: np.ndarray,
         val_labels: np.ndarray,
+        eval: bool = False,
     ):
         """Train the quclassi.
 
@@ -77,6 +90,7 @@ class QuClassiTrainer:
         :param np.ndarray train_labels: corresponding train labels
         :param np.ndarray val_data: whole validation data
         :param np.ndarray val_labels: corresponding validation labels
+        :param bool eval: whether evaluation has to be done or not
         """
         # Separate the data.
         train_data_separated_label = dict()
@@ -96,36 +110,37 @@ class QuClassiTrainer:
                     for label in tlabels:
                         tlabels.set_description(f"Label {label}")
                         target_train_data = train_data_separated_label[label]
-                        target_val_data = val_data_separated_label[label]
                         self.train_one_epoch(
                             train_data=target_train_data,
                             label=label,
                             epoch=epoch,
-                            val_data=target_val_data,
                         )
 
-                # Get the accuracies.
-                predicted_train_labels = [self.quclassi(data) for data in train_data]
-                self.train_accuracies.append(
-                    src.utils.calculate_accuracy(
-                        predicted_labels=predicted_train_labels,
-                        true_labels=train_labels,
+                if eval:
+                    # Get the accuracies.
+                    predicted_train_labels = [
+                        self.quclassi(data) for data in train_data
+                    ]
+                    self.train_accuracies.append(
+                        src.utils.calculate_accuracy(
+                            predicted_labels=predicted_train_labels,
+                            true_labels=train_labels,
+                        )
                     )
-                )
-                predicted_val_labels = [self.quclassi(data) for data in val_data]
-                self.val_accuracies.append(
-                    src.utils.calculate_accuracy(
-                        predicted_labels=predicted_val_labels,
-                        true_labels=val_labels,
+                    predicted_val_labels = [self.quclassi(data) for data in val_data]
+                    self.val_accuracies.append(
+                        src.utils.calculate_accuracy(
+                            predicted_labels=predicted_val_labels,
+                            true_labels=val_labels,
+                        )
                     )
-                )
 
-                tepoch.set_postfix(
-                    {
-                        "Train Acc": self.train_accuracies[-1],
-                        "Val Acc": self.val_accuracies[-1],
-                    }
-                )
+                    tepoch.set_postfix(
+                        {
+                            "Train Acc": self.train_accuracies[-1],
+                            "Val Acc": self.val_accuracies[-1],
+                        }
+                    )
 
         # Set the trained parameters to self.quclassi.
         self.quclassi.trained_parameters = self.current_parameters
