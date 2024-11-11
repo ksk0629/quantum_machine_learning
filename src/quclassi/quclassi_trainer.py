@@ -67,6 +67,9 @@ class QuClassiTrainer:
             for label, _d in data_separated_label.items():
                 self.train_one_epoch(data=_d, label=label, epoch=epoch)
 
+        # Set the trained parameters to self.quclassi.
+        self.quclassi.trained_parameters = self.current_parameters
+
     def train_one_epoch(
         self,
         data: np.ndarray,
