@@ -20,6 +20,10 @@ class QuClassiTrainer:
         batch_size: int = 1,
         shuffle: bool = True,
         initial_paramters: np.ndarray | None = None,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 1024,
     ):
         """Initialise this trainer.
 
@@ -29,6 +33,8 @@ class QuClassiTrainer:
         :param int batch_size: batch size, defaults to 1
         :param bool shuffle: whether dataset is shuffled or not, defaults to True
         :param np.ndarray | None initial_paramters: initial parameters, defaults to None
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
         :raises ValueError: if the lengths of quclassi.labels and initial_paramters do not match
         """
         if initial_paramters is not None and len(set(quclassi.labels)) != len(
@@ -51,6 +57,8 @@ class QuClassiTrainer:
                 )
                 * np.pi
             ).reshape((len(quclassi.labels), -1))
+        self.sampler = sampler
+        self.shots = shots
 
         # Initialise the histories.
         self.train_accuracies = []
@@ -127,10 +135,6 @@ class QuClassiTrainer:
         train_data: np.ndarray,
         label: object,
         epoch: int,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 1024,
     ):
         """Train the quclassi only one epoch for one class.
 
@@ -138,8 +142,6 @@ class QuClassiTrainer:
         :param object label: label to which the data belong
         :param int epoch: current epoch
         :param np.ndarray val_data: validation data belonging to the given label
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
-        :param int shots: number of shots
         """
         # Shuffle the data if needed.
         if self.shuffle:
@@ -176,8 +178,6 @@ class QuClassiTrainer:
                 forward_difference_fidelities = self.get_fidelities(
                     data=target_data,
                     trained_parameters=forward_difference_parameters,
-                    sampler=sampler,
-                    shots=shots,
                 )
                 forward_difference_fidelity = -np.log(
                     np.average(forward_difference_fidelities)
@@ -197,8 +197,6 @@ class QuClassiTrainer:
                 backward_difference_fidelities = self.get_fidelities(
                     data=target_data,
                     trained_parameters=backward_difference_parameters,
-                    sampler=sampler,
-                    shots=shots,
                 )
                 backward_difference_fidelity = -np.log(
                     np.average(backward_difference_fidelities)
@@ -216,17 +214,11 @@ class QuClassiTrainer:
         self,
         data: np.ndarray,
         trained_parameters: dict[str, float],
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 1024,
     ) -> qiskit.providers.Job:
         """Run the given sampler.
 
         :param np.ndarray data: data to run the circuit.
         :param dict[str, float] trained_parameters: parameters to run the circuit
-        :param primitives.BaseSamplerV1  |  primitives.BaseSamplerV2 sampler: sampler, defaults to primitives.StatevectorSampler(seed=901)
-        :param int shots: number of shots, defaults to 1024
         :return qiskit.providers.Job: result of running sampler
         """
         # Create the combination of the circuit and parameters to run the circuits.
@@ -240,31 +232,23 @@ class QuClassiTrainer:
             pubs.append((self.quclassi.circuit, parameters))
 
         # Run the sampler.
-        job = sampler.run(pubs, shots=shots)
+        job = self.sampler.run(pubs, shots=self.shots)
         return job
 
     def get_fidelities(
         self,
         data: np.ndarray,
         trained_parameters: dict[str, float],
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 1024,
     ) -> np.ndarray:
         """Get the sequence of fidelities.
 
         :param np.ndarray data: data to calculate fidelity
         :param dict[str, float] trained_parameters: parameters to calculate fidelity
-        :param primitives.BaseSamplerV1  |  primitives.BaseSamplerV2 sampler: sampler, defaults to primitives.StatevectorSampler(seed=901)
-        :param int shots: number of shots, defaults to 1024
         :return np.ndarray: sequence of fidelities
         """
         job = self.run_sampler(
             data=data,
             trained_parameters=trained_parameters,
-            sampler=sampler,
-            shots=shots,
         )
         # Calculate the sequence of the fidelities.
         fidelities = []
