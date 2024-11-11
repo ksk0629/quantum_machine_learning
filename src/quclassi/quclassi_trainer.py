@@ -194,49 +194,63 @@ class QuClassiTrainer:
                 end_index = iteration * self.batch_size + self.batch_size
                 target_data = train_data[start_index:end_index]
 
-                # Get the forward difference.
-                forward_difference_parameters = self.current_parameters[
-                    target_label_index
-                ] + (np.pi / (2 * np.sqrt(epoch)))
-                forward_difference_parameters = {
-                    trainable_parameter: trained_parameter
-                    for trainable_parameter, trained_parameter in zip(
-                        self.quclassi.trainable_parameters,
-                        forward_difference_parameters,
+                # Train each parameter.
+                for parameter_index in range(
+                    len(self.current_parameters[target_label_index])
+                ):
+                    # Get the forward difference.
+                    forward_shift = np.zeros(
+                        (self.current_parameters[target_label_index].shape)
                     )
-                }
-                forward_difference_fidelities = self.get_fidelities(
-                    data=target_data,
-                    trained_parameters=forward_difference_parameters,
-                )
-                forward_difference_fidelity = -np.log(
-                    np.average(forward_difference_fidelities)
-                )
-
-                # Get the backward differene.
-                backward_difference_parameters = self.current_parameters[
-                    target_label_index
-                ] - (np.pi / (2 * np.sqrt(epoch)))
-                backward_difference_parameters = {
-                    trainable_parameter: trained_parameter
-                    for trainable_parameter, trained_parameter in zip(
-                        self.quclassi.trainable_parameters,
-                        backward_difference_parameters,
+                    forward_shift[parameter_index] += np.pi / (2 * np.sqrt(epoch))
+                    forward_difference_parameters = (
+                        self.current_parameters[target_label_index] + forward_shift
                     )
-                }
-                backward_difference_fidelities = self.get_fidelities(
-                    data=target_data,
-                    trained_parameters=backward_difference_parameters,
-                )
-                backward_difference_fidelity = -np.log(
-                    np.average(backward_difference_fidelities)
-                )
+                    forward_difference_parameters = {
+                        trainable_parameter: trained_parameter
+                        for trainable_parameter, trained_parameter in zip(
+                            self.quclassi.trainable_parameters,
+                            forward_difference_parameters,
+                        )
+                    }
+                    forward_difference_fidelities = self.get_fidelities(
+                        data=target_data,
+                        trained_parameters=forward_difference_parameters,
+                    )
+                    forward_difference_fidelity = -np.log(
+                        np.average(forward_difference_fidelities)
+                    )
 
-                # Update the current parameters.
-                diff = 0.5 * (
-                    forward_difference_fidelity - backward_difference_fidelity
-                )
-                self.current_parameters[target_label_index] -= diff * self.learning_rate
+                    # Get the backward differene.
+                    backward_shift = np.zeros(
+                        (self.current_parameters[target_label_index].shape)
+                    )
+                    backward_shift[parameter_index] -= np.pi / (2 * np.sqrt(epoch))
+                    backward_difference_parameters = (
+                        self.current_parameters[target_label_index] + backward_shift
+                    )
+                    backward_difference_parameters = {
+                        trainable_parameter: trained_parameter
+                        for trainable_parameter, trained_parameter in zip(
+                            self.quclassi.trainable_parameters,
+                            backward_difference_parameters,
+                        )
+                    }
+                    backward_difference_fidelities = self.get_fidelities(
+                        data=target_data,
+                        trained_parameters=backward_difference_parameters,
+                    )
+                    backward_difference_fidelity = -np.log(
+                        np.average(backward_difference_fidelities)
+                    )
+
+                    # Update the current parameters.
+                    diff = 0.5 * (
+                        forward_difference_fidelity - backward_difference_fidelity
+                    )
+                    self.current_parameters[target_label_index][parameter_index] -= (
+                        diff * self.learning_rate
+                    )
 
     def run_sampler(
         self,
