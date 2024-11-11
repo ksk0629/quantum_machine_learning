@@ -127,7 +127,6 @@ class QuClassiTrainer:
         train_data: np.ndarray,
         label: object,
         epoch: int,
-        val_data: np.ndarray,
         sampler: (
             primitives.BaseSamplerV1 | primitives.BaseSamplerV2
         ) = primitives.StatevectorSampler(seed=901),
