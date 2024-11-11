@@ -1,5 +1,6 @@
 import numpy as np
 from qiskit import primitives
+from tqdm.auto import tqdm
 
 from src.quclassi.quclassi import QuClassi
 import src.utils
@@ -63,9 +64,14 @@ class QuClassiTrainer:
             data_separated_label[label] = data[target_indices]
 
         # Train self.quclassi.
-        for epoch in range(1, self.epochs + 1):
-            for label, _d in data_separated_label.items():
-                self.train_one_epoch(data=_d, label=label, epoch=epoch)
+        with tqdm(range(1, self.epochs + 1)) as tepoch:
+            for epoch in tepoch:
+                tepoch.set_description(f"Epoch {epoch} (train)")
+
+                with tqdm(data_separated_label.items(), leave=False) as dataset:
+                    for label, _d in dataset:
+                        dataset.set_description(f"Label {label}")
+                        self.train_one_epoch(data=_d, label=label, epoch=epoch)
 
         # Set the trained parameters to self.quclassi.
         self.quclassi.trained_parameters = self.current_parameters
@@ -101,59 +107,63 @@ class QuClassiTrainer:
         target_label_index = self.quclassi.labels.index(label)
 
         iterations = len(data) // self.batch_size
-        for iteration in range(iterations):
-            # Get target data for this iteration.
-            start_index = iteration * self.batch_size
-            end_index = iteration * self.batch_size + self.batch_size
-            target_data = data[start_index:end_index]
+        with tqdm(range(iterations), leave=False) as titerations:
+            for iteration in titerations:
+                titerations.set_description(f"Iteration {iteration}")
+                # Get target data for this iteration.
+                start_index = iteration * self.batch_size
+                end_index = iteration * self.batch_size + self.batch_size
+                target_data = data[start_index:end_index]
 
-            # Get the forward difference.
-            forward_difference_parameters = self.current_parameters[
-                target_label_index
-            ] + (np.pi / (2 * np.sqrt(epoch)))
-            forward_difference_parameters = {
-                trainable_parameter: trained_parameter
-                for trainable_parameter, trained_parameter in zip(
-                    self.quclassi.trainable_parameters,
-                    forward_difference_parameters,
+                # Get the forward difference.
+                forward_difference_parameters = self.current_parameters[
+                    target_label_index
+                ] + (np.pi / (2 * np.sqrt(epoch)))
+                forward_difference_parameters = {
+                    trainable_parameter: trained_parameter
+                    for trainable_parameter, trained_parameter in zip(
+                        self.quclassi.trainable_parameters,
+                        forward_difference_parameters,
+                    )
+                }
+                forward_difference_fidelities = self.get_fidelities(
+                    data=target_data,
+                    trained_parameters=forward_difference_parameters,
+                    sampler=sampler,
+                    shots=shots,
                 )
-            }
-            forward_difference_fidelities = self.get_fidelities(
-                data=target_data,
-                trained_parameters=forward_difference_parameters,
-                sampler=sampler,
-                shots=shots,
-            )
-            forward_difference_fidelity = -np.log(
-                np.average(forward_difference_fidelities)
-            )
-
-            # Get the backward differene.
-            backward_difference_parameters = self.current_parameters[
-                target_label_index
-            ] - (np.pi / (2 * np.sqrt(epoch)))
-            backward_difference_parameters = {
-                trainable_parameter: trained_parameter
-                for trainable_parameter, trained_parameter in zip(
-                    self.quclassi.trainable_parameters,
-                    backward_difference_parameters,
+                forward_difference_fidelity = -np.log(
+                    np.average(forward_difference_fidelities)
                 )
-            }
-            backward_difference_fidelities = self.get_fidelities(
-                data=target_data,
-                trained_parameters=backward_difference_parameters,
-                sampler=sampler,
-                shots=shots,
-            )
-            backward_difference_fidelity = -np.log(
-                np.average(backward_difference_fidelities)
-            )
 
-            # Update the current parameters.
-            diff = 0.5 * (forward_difference_fidelity - backward_difference_fidelity)
-            if diff <= 0:
-                diff = 10 ** (-10)
-            self.current_parameters[target_label_index] -= diff * self.learning_rate
+                # Get the backward differene.
+                backward_difference_parameters = self.current_parameters[
+                    target_label_index
+                ] - (np.pi / (2 * np.sqrt(epoch)))
+                backward_difference_parameters = {
+                    trainable_parameter: trained_parameter
+                    for trainable_parameter, trained_parameter in zip(
+                        self.quclassi.trainable_parameters,
+                        backward_difference_parameters,
+                    )
+                }
+                backward_difference_fidelities = self.get_fidelities(
+                    data=target_data,
+                    trained_parameters=backward_difference_parameters,
+                    sampler=sampler,
+                    shots=shots,
+                )
+                backward_difference_fidelity = -np.log(
+                    np.average(backward_difference_fidelities)
+                )
+
+                # Update the current parameters.
+                diff = 0.5 * (
+                    forward_difference_fidelity - backward_difference_fidelity
+                )
+                if diff <= 0:
+                    diff = 10 ** (-10)
+                self.current_parameters[target_label_index] -= diff * self.learning_rate
 
     def get_fidelities(
         self,
