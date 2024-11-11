@@ -36,3 +36,41 @@ class TestUtils:
         )
         assert x_np == np.random.randint(low, high)
         assert x_torch == torch.randint(low=low, high=high, size=(1,))
+
+    @pytest.mark.parametrize(
+        "result",
+        [
+            {"0": 1, "1": 1, "2": 1},
+            {},
+            {"0": 1, "-1": 1},
+            {"1": 1, "3": 1},
+            {"-2": 1},
+            {"0": 1, "1": -3},
+        ],
+    )
+    def test_calculate_fidelity_from_swap_test_with_invalid_arg(self, result):
+        """Abnormal test;
+        Run calculate_fidelity_from_swap_test with an invalid argument.
+
+        Check if ValueError happens.
+        """
+        with pytest.raises(ValueError):
+            utils.calculate_fidelity_from_swap_test(result)
+
+    @pytest.mark.parametrize(
+        "result",
+        [
+            {"0": 1},
+            {"0": 1, "1": 1},
+            {"1": 1},
+        ],
+    )
+    def test_calculate_fidelity_from_swap_test_with_valid_arg(self, result):
+        """Normal test;
+        Run calculate_fidelity_from_swap_test with a valid argument.
+
+        Check if
+        - the return value is between 0 and 1
+        """
+        fidelity = utils.calculate_fidelity_from_swap_test(result)
+        assert 0 <= fidelity <= 1

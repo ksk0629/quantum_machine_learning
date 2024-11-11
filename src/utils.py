@@ -1,4 +1,5 @@
 import random
+import warnings
 
 import numpy as np
 import qiskit_algorithms
@@ -20,3 +21,37 @@ def fix_seed(seed: int):
     torch.backends.cudnn.benchmark = False
 
     qiskit_algorithms.utils.algorithm_globals.random_seed = 12345
+
+
+def calculate_fidelity_from_swap_test(result: dict[str, int]) -> float:
+    """Calculate the quantum fidelity from the result of cswap test.
+
+    :param dict[str, int] result: result of cswap test
+    :raises ValueError: if the given result contains nothing or more than two keys
+    :raises ValueError: if the given result is consisted with other thatn 0 and/or 1
+    :raises ValueError: if the calculated quantum fidelity is negative
+    :return float: quantum fidelity
+    """
+    key_0 = "0"
+    key_1 = "1"
+
+    if len(result) > 2 or len(result) == 0:
+        msg = f"The argument result must be the dict whose keys are {key_0} and {key_1} as the result of CSWAP test, but {result}."
+        raise ValueError(msg)
+
+    keys = set(result.keys())
+    if set(key_0) != keys and set(key_1) != keys and set([key_0, key_1]) != keys:
+        msg = f"The keys of a given result must consist with {key_0} and/or {key_1}, but {keys}."
+        raise ValueError(msg)
+
+    num_zeros = result[key_0] if key_0 in result else 0
+    if num_zeros == 0:
+        return 0
+    num_ones = result[key_1] if key_1 in result else 0
+    probability_zero = num_zeros / (num_zeros + num_ones)
+    fidelity = 2 * probability_zero - 1
+    if fidelity < 0:
+        msg = f"fidelity must be non-negative but {fidelity}."
+        raise ValueError(msg)
+
+    return fidelity
