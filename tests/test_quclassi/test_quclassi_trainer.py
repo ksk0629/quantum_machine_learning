@@ -26,15 +26,18 @@ class TestQuClassiTrainer:
         cls.epochs = 2
         cls.batch_size = 3
         cls.trained_paramters = {"layer0[0]": 1, "layer0[1]": 1}
+        cls.initial_parameters = np.array([[1, 1], [0, 0]])
 
     def get_trainer(self):
         return QuClassiTrainer(
-            quclassi=self.quclassi, batch_size=self.batch_size, epochs=self.epochs
+            quclassi=self.quclassi,
+            batch_size=self.batch_size,
+            epochs=self.epochs,
         )
 
-    def test_init_invalid_initial_parameters(self):
+    def test_init_with_invalid_initial_parameters(self):
         """Abnormal test;
-        Create the instance with invalid initial_parameters.
+        Create the instance with an invalid initial_parameters.
 
         Check if ValueError happens.
         """
@@ -43,6 +46,24 @@ class TestQuClassiTrainer:
             QuClassiTrainer(
                 quclassi=self.quclassi, initial_paramters=initial_parameters
             )
+
+    def test_init_with_valid_initial_parameters(self):
+        """Abnormal test;
+        Create the instance with a valid initial_parameters.
+
+        Check if
+        - the length of the member variable parameters_history of the return value is one
+        - the only element of the member variable parameters_history of the return value is the same as self.initial_parameters.
+        - the current_parameters of the return value is the same as self.initial_parameters.
+        """
+        quclassi_trainer = QuClassiTrainer(
+            quclassi=self.quclassi, initial_paramters=self.initial_parameters
+        )
+        assert len(quclassi_trainer.parameters_history) == 1
+        assert np.allclose(
+            quclassi_trainer.parameters_history[0], self.initial_parameters
+        )
+        assert np.allclose(quclassi_trainer.current_parameters, self.initial_parameters)
 
     def test_train_with_evaluation(self):
         """Normal test;
