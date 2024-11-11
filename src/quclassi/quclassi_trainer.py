@@ -1,4 +1,5 @@
 import numpy as np
+import qiskit
 from qiskit import primitives
 from tqdm.auto import tqdm
 
@@ -51,36 +52,82 @@ class QuClassiTrainer:
                 * np.pi
             ).reshape((len(quclassi.labels), -1))
 
-    def train(self, data: np.ndarray, labels: np.ndarray):
+        # Initialise the histories.
+        self.train_accuracies = []
+        self.val_accuracies = []
+
+    def train(
+        self,
+        train_data: np.ndarray,
+        train_labels: np.ndarray,
+        val_data: np.ndarray,
+        val_labels: np.ndarray,
+    ):
         """Train the quclassi.
 
-        :param np.ndarray data: whole data
-        :param np.ndarray labels: corresponding labels
+        :param np.ndarray train_data: whole train data
+        :param np.ndarray train_labels: corresponding train labels
+        :param np.ndarray val_data: whole validation data
+        :param np.ndarray val_labels: corresponding validation labels
         """
         # Separate the data.
-        data_separated_label = dict()
+        train_data_separated_label = dict()
+        val_data_separated_label = dict()
         for label in self.quclassi.labels:
-            target_indices = np.where(labels == label)
-            data_separated_label[label] = data[target_indices]
+            target_train_indices = np.where(train_labels == label)
+            train_data_separated_label[label] = train_data[target_train_indices]
+            target_val_indices = np.where(val_labels == label)
+            val_data_separated_label[label] = val_data[target_val_indices]
 
         # Train self.quclassi.
         with tqdm(range(1, self.epochs + 1)) as tepoch:
             for epoch in tepoch:
                 tepoch.set_description(f"Epoch {epoch} (train)")
 
-                with tqdm(data_separated_label.items(), leave=False) as dataset:
-                    for label, _d in dataset:
-                        dataset.set_description(f"Label {label}")
-                        self.train_one_epoch(data=_d, label=label, epoch=epoch)
+                with tqdm(self.quclassi.labels, leave=False) as tlabels:
+                    for label in tlabels:
+                        tlabels.set_description(f"Label {label}")
+                        target_train_data = train_data_separated_label[label]
+                        target_val_data = val_data_separated_label[label]
+                        self.train_one_epoch(
+                            train_data=target_train_data,
+                            label=label,
+                            epoch=epoch,
+                            val_data=target_val_data,
+                        )
+
+                # Get the accuracies.
+                predicted_train_labels = [self.quclassi(data) for data in train_data]
+                self.train_accuracies.append(
+                    src.utils.calculate_accuracy(
+                        predicted_labels=predicted_train_labels,
+                        true_labels=train_labels,
+                    )
+                )
+                predicted_val_labels = [self.quclassi(data) for data in val_data]
+                self.val_accuracies.append(
+                    src.utils.calculate_accuracy(
+                        predicted_labels=predicted_val_labels,
+                        true_labels=val_labels,
+                    )
+                )
+
+                tepoch.set_postfix(
+                    {
+                        "Train Acc": self.train_accuracies[-1],
+                        "Val Acc": self.val_accuracies[-1],
+                    }
+                )
 
         # Set the trained parameters to self.quclassi.
         self.quclassi.trained_parameters = self.current_parameters
 
     def train_one_epoch(
         self,
-        data: np.ndarray,
+        train_data: np.ndarray,
         label: object,
         epoch: int,
+        val_data: np.ndarray,
         sampler: (
             primitives.BaseSamplerV1 | primitives.BaseSamplerV2
         ) = primitives.StatevectorSampler(seed=901),
@@ -88,32 +135,33 @@ class QuClassiTrainer:
     ):
         """Train the quclassi only one epoch for one class.
 
-        :param np.ndarray data: data belonging to the given label
+        :param np.ndarray train_data: train data belonging to the given label
         :param object label: label to which the data belong
         :param int epoch: current epoch
+        :param np.ndarray val_data: validation data belonging to the given label
         :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
         :param int shots: number of shots
         """
         # Shuffle the data if needed.
         if self.shuffle:
-            np.random.shuffle(data)
+            np.random.shuffle(train_data)
 
         # Adjust the size of the data if needed.
-        remainder = len(data) % self.batch_size
+        remainder = len(train_data) % self.batch_size
         if remainder != 0:
             data = np.concatenate((data, data[:remainder]))
 
         # Get the index of the target label, which corresponds to the target parameters.
         target_label_index = self.quclassi.labels.index(label)
 
-        iterations = len(data) // self.batch_size
+        iterations = len(train_data) // self.batch_size
         with tqdm(range(iterations), leave=False) as titerations:
             for iteration in titerations:
                 titerations.set_description(f"Iteration {iteration}")
                 # Get target data for this iteration.
                 start_index = iteration * self.batch_size
                 end_index = iteration * self.batch_size + self.batch_size
-                target_data = data[start_index:end_index]
+                target_data = train_data[start_index:end_index]
 
                 # Get the forward difference.
                 forward_difference_parameters = self.current_parameters[
@@ -165,6 +213,37 @@ class QuClassiTrainer:
                     diff = 10 ** (-10)
                 self.current_parameters[target_label_index] -= diff * self.learning_rate
 
+    def run_sampler(
+        self,
+        data: np.ndarray,
+        trained_parameters: dict[str, float],
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 1024,
+    ) -> qiskit.providers.Job:
+        """Run the given sampler.
+
+        :param np.ndarray data: data to run the circuit.
+        :param dict[str, float] trained_parameters: parameters to run the circuit
+        :param primitives.BaseSamplerV1  |  primitives.BaseSamplerV2 sampler: sampler, defaults to primitives.StatevectorSampler(seed=901)
+        :param int shots: number of shots, defaults to 1024
+        :return qiskit.providers.Job: result of running sampler
+        """
+        # Create the combination of the circuit and parameters to run the circuits.
+        pubs = []
+        for _td in data:
+            data_parameters = {
+                data_parameter: _d
+                for data_parameter, _d in zip(self.quclassi.data_parameters, _td)
+            }
+            parameters = {**trained_parameters, **data_parameters}
+            pubs.append((self.quclassi.circuit, parameters))
+
+        # Run the sampler.
+        job = sampler.run(pubs, shots=shots)
+        return job
+
     def get_fidelities(
         self,
         data: np.ndarray,
@@ -182,18 +261,12 @@ class QuClassiTrainer:
         :param int shots: number of shots, defaults to 1024
         :return np.ndarray: sequence of fidelities
         """
-        # Create the combination of the circuit and parameters to run the circuits.
-        pubs = []
-        for _td in data:
-            data_parameters = {
-                data_parameter: _d
-                for data_parameter, _d in zip(self.quclassi.data_parameters, _td)
-            }
-            parameters = {**trained_parameters, **data_parameters}
-            pubs.append((self.quclassi.circuit, parameters))
-
-        # Run the sampler.
-        job = sampler.run(pubs, shots=shots)
+        job = self.run_sampler(
+            data=data,
+            trained_parameters=trained_parameters,
+            sampler=sampler,
+            shots=shots,
+        )
         # Calculate the sequence of the fidelities.
         fidelities = []
         results = job.result()
