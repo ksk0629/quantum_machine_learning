@@ -24,10 +24,13 @@ class TestQuClassiTrainer:
         cls.quclassi.build(structure)
 
         cls.epochs = 2
+        cls.batch_size = 3
         cls.trained_paramters = {"layer0[0]": 1, "layer0[1]": 1}
 
     def get_trainer(self):
-        return QuClassiTrainer(quclassi=self.quclassi, epochs=self.epochs)
+        return QuClassiTrainer(
+            quclassi=self.quclassi, batch_size=self.batch_size, epochs=self.epochs
+        )
 
     def test_init_invalid_initial_parameters(self):
         """Abnormal test;

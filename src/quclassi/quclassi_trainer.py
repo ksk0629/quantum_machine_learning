@@ -180,7 +180,7 @@ class QuClassiTrainer:
         # Adjust the size of the data if needed.
         remainder = len(train_data) % self.batch_size
         if remainder != 0:
-            data = np.concatenate((data, data[:remainder]))
+            train_data = np.concatenate((train_data, train_data[:remainder]))
 
         # Get the index of the target label, which corresponds to the target parameters.
         target_label_index = self.quclassi.labels.index(label)
