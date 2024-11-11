@@ -125,3 +125,19 @@ class TestUtils:
         )
 
         assert result == parameter_dict
+
+    @pytest.mark.parametrize("data", [[[2, 3], [1, 1]], [[1, 1]]])
+    def test_normalise_data(self, data):
+        """Normal test;
+        Run normalise_data.
+
+        Check if the vectors are normalised.
+        """
+        result = utils.normalise_data(data)
+
+        normalised_data = []
+        for _d in data:
+            normalised_data.append(_d / np.linalg.norm(_d))
+        normalised_data = np.array(normalised_data)
+
+        assert np.allclose(result, normalised_data)

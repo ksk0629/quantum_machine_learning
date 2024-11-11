@@ -87,3 +87,7 @@ def get_parameter_dict(
         for parameter_name, parameter in zip(parameter_names, parameters)
     }
     return parameter_dict
+
+
+def normalise_data(data: np.ndarray):
+    return data / np.linalg.norm(data, axis=1, keepdims=1)
