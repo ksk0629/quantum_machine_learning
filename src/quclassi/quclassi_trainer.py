@@ -244,12 +244,12 @@ class QuClassiTrainer:
         self,
         data: np.ndarray,
         trained_parameters: dict[str, float],
-    ) -> qiskit.providers.Job:
+    ) -> qiskit.primitives.primitive_job.PrimitiveJob:
         """Run the given sampler.
 
         :param np.ndarray data: data to run the circuit.
         :param dict[str, float] trained_parameters: parameters to run the circuit
-        :return qiskit.providers.Job: result of running sampler
+        :return qiskit.primitives.primitive_job.PrimitiveJob: result of running sampler
         """
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
