@@ -113,3 +113,15 @@ class TestUtils:
             predicted_labels=predicted_labels, true_labels=true_labels
         )
         assert accuracy == true_accuracy
+
+    @pytest.mark.parametrize(
+        "parameter_dict", [{"x": 1.2, "1": 2}, {"y": 3.1}, {"layers!": 901}]
+    )
+    def test_get_parameter_dict(self, parameter_dict):
+        parameter_names = list(parameter_dict.keys())
+        parameters = list(parameter_dict.values())
+        result = utils.get_parameter_dict(
+            parameter_names=parameter_names, parameters=parameters
+        )
+
+        assert result == parameter_dict
