@@ -111,6 +111,7 @@ class QuClassiTrainer:
                     self.parameters_history.append(self.current_parameters)
 
                 if eval:
+                    self.quclassi.trained_parameters = self.current_parameters
                     # Get the accuracies.
                     predicted_train_labels = [
                         self.quclassi(data) for data in train_data
@@ -137,6 +138,7 @@ class QuClassiTrainer:
                     )
 
         # Get the accuracies.
+        self.quclassi.trained_parameters = self.current_parameters
         predicted_train_labels = [self.quclassi(data) for data in train_data]
         self.train_accuracies.append(
             src.utils.calculate_accuracy(
