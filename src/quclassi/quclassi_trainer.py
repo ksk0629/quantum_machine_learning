@@ -142,6 +142,24 @@ class QuClassiTrainer:
                         }
                     )
 
+        # Get the accuracies.
+        predicted_train_labels = [self.quclassi(data) for data in train_data]
+        self.train_accuracies.append(
+            src.utils.calculate_accuracy(
+                predicted_labels=predicted_train_labels,
+                true_labels=train_labels,
+            )
+        )
+        predicted_val_labels = [self.quclassi(data) for data in val_data]
+        self.val_accuracies.append(
+            src.utils.calculate_accuracy(
+                predicted_labels=predicted_val_labels,
+                true_labels=val_labels,
+            )
+        )
+        print(f"Train Accuracy: {self.train_accuracies[-1]}")
+        print(f"Validation Accuracy: {self.val_accuracies[-1]}")
+
         # Set the trained parameters to self.quclassi.
         self.quclassi.trained_parameters = self.current_parameters
 
