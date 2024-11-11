@@ -206,13 +206,10 @@ class QuClassiTrainer:
                     forward_difference_parameters = (
                         self.current_parameters[target_label_index] + forward_shift
                     )
-                    forward_difference_parameters = {
-                        trainable_parameter: trained_parameter
-                        for trainable_parameter, trained_parameter in zip(
-                            self.quclassi.trainable_parameters,
-                            forward_difference_parameters,
-                        )
-                    }
+                    forward_difference_parameters = src.utils.get_parameter_dict(
+                        parameter_names=self.quclassi.trainable_parameters,
+                        parameters=forward_difference_parameters,
+                    )
                     forward_difference_fidelities = self.get_fidelities(
                         data=target_data,
                         trained_parameters=forward_difference_parameters,
@@ -229,13 +226,10 @@ class QuClassiTrainer:
                     backward_difference_parameters = (
                         self.current_parameters[target_label_index] + backward_shift
                     )
-                    backward_difference_parameters = {
-                        trainable_parameter: trained_parameter
-                        for trainable_parameter, trained_parameter in zip(
-                            self.quclassi.trainable_parameters,
-                            backward_difference_parameters,
-                        )
-                    }
+                    backward_difference_parameters = src.utils.get_parameter_dict(
+                        parameter_names=self.quclassi.trainable_parameters,
+                        parameters=backward_difference_parameters,
+                    )
                     backward_difference_fidelities = self.get_fidelities(
                         data=target_data,
                         trained_parameters=backward_difference_parameters,
@@ -266,10 +260,9 @@ class QuClassiTrainer:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for _td in data:
-            data_parameters = {
-                data_parameter: _d
-                for data_parameter, _d in zip(self.quclassi.data_parameters, _td)
-            }
+            data_parameters = src.utils.get_parameter_dict(
+                parameter_names=self.quclassi.data_parameters, parameters=_td
+            )
             parameters = {**trained_parameters, **data_parameters}
             pubs.append((self.quclassi.circuit, parameters))
 
