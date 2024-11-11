@@ -236,8 +236,6 @@ class QuClassiTrainer:
                 diff = 0.5 * (
                     forward_difference_fidelity - backward_difference_fidelity
                 )
-                if diff <= 0:
-                    diff = 10 ** (-10)
                 self.current_parameters[target_label_index] -= diff * self.learning_rate
 
     def run_sampler(
