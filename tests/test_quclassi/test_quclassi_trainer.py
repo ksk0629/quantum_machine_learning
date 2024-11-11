@@ -1,9 +1,162 @@
+import glob
+import os
+
+import numpy as np
+import qiskit
 import pytest
 
+from src.quclassi.quclassi import QuClassi
 from src.quclassi.quclassi_trainer import QuClassiTrainer
 
 
 class TestQuClassiTrainer:
     @classmethod
     def setup_class(cls):
-        pass
+        classical_data_size = 2
+        labels = ["Large", "Small"]
+        cls.positive_data = np.array([[0.9, 0.8], [0.8, 0.9]])
+        cls.negative_data = np.array([[0.1, 0.2], [0.2, 0.1]])
+        cls.train_data = np.concatenate((cls.positive_data, cls.negative_data))
+        cls.train_labels = np.array(["Large", "Large", "Small", "Small"])
+        structure = "s"
+        cls.model_dir_path = "./test/"
+        cls.quclassi = QuClassi(classical_data_size=classical_data_size, labels=labels)
+        cls.quclassi.build(structure)
+
+        cls.epochs = 2
+        cls.trained_paramters = {"layer0[0]": 1, "layer0[1]": 1}
+
+    def get_trainer(self):
+        return QuClassiTrainer(quclassi=self.quclassi, epochs=self.epochs)
+
+    def test_init_invalid_initial_parameters(self):
+        """Abnormal test;
+        Create the instance with invalid initial_parameters.
+
+        Check if ValueError happens.
+        """
+        initial_parameters = np.array([1])
+        with pytest.raises(ValueError):
+            QuClassiTrainer(
+                quclassi=self.quclassi, initial_paramters=initial_parameters
+            )
+
+    def test_train_with_evaluation(self):
+        """Normal test;
+        Run train with eval=True.
+
+        Check if
+        - the length of parameters_history is self.epochs + 1.
+        - the length of train_accuracies is self.epochs.
+        - the length of val_accuracies is self.epochs.
+        - the current_parameters is not the same as the first element of the parameter_histories.
+        """
+        quclassi_trainer = self.get_trainer()
+        quclassi_trainer.train(
+            train_data=self.train_data,
+            train_labels=self.train_labels,
+            val_data=self.train_data,
+            val_labels=self.train_labels,
+            eval=True,
+        )
+        assert len(quclassi_trainer.parameters_history) == self.epochs + 1
+        assert len(quclassi_trainer.train_accuracies) == self.epochs
+        assert len(quclassi_trainer.val_accuracies) == self.epochs
+        assert not np.allclose(
+            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
+        )
+
+    def test_train_without_evaluation(self):
+        """Normal test;
+        Run train without eval=True.
+
+        Check if
+        - the length of parameters_history is self.epochs + 1.
+        - the length of train_accuracies is 1.
+        - the length of val_accuracies is 1.
+        - the current_parameters is not the same as the first element of the parameter_histories.
+        """
+        quclassi_trainer = self.get_trainer()
+        quclassi_trainer.train(
+            train_data=self.train_data,
+            train_labels=self.train_labels,
+            val_data=self.train_data,
+            val_labels=self.train_labels,
+            eval=False,
+        )
+        assert len(quclassi_trainer.parameters_history) == self.epochs + 1
+        assert len(quclassi_trainer.train_accuracies) == 1
+        assert len(quclassi_trainer.val_accuracies) == 1
+        assert not np.allclose(
+            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
+        )
+
+    def test_train_one_epoch(self):
+        """Normal test;
+        Run train_one_epoch.
+
+        Check if the current_parameters is not the same as the first element of the parameter_histories.
+        """
+        quclassi_trainer = self.get_trainer()
+        quclassi_trainer.train_one_epoch(
+            train_data=self.positive_data, label="Large", epoch=1
+        )
+        assert not np.allclose(
+            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
+        )
+
+    def test_run_sampler(self):
+        """Normal test;
+        Run run_sampler.
+
+        Check if
+        - the type of the return value is qiskit.primitives.primitive_job.PrimitiveJob.
+        - the return value has the function result() and its return value's length is the same as the length of self.train_data.
+        """
+        quclassi_trainer = self.get_trainer()
+        jobs = quclassi_trainer.run_sampler(
+            self.train_data, trained_parameters=self.trained_paramters
+        )
+        assert isinstance(jobs, qiskit.primitives.primitive_job.PrimitiveJob)
+        assert len(jobs.result()) == len(self.train_data)
+
+    def test_get_fidelities(self):
+        """Normal test;
+        Run get_fidelities.
+
+        Check if
+        - the length of the return value is the same as the length of self.train_data.
+        - each element of the return value is between 0 and 1.
+        """
+        quclassi_trainer = self.get_trainer()
+        fidelities = quclassi_trainer.get_fidelities(
+            self.train_data, trained_parameters=self.trained_paramters
+        )
+        assert len(fidelities) == len(self.train_data)
+        for fidelity in fidelities:
+            assert 0 <= fidelity <= 1
+
+    def test_save(self):
+        """Normal test;
+        Run save after running train.
+
+        Check if there are (self.epochs + 1) + 4 .pkl files under self.model_dir_path.
+        Note that, the "+4" comes from QuClassi.save function.
+        """
+        quclassi_trainer = self.get_trainer()
+        quclassi_trainer.train(
+            train_data=self.train_data,
+            train_labels=self.train_labels,
+            val_data=self.train_data,
+            val_labels=self.train_labels,
+            eval=False,
+        )
+
+        quclassi_trainer.save(self.model_dir_path)
+        pkl_files = glob.glob(os.path.join(self.model_dir_path, "*.pkl"))
+        assert len(pkl_files) == self.epochs + 1 + 4
+
+        all_files = glob.glob(os.path.join(self.model_dir_path, "*"))
+        for file in all_files:
+            os.remove(file)
+        os.rmdir(self.model_dir_path)
