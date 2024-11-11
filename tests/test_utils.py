@@ -141,3 +141,14 @@ class TestUtils:
         normalised_data = np.array(normalised_data)
 
         assert np.allclose(result, normalised_data)
+
+    @pytest.mark.parametrize("data", [[[0.1, 0.9], [1, 1]], [[1, 1]]])
+    def test_encode_through_arcsin(self, data):
+        """Normal test;
+        Run encode_through_arcsin.
+
+        Check if the data is encoded as it should be.
+        """
+        result = utils.encode_through_arcsin(data)
+        encoded_data = 2 * np.arcsin(np.sqrt(data))
+        assert np.allclose(result, encoded_data)

@@ -91,3 +91,7 @@ def get_parameter_dict(
 
 def normalise_data(data: np.ndarray):
     return data / np.linalg.norm(data, axis=1, keepdims=1)
+
+
+def encode_through_arcsin(data: np.ndarray):
+    return 2 * np.arcsin(np.sqrt(data))
