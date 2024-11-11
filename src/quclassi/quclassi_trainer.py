@@ -61,7 +61,7 @@ class QuClassiTrainer:
                 )
                 * np.pi
             ).reshape((len(quclassi.labels), -1))
-        self.parameters_history.append(self.current_parameters)
+        self.parameters_history.append(self.current_parameters.copy())
         self.sampler = sampler
         self.shots = shots
 
@@ -108,7 +108,7 @@ class QuClassiTrainer:
                             label=label,
                             epoch=epoch,
                         )
-                    self.parameters_history.append(self.current_parameters)
+                    self.parameters_history.append(self.current_parameters.copy())
 
                 if eval:
                     self.quclassi.trained_parameters = self.current_parameters
