@@ -89,9 +89,20 @@ def get_parameter_dict(
     return parameter_dict
 
 
-def normalise_data(data: np.ndarray):
+def normalise_data(data: np.ndarray) -> np.ndarray:
+    """Normalise each data, which correponds to each row of the given data.
+
+    :param np.ndarray data: data
+    :return np.ndarray: normalised data
+    """
     return data / np.linalg.norm(data, axis=1, keepdims=1)
 
 
-def encode_through_arcsin(data: np.ndarray):
+def encode_through_arcsin(data: np.ndarray) -> np.ndarray:
+    """Encode the given data through arcsin,
+    which is given in the paper https://arxiv.org/pdf/2103.11307.
+
+    :param np.ndarray data: data
+    :return np.ndarray: encoded data
+    """
     return 2 * np.arcsin(np.sqrt(data))
