@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy as np
 import qiskit
 from qiskit import primitives
@@ -50,31 +53,21 @@ class QuClassiTrainer:
         self.shuffle = shuffle
         self.parameters_history = []
         if initial_paramters is not None:
-            self.parameters_history.append(initial_paramters)
+            self.current_parameters = initial_paramters
         else:
-            self.parameters_history.append(
-                (
-                    np.random.rand(
-                        len(self.quclassi.trainable_parameters)
-                        * len(self.quclassi.labels)
-                    )
-                    * np.pi
-                ).reshape((len(quclassi.labels), -1))
-            )
+            self.current_parameters = (
+                np.random.rand(
+                    len(self.quclassi.trainable_parameters) * len(self.quclassi.labels)
+                )
+                * np.pi
+            ).reshape((len(quclassi.labels), -1))
+        self.parameters_history.append(self.current_parameters)
         self.sampler = sampler
         self.shots = shots
 
         # Initialise the histories.
         self.train_accuracies = []
         self.val_accuracies = []
-
-    @property
-    def current_parameters(self) -> np.ndarray:
-        """Get the lates parameters.
-
-        :return np.ndarray: latest parameters
-        """
-        return self.parameters_history[-1]
 
     def train(
         self,
@@ -115,6 +108,7 @@ class QuClassiTrainer:
                             label=label,
                             epoch=epoch,
                         )
+                    self.parameters_history.append(self.current_parameters)
 
                 if eval:
                     # Get the accuracies.
@@ -291,3 +285,24 @@ class QuClassiTrainer:
                 src.utils.calculate_fidelity_from_swap_test(result.data.c.get_counts())
             )
         return fidelities
+
+    def save(self, model_dir_path: str):
+        """Save the circuit and parameters to the directory specified by the given model_dir_path.
+
+        :param str model_dir_path: path to the output directory.
+        """
+        # Save the model.
+        self.quclassi.save(model_dir_path=model_dir_path)
+
+        # Save the trained_parameters for each epoch.
+        trained_parameter_path = self.quclassi.get_trained_parameters_path(
+            model_dir_path=model_dir_path
+        )
+
+        name, extension = os.path.splitext(os.path.basename(trained_parameter_path))
+        for index, parameters in enumerate(self.parameters_history):
+            parameters_path = os.path.join(
+                model_dir_path, f"{name}_{index:0>{len(str(self.epochs))}}{extension}"
+            )
+            with open(parameters_path, "wb") as pkl_file:
+                pickle.dump(parameters, pkl_file)
