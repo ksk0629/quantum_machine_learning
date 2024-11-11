@@ -2,6 +2,7 @@ import numpy as np
 from qiskit import primitives
 
 from src.quclassi.quclassi import QuClassi
+import src.utils
 
 
 class QuClassiTrainer:
@@ -184,9 +185,7 @@ class QuClassiTrainer:
         fidelities = []
         results = job.result()
         for result in results:
-            probability_zero = result.data.c.get_counts()["0"] / shots
-            fidelity = 2 * probability_zero - 1
-            if fidelity < 0:
-                fidelity = 0
-            fidelities.append(fidelity)
+            fidelities.append(
+                src.utils.calculate_fidelity_from_swap_test(result.data.c.get_counts())
+            )
         return fidelities

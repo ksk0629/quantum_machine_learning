@@ -9,6 +9,7 @@ from src.encoders.yz_encoder import YZEncoder
 from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
 from src.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
 from src.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
+import src.utils
 
 
 class QuClassi:
@@ -242,11 +243,9 @@ class QuClassi:
         fidelities = {}
         results = job.result()
         for result, label in zip(results, self.labels):
-            probability_zero = result.data.c.get_counts()["0"] / shots
-            fidelity = 2 * probability_zero - 1
-            if fidelity < 0:
-                fidelity = 0
-            fidelities[label] = fidelity
+            fidelities[label] = src.utils.calculate_fidelity_from_swap_test(
+                result.data.c.get_counts()
+            )
 
         return fidelities
 
