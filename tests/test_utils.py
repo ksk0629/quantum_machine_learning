@@ -45,7 +45,6 @@ class TestUtils:
             {"0": 1, "-1": 1},
             {"1": 1, "3": 1},
             {"-2": 1},
-            {"0": 1, "1": -3},
         ],
     )
     def test_calculate_fidelity_from_swap_test_with_invalid_arg(self, result):

@@ -51,8 +51,7 @@ def calculate_fidelity_from_swap_test(result: dict[str, int]) -> float:
     probability_zero = num_zeros / (num_zeros + num_ones)
     fidelity = 2 * probability_zero - 1
     if fidelity < 0:
-        msg = f"fidelity must be non-negative but {fidelity}."
-        raise ValueError(msg)
+        fidelity = 0
 
     return fidelity
 
