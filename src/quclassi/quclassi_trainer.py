@@ -59,7 +59,6 @@ class QuClassiTrainer:
                 np.random.rand(
                     len(self.quclassi.trainable_parameters) * len(self.quclassi.labels)
                 )
-                * np.pi
             ).reshape((len(quclassi.labels), -1))
         self.parameters_history.append(self.current_parameters.copy())
         self.sampler = sampler
@@ -214,9 +213,12 @@ class QuClassiTrainer:
                         data=target_data,
                         trained_parameters=forward_difference_parameters,
                     )
-                    forward_difference_fidelity = -np.log(
-                        np.average(forward_difference_fidelities)
+                    forward_averaged_fidelity = np.average(
+                        forward_difference_fidelities
                     )
+                    if forward_averaged_fidelity == 0:
+                        forward_averaged_fidelity = 1e-10
+                    forward_difference_fidelity = -np.log(forward_averaged_fidelity)
 
                     # Get the backward differene.
                     backward_shift = np.zeros(
@@ -234,9 +236,12 @@ class QuClassiTrainer:
                         data=target_data,
                         trained_parameters=backward_difference_parameters,
                     )
-                    backward_difference_fidelity = -np.log(
-                        np.average(backward_difference_fidelities)
+                    backward_averaged_fidelity = np.average(
+                        backward_difference_fidelities
                     )
+                    if backward_averaged_fidelity == 0:
+                        backward_averaged_fidelity = 1e-10
+                    backward_difference_fidelity = -np.log(backward_averaged_fidelity)
 
                     # Update the current parameters.
                     diff = 0.5 * (
