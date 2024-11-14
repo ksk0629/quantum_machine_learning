@@ -227,12 +227,9 @@ class QuClassi:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for trained_parameters in self.trained_parameters:
-            parameters = {
-                trainable_parameter: trained_parameter
-                for trainable_parameter, trained_parameter in zip(
-                    self.trainable_parameters, trained_parameters
-                )
-            }
+            parameters = src.utils.get_parameter_dict(
+                parameter_names=self.trainable_parameters, parameters=trained_parameters
+            )
             parameters = {**parameters, **data_parameters}
             pubs.append((self.circuit, parameters))
 
