@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 import qiskit_algorithms
+from sklearn.preprocessing import MinMaxScaler
 import torch
 
 
@@ -95,6 +96,16 @@ def normalise_data(data: np.ndarray) -> np.ndarray:
     :return np.ndarray: normalised data
     """
     return data / np.linalg.norm(data, axis=1, keepdims=1)
+
+
+def scale_data(data: np.ndarray) -> np.ndarray:
+    """Scale each datam which corresponds to each row.
+
+    :param np.ndarray data: data
+    :return np.ndarray: scaled data
+    """
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    return scaler.fit_transform(data)
 
 
 def encode_through_arcsin(data: np.ndarray) -> np.ndarray:

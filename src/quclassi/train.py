@@ -30,9 +30,8 @@ def preprocess_dataset(
     :return tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: train data, train labels, validation data, validation labels
     """
     # Scale the data if needed.
-    if should_scale:
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        data = scaler.fit_transform(data)
+    data = utils.scale_data(data) if should_scale else data
+
     # Split the data and labels.
     train_data, val_data, train_labels, val_labels = train_test_split(
         data,
