@@ -9,6 +9,7 @@ from src.encoders.yz_encoder import YZEncoder
 from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
 from src.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
 from src.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
+from src.layers.swap_test_layer import SwapTestLayer
 import src.utils
 
 
@@ -173,8 +174,6 @@ class QuClassi:
 
         # >>> Whole circuit creation >>>
         circuit = qiskit.QuantumCircuit(self.num_qubits, 1, name="QuClassi")
-        circuit.h(0)
-        circuit.barrier()
 
         ansatz_qubits = range(1, self.num_train_qubits + 1)
         circuit.compose(ansatz, ansatz_qubits, inplace=True)
@@ -189,9 +188,11 @@ class QuClassi:
         self.data_parameters = feature_map.parameters
         circuit.barrier()
 
-        for ansatz_qubit, feature_map_qubit in zip(ansatz_qubits, feature_map_qubits):
-            circuit.cswap(0, ansatz_qubit, feature_map_qubit)
-        circuit.h(0)
+        qubit_pairs = [
+            qubit_pair for qubit_pair in zip(ansatz_qubits, feature_map_qubits)
+        ]
+        swap_test_layer = SwapTestLayer(0, qubit_pairs)
+        circuit.compose(swap_test_layer(), range(self.num_qubits), inplace=True)
 
         circuit.measure(0, 0)
         # <<< Whole circuit creation <<<
