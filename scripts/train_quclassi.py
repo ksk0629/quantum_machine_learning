@@ -1,4 +1,5 @@
 import argparse
+import shutil
 import yaml
 
 from qiskit import primitives
@@ -20,7 +21,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    with open(args.config_yaml_path, "r") as yaml_f:
+    config_yaml_path = args.config_yaml_path
+    with open(config_yaml_path, "r") as yaml_f:
         config = yaml.safe_load(yaml_f)
 
     # Fix the seed.
@@ -54,3 +56,5 @@ if __name__ == "__main__":
         eval=eval,
         model_dir_path=model_dir_path,
     )
+
+    shutil.copy2(config_yaml_path, model_dir_path)
