@@ -8,11 +8,11 @@ trainer_options:
   batch_size: 1
   shuffle: True
   initial_paramters: Null
-  shots: 1024
+  shots: 8000
   eval: False
-  model_dir_path: "./models/iris"
+  model_dir_path: "./models/wine"
 dataset_options:
-  name: iris
+  name: wine
   should_scale: False
   train_size: 0.75
   shuffle: True
