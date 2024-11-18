@@ -2,7 +2,6 @@ from typing import Callable
 
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 
 from src.quclassi.quclassi import QuClassi
 from src.quclassi.quclassi_trainer import QuClassiTrainer
