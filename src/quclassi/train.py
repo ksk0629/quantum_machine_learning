@@ -51,20 +51,8 @@ def preprocess_dataset(
     train_data = encoding_method(train_data)
     val_data = encoding_method(val_data)
     # Make the length of the each data even.
-    if train_data.shape[1] % 2 != 0:
-        new_shape = [0, 0]
-        new_shape[0] = train_data.shape[0]
-        new_shape[1] = train_data.shape[1] + 1
-        train_data_new = np.zeros(new_shape)
-        train_data_new[:, :-1] = train_data
-        train_data = train_data_new
-    if val_data.shape[1] % 2 != 0:
-        new_shape = [0, 0]
-        new_shape[0] = val_data.shape[0]
-        new_shape[1] = val_data.shape[1] + 1
-        val_data_new = np.zeros(new_shape)
-        val_data_new[:, :-1] = val_data
-        val_data = val_data_new
+    train_data = utils.pad_data(data=train_data)
+    val_data = utils.pad_data(data=val_data)
 
     return train_data, train_labels, val_data, val_labels
 

@@ -116,3 +116,19 @@ def encode_through_arcsin(data: np.ndarray) -> np.ndarray:
     :return np.ndarray: encoded data
     """
     return 2 * np.arcsin(np.sqrt(data))
+
+
+def pad_data(data: np.ndarray, pad_value: float = 0) -> np.ndarray:
+    """Pad data with the given filling value.
+
+    :param np.ndarray data: data
+    :param float pad_value: value to pad given data, defaults to 0
+    :return np.ndarray: padded data
+    """
+    if data.shape[1] % 2 != 0:
+        new_shape = [0, 0]
+        new_shape[0] = data.shape[0]
+        new_shape[1] = data.shape[1] + 1
+        padded_data = np.zeros(new_shape) + pad_value
+        padded_data[:, :-1] = data
+    return padded_data
