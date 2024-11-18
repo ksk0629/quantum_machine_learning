@@ -22,7 +22,7 @@ class QuClassiTrainer:
         learning_rate: float = 0.01,
         batch_size: int = 1,
         shuffle: bool = True,
-        initial_paramters: np.ndarray | None = None,
+        initial_parameters: np.ndarray | None = None,
         sampler: (
             primitives.BaseSamplerV1 | primitives.BaseSamplerV2
         ) = primitives.StatevectorSampler(seed=901),
@@ -35,13 +35,13 @@ class QuClassiTrainer:
         :param float learning_rate: learning rate, defaults to 0.01
         :param int batch_size: batch size, defaults to 1
         :param bool shuffle: whether dataset is shuffled or not, defaults to True
-        :param np.ndarray | None initial_paramters: initial parameters, defaults to None
+        :param np.ndarray | None initial_parameters: initial parameters, defaults to None
         :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
         :param int shots: number of shots
-        :raises ValueError: if the lengths of quclassi.labels and initial_paramters do not match
+        :raises ValueError: if the lengths of quclassi.labels and initial_parameters do not match
         """
-        if initial_paramters is not None and len(set(quclassi.labels)) != len(
-            initial_paramters
+        if initial_parameters is not None and len(set(quclassi.labels)) != len(
+            initial_parameters
         ):
             msg = f"The labels the given quclassi has and the labels the given initial_weights has must be the same lengths, but {quclassi.labels} and {initial_paramters}"
             raise ValueError(msg)
@@ -52,8 +52,8 @@ class QuClassiTrainer:
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.parameters_history = []
-        if initial_paramters is not None:
-            self.current_parameters = initial_paramters
+        if initial_parameters is not None:
+            self.current_parameters = initial_parameters
         else:
             self.current_parameters = (
                 np.random.rand(
