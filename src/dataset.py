@@ -56,6 +56,7 @@ def get_pos_neg(
     :return tuple[np.ndarray, list[str]]: positive-negative numbers dataset
     """
     data = np.random.rand(num_data, dimension) * highest
+    data -= highest / 2
     labels = ["positive" if np.sum(_d) >= 0 else "negative" for _d in data]
 
     assert len(data) == len(labels)
