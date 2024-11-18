@@ -26,7 +26,7 @@ class QuClassiTrainer:
         sampler: (
             primitives.BaseSamplerV1 | primitives.BaseSamplerV2
         ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 1024,
+        shots: int = 8096,
     ):
         """Initialise this trainer.
 
