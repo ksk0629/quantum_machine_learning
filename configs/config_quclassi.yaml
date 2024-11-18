@@ -7,12 +7,12 @@ trainer_options:
   learning_rate: 0.01
   batch_size: 1
   shuffle: True
-  initial_paramters: Null
-  shots: 8000
+  initial_parameters: Null
+  shots: 8096
   eval: False
-  model_dir_path: "./models/wine"
+  model_dir_path: "./models/iris"
 dataset_options:
-  name: wine
+  name: iris
   should_scale: False
   train_size: 0.75
   shuffle: True
