@@ -1,3 +1,8 @@
+# Config
+configs/local_config_quclassi.yaml
+# models
+models/
+
 # poetry
 poetry.lock
 

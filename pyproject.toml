@@ -14,10 +14,13 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.12"
-qiskit-machine-learning = "^0.7.2"
+qiskit-machine-learning = "0.8.0"
 qiskit-algorithms = "^0.3.1"
 torch = "^2.5.1"
 numpy = "^2.1.2"
+matplotlib = "^3.9.2"
+pylatexenc = "^2.10"
+tqdm = "^4.67.0"
 
 [tool.poetry.scripts]
 run_example = "src.example_package.example:main"
@@ -28,6 +31,8 @@ pytest = "^7.4.2"
 pytest-cov = "^4.1.0"
 sphinx = "^7.2.6"
 black = "^23.9.1"
+jupyter = "^1.1.1"
+notebook = "^7.2.2"
 
 
 [build-system]
