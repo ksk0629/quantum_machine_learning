@@ -20,9 +20,15 @@ class TestSSwapGate:
         )
 
     def test_init(self):
+        """Normal test;
+        Check if the SSwapGate created in setup_class is the instance of qiskit.circuit.Gate.
+        """
         assert isinstance(self.sswap, qiskit.circuit.Gate)
 
     def test_matrix_representation(self):
+        """Normal test;
+        Check if the matrix representation of SSwapGate is correct.
+        """
         circuit = qiskit.QuantumCircuit(2)
         circuit.append(self.sswap, [0, 1])
 
