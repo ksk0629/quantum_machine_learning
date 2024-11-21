@@ -221,9 +221,9 @@ class QuClassi:
             raise ValueError(msg)
 
         # Set data as the data_parameters.
-        data_parameters = {
-            data_parameter: _d for data_parameter, _d in zip(self.data_parameters, data)
-        }
+        data_parameters = src.utils.get_parameter_dict(
+            parameter_names=self.data_parameters, parameters=data
+        )
 
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
