@@ -44,7 +44,7 @@ class TestQuClassiTrainer:
         initial_parameters = np.array([1])
         with pytest.raises(ValueError):
             QuClassiTrainer(
-                quclassi=self.quclassi, initial_paramters=initial_parameters
+                quclassi=self.quclassi, initial_parameters=initial_parameters
             )
 
     def test_init_with_valid_initial_parameters(self):
@@ -57,7 +57,7 @@ class TestQuClassiTrainer:
         - the current_parameters of the return value is the same as self.initial_parameters.
         """
         quclassi_trainer = QuClassiTrainer(
-            quclassi=self.quclassi, initial_paramters=self.initial_parameters
+            quclassi=self.quclassi, initial_parameters=self.initial_parameters
         )
         assert len(quclassi_trainer.parameters_history) == 1
         assert np.allclose(
