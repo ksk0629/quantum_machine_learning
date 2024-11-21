@@ -43,7 +43,7 @@ class QuClassiTrainer:
         if initial_parameters is not None and len(set(quclassi.labels)) != len(
             initial_parameters
         ):
-            msg = f"The labels the given quclassi has and the labels the given initial_weights has must be the same lengths, but {quclassi.labels} and {initial_paramters}"
+            msg = f"The labels the given quclassi has and the labels the given initial_weights has must be the same lengths, but {quclassi.labels} and {initial_parameters}"
             raise ValueError(msg)
 
         self.quclassi = quclassi
