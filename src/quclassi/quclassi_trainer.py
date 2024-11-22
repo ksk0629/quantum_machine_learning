@@ -308,7 +308,7 @@ class QuClassiTrainer:
         self.quclassi.save(model_dir_path=model_dir_path)
 
         # Save the trained_parameters for each epoch.
-        trained_parameter_path = self.quclassi.get_trained_parameters_path(
+        trained_parameter_path = src.utils.get_trained_parameters_path(
             model_dir_path=model_dir_path
         )
 
