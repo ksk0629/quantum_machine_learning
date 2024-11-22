@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy as np
 import qiskit
 from qiskit import qpy, primitives
@@ -19,7 +22,6 @@ class QuanvLayer:
         self.kernel_size = kernel_size
         self.num_filters = num_filters
 
-        self.num_qubits = self.kernel_size[0] * self.kernel_size[1]
         circuit = qiskit.QuantumCircuit(self.num_qubits, name="QuanvFilter")
         circuit.compose(
             XEncoder(num_qubits=self.num_qubits)(), range(self.num_qubits), inplace=True
@@ -35,6 +37,14 @@ class QuanvLayer:
             )
             _c.measure_all()
             self.filters.append(_c)
+
+    @property
+    def num_qubits(self) -> int:
+        """Get the number of qubits of each filter.
+
+        :return int: number of qubits
+        """
+        return self.kernel_size[0] * self.kernel_size[1]
 
     def __call__(
         self,
