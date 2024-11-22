@@ -132,3 +132,19 @@ def pad_data(data: np.ndarray, pad_value: float = 0) -> np.ndarray:
         padded_data = np.zeros(new_shape) + pad_value
         padded_data[:, :-1] = data
     return padded_data
+
+
+def count_ones(result: dict[str, int]) -> int:
+    """Count the number of ones in the most likely outcome of the circuit result.
+
+    :param dict[str, int] result: qiskit circuit result
+    :return int: number of ones
+    """
+    key_1 = "1"
+    # Sort the resuly by the frequency.
+    sorted_result = dict(sorted(result.items(), key=lambda item: -item[1]))
+    # Get the most likely result.
+    most_likely_result = list(sorted_result.keys())[0]
+    # Count the number of ones.
+    num_ones = most_likely_result.count(key_1)
+    return num_ones
