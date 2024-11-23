@@ -17,15 +17,10 @@ class TestQuanvLayer:
         )
 
         cls.batch_data = np.array(
-            [
-                [[1, 1, 1, 1], [1, 1, 0, 1], [1, 0, 0, 1]],
-                [[0, 0, 1, 1], [1, 0, 0, 0], [1, 1, 1, 1]],
-                [[0, 1, 1, 0], [0, 0, 0, 0], [1, 1, 0, 0]],
-            ]
+            [[1, 1, 1, 1], [1, 1, 0, 1], [1, 0, 0, 1]],
         )
         num_batch = len(cls.batch_data)
-        num_channels = cls.batch_data[0].shape[0]
-        cls.correct_output_shape = (num_batch, num_channels * cls.num_filters, 1)
+        cls.correct_output_shape = (cls.num_filters, num_batch)
 
     def test_init(self):
         """Normal test;
@@ -77,7 +72,7 @@ class TestQuanvLayer:
 
         Check if ValueError happens.
         """
-        invalid_batch_data = np.array([[1, 1, 1, 1], [1, 1, 0, 1], [1, 0, 0, 1]])
+        invalid_batch_data = np.array([[[1, 1, 1, 1], [1, 1, 0, 1], [1, 0, 0, 1]]])
         with pytest.raises(ValueError):
             self.quanv_layer.process(batch_data=invalid_batch_data)
 
@@ -88,11 +83,7 @@ class TestQuanvLayer:
         Check if ValueError happens.
         """
         invalid_batch_data = np.array(
-            [
-                [[1, 1, 1, 1, 5], [1, 1, 0, 1, 5], [1, 0, 0, 1, 5]],
-                [[0, 0, 1, 1, 5], [1, 0, 0, 0, 5], [1, 1, 1, 1, 5]],
-                [[0, 1, 1, 0, 5], [0, 0, 0, 0, 5], [1, 1, 0, 0, 5]],
-            ]
+            [[1, 1, 1, 1, 9], [1, 1, 0, 1, 9], [1, 0, 0, 1, 9]],
         )
         with pytest.raises(ValueError):
             self.quanv_layer.process(batch_data=invalid_batch_data)

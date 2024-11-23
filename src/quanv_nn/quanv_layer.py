@@ -78,20 +78,18 @@ class QuanvLayer:
     ) -> np.ndarray:
         """Process the given batch data through all filters.
 
-        :param np.ndarray batch_data: batch data whose shape is [batch, depth(=channel), data (whose length is the same as the number of qubits of each filter)]
+        :param np.ndarray batch_data: batch data whose shape is (batch, data (whose length is the same as the number of qubits of each filter))
         :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
         :param int shots: number of shots
-        :return np.ndarray: processed batch data
-        :raises ValueError: if length of shape of batch_data is not 3
-        :raises ValueError: if second element of shape of each data in batch_data
+        :return np.ndarray: processed batch data, first index implies the filter and the other implies the data in the given barch data
+        :raises ValueError: if length of shape of batch_data is not 2
+        :raises ValueError: if each data's shape is not the same as self.num_qubits
         """
-        if len(batch_data.shape) != 3:
-            msg = f"The given batch_data shape must be three [batch, depth, data], but {batch_data.shape}."
+        if len(batch_data.shape) != 2:
+            msg = f"The given batch_data shape must be three (batch, data), but {batch_data.shape}."
             raise ValueError(msg)
 
-        is_data_shape_valid = all(
-            [len(channel) != self.num_qubits for data in batch_data for channel in data]
-        )
+        is_data_shape_valid = all([len(data) != self.num_qubits for data in batch_data])
         if is_data_shape_valid:
             msg = f"The given batch_data must contain data having the shape as same as num.qubits {self.num_qubits}."
             raise ValueError(msg)
@@ -101,10 +99,10 @@ class QuanvLayer:
             #            () means a scalar
             #            ->(p, q) means the length of the output shape is two
             self.__process_one_data,
-            signature="(m, n),(),()->(p, q)",
+            signature="(l),(),()->(m, n)",
         )
-
-        return process_one_data_np(batch_data, sampler, shots)
+        processed_batch_data = process_one_data_np(batch_data, sampler, shots)
+        return np.hstack(processed_batch_data)
 
     def __process_one_data(
         self,
@@ -114,31 +112,27 @@ class QuanvLayer:
         ) = primitives.StatevectorSampler(seed=901),
         shots: int = 8096,
     ) -> np.ndarray:
-        """Process one data, whose shape is [depth(=channel), data (whose length is the same as the number of qubits of each filter)]
+        """Process one data, which is one-dimensional array.
 
         :param np.ndarray data: one data
         :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
         :param int shots: number of shots
-        :return np.ndarray: processed data whose shape is [depth(=channel) * filters, processed data (= 1 for now)]
+        :return np.ndarray: processed data through each filter, first index implies filter
         """
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for filter in self.filters:
-            for channel in data:
-                parameters = src.utils.get_parameter_dict(
-                    parameter_names=filter.parameters, parameters=channel
-                )
-                pubs.append((filter, parameters))
+            parameters = src.utils.get_parameter_dict(
+                parameter_names=filter.parameters, parameters=data
+            )
+            pubs.append((filter, parameters))
 
         # Run the sampler.
         job = sampler.run(pubs, shots=shots)
         # Count the number of ones from each result.
         results = job.result()
         results = [result.data.meas.get_counts() for result in results]
-        processed_data_dimension = 1
-        processed_data = np.empty(
-            (len(self.filters) * len(data), processed_data_dimension)
-        )
+        processed_data = np.empty((len(self.filters), 1))
         processed_data[:, 0] = list(map(src.utils.count_ones, results))
 
         return processed_data
