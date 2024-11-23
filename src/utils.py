@@ -223,3 +223,51 @@ def get_trained_parameters_path(
         else "trained_parameters.pkl"
     )
     return os.path.join(model_dir_path, filename)
+
+
+def get_sliding_window_single_channel_data(
+    data: np.ndarray, window_size: tuple[int, int]
+) -> np.ndarray:
+    """Get the sliding window data.
+
+    :param np.ndarray data: two dimensional data
+    :param tuple[int, int] window_size: window size
+    :return np.ndarray: data whose each entry is sliding window
+    """
+    return np.lib.stride_tricks.sliding_window_view(data, window_size)
+
+
+def get_sliding_window_multi_channel_data(
+    data: np.ndarray, window_size: tuple[int, int]
+) -> np.ndarray:
+    """Get the sliding window data.
+
+    :param np.ndarray data: three dimensional data
+    :param tuple[int, int] window_size: window size
+    :return np.ndarray: data whose each entry is sliding window
+    """
+    sliding_window_data = []
+    for single_channel in data:
+        sliding_window_data.append(
+            get_sliding_window_single_channel_data(
+                data=single_channel, window_size=window_size
+            )
+        )
+    return np.array(sliding_window_data)
+
+
+def get_sliding_window_batch_data(
+    batch_data: np.ndarray, window_size: tuple[int, int]
+) -> np.ndarray:
+    """Get the sliding window data.
+
+    :param np.ndarray batch_data: batch data whose shape is [batch, channels, height, width]
+    :param tuple[int, int] window_size: window size
+    :return np.ndarray: batch data whose each entry is sliding window
+    """
+    processed_batch_data = []
+    for data in batch_data:
+        processed_batch_data.append(
+            get_sliding_window_multi_channel_data(data=data, window_size=window_size)
+        )
+    return np.array(processed_batch_data)
