@@ -1,3 +1,4 @@
+import glob
 import os
 import pickle
 
@@ -13,11 +14,14 @@ import src.utils
 class QuanvLayer:
     """Quanvolutional layer class."""
 
-    def __init__(self, kernel_size: tuple[int, int], num_filters: int):
+    def __init__(
+        self, kernel_size: tuple[int, int], num_filters: int, is_loaded: bool = False
+    ):
         """Initialise the quanvolutional layer.
 
         :param tuple[int, int] kernel_size: kernel size
         :param int num_filters: number of filiters
+        :param bool is_loaded: if loaded mode
         """
         self.kernel_size = kernel_size
         self.num_filters = num_filters
@@ -29,14 +33,15 @@ class QuanvLayer:
         circuit.barrier()
 
         self.filters = []
-        for _ in range(self.num_filters):
-            _c = circuit.compose(
-                RandomLayer(num_qubits=self.num_qubits)(),
-                range(self.num_qubits),
-                inplace=False,
-            )
-            _c.measure_all()
-            self.filters.append(_c)
+        if not is_loaded:
+            for _ in range(self.num_filters):
+                _c = circuit.compose(
+                    RandomLayer(num_qubits=self.num_qubits)(),
+                    range(self.num_qubits),
+                    inplace=False,
+                )
+                _c.measure_all()
+                self.filters.append(_c)
 
     @property
     def num_qubits(self) -> int:
@@ -137,3 +142,45 @@ class QuanvLayer:
         processed_data[:, 0] = list(map(src.utils.count_ones, results))
 
         return processed_data
+
+    def save(self, model_dir_path: str):
+        """Save the filters to the directory specified by the given model_dir_path.
+
+        :param str model_dir_path: path to the output directory.
+        """
+        # Create the directory specified by the argument output_dir_path.
+        os.makedirs(model_dir_path)
+
+        # Save the basic information of this QuanvLayer.
+        basic_info = {
+            "kernel_size": self.kernel_size,
+            "num_filters": self.num_filters,
+        }
+        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        with open(basic_info_path, "wb") as pkl_file:
+            pickle.dump(basic_info, pkl_file)
+
+        # Save the circuit.
+        filter_path = src.utils.get_circuit_path(model_dir_path)
+        with open(filter_path, "wb") as qpy_file:
+            qpy.dump(self.filters, qpy_file)
+
+    @classmethod
+    def load(cls, model_dir_path: str):
+        """Load the filters from the directory specified by the given model_dir_path.
+
+        :param str model_dir_path: path to the input directory.
+        """
+        # Load the basic information.
+        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        with open(basic_info_path, "rb") as pkl_file:
+            basic_info = pickle.load(pkl_file)
+        basic_info["is_loaded"] = True
+        loaded_quanv_layer = cls(**basic_info)
+
+        # Load the filters.
+        filter_path = src.utils.get_circuit_path(model_dir_path)
+        with open(filter_path, "rb") as qpy_file:
+            loaded_quanv_layer.filters = qpy.load(qpy_file)
+
+        return loaded_quanv_layer
