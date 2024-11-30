@@ -2,6 +2,9 @@
 configs/local_config_quclassi.yaml
 # models
 models/
+# data
+data/
+notebooks/data
 
 # poetry
 poetry.lock
