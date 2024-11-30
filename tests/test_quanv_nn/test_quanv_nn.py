@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pytest
 import torch
@@ -49,6 +51,8 @@ class TestQuanvNN:
         )
         cls.data = torch.Tensor(data)
 
+        cls.model_dir_path = "./test"
+
     def test_init(self):
         """Normal test;
         Check if self.quanv_nn has
@@ -78,3 +82,33 @@ class TestQuanvNN:
         y = self.quanv_nn.classify(self.data)
         assert len(y.shape) == 1
         assert len(y) == 2
+
+    def test_save(self):
+        """Normal test;
+        run self.quanv_nn.save.
+
+        Check if
+        - there is basic_info.pkl.
+        - there is circuit.qpy.
+        - there is lookup_tables.pkl.
+        - there is classical_model.pth.
+        """
+        self.quanv_nn.save(model_dir_path=self.model_dir_path)
+
+        basic_info_path = os.path.join(self.model_dir_path, "basic_info.pkl")
+        assert os.path.isfile(basic_info_path)
+        os.remove(basic_info_path)
+
+        filters_path = os.path.join(self.model_dir_path, "circuit.qpy")
+        assert os.path.isfile(filters_path)
+        os.remove(filters_path)
+
+        lookup_tables_path = os.path.join(self.model_dir_path, "lookup_tables.pkl")
+        assert os.path.isfile(lookup_tables_path)
+        os.remove(lookup_tables_path)
+
+        classical_model_path = os.path.join(self.model_dir_path, "classical_model.pth")
+        assert os.path.isfile(classical_model_path)
+        os.remove(classical_model_path)
+
+        os.rmdir(self.model_dir_path)

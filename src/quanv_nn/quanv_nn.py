@@ -93,3 +93,14 @@ class QuanvNN(torch.nn.Module):
         """
         probabilities = self.forward(x, sampler=sampler, shots=shots)
         return torch.argmax(probabilities, dim=1)
+
+    def save(self, model_dir_path: str):
+        """Save this NN to the directory specified by the given model_dir_path.
+
+        :param str model_dir_path: path to the output directory.
+        """
+        self.quanv_layer.save(model_dir_path=model_dir_path)
+        classical_model_path = utils.get_classical_torch_model_path(
+            model_dir_path=model_dir_path
+        )
+        torch.save(self.classical_model.state_dict(), classical_model_path)
