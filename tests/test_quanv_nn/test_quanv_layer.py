@@ -107,6 +107,10 @@ class TestQuanvLayer:
         assert os.path.isfile(filters_path)
         os.remove(filters_path)
 
+        lookup_tables_path = os.path.join(self.model_dir_path, "lookup_tables.pkl")
+        assert os.path.isfile(lookup_tables_path)
+        os.remove(lookup_tables_path)
+
         os.rmdir(self.model_dir_path)
 
     def test_load(self):
@@ -132,6 +136,8 @@ class TestQuanvLayer:
         os.remove(basic_info_path)
         filters_path = os.path.join(self.model_dir_path, "circuit.qpy")
         os.remove(filters_path)
+        lookup_tables_path = os.path.join(self.model_dir_path, "lookup_tables.pkl")
+        os.remove(lookup_tables_path)
         os.rmdir(self.model_dir_path)
 
     def test_build_lookup_tables(self):

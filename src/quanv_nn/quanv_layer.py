@@ -51,6 +51,22 @@ class QuanvLayer:
         """
         return self.kernel_size[0] * self.kernel_size[1]
 
+    def get_lookup_tables_path(
+        self, model_dir_path: str, file_prefix: str | None = None
+    ) -> str:
+        """Get lookup_tables.pkl path.
+
+        :param str model_dir_path: path to directory
+        :param str | None file_prefix: file prefix, defaults to None
+        :return str: path to look-up tables file path
+        """
+        filename = (
+            f"{file_prefix}lookup_tables.pkl"
+            if file_prefix is not None
+            else "lookup_tables.pkl"
+        )
+        return os.path.join(model_dir_path, filename)
+
     def __call__(
         self,
         batch_data: np.ndarray,
@@ -217,6 +233,11 @@ class QuanvLayer:
         with open(filter_path, "wb") as qpy_file:
             qpy.dump(self.filters, qpy_file)
 
+        # Save the look-up tables.
+        lookup_tables_path = self.get_lookup_tables_path(model_dir_path)
+        with open(lookup_tables_path, "wb") as pkl_file:
+            pickle.dump(self.lookup_tables, pkl_file)
+
     @classmethod
     def load(cls, model_dir_path: str):
         """Load the filters from the directory specified by the given model_dir_path.
@@ -234,5 +255,10 @@ class QuanvLayer:
         filter_path = src.utils.get_circuit_path(model_dir_path)
         with open(filter_path, "rb") as qpy_file:
             loaded_quanv_layer.filters = qpy.load(qpy_file)
+
+        # Save the look-up tables.
+        lookup_tables_path = loaded_quanv_layer.get_lookup_tables_path(model_dir_path)
+        with open(lookup_tables_path, "rb") as pkl_file:
+            loaded_quanv_layer.lookup_tables = pickle.load(pkl_file)
 
         return loaded_quanv_layer
