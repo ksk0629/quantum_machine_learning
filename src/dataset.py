@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import datasets
+import torchvision
 
 
 def get_dataset(name: str) -> tuple[np.ndarray, list[str]]:
@@ -17,6 +18,8 @@ def get_dataset(name: str) -> tuple[np.ndarray, list[str]]:
             return get_pos_neg()
         case "get_large_small":
             return get_large_small()
+        case "mnist":
+            return get_mnist()
 
 
 def get_iris() -> tuple[np.ndarray, list[str]]:
@@ -193,3 +196,32 @@ def get_hor_ver(
                 )
 
     return np.array(images), labels
+
+
+def get_mnist() -> tuple[np.ndarray, list[int]]:
+    """Get the MNIST dataset.
+
+    :return tuple[np.ndarray, list[int]]: MNIST dataset
+    """
+    # Get the MNIST datasets.
+    train_dataset = torchvision.datasets.MNIST(
+        root="./data",
+        train=True,
+        download=False,
+        transform=torchvision.transforms.ToTensor(),
+    )
+    val_dataset = torchvision.datasets.MNIST(
+        root="./data",
+        train=False,
+        download=False,
+        transform=torchvision.transforms.ToTensor(),
+    )
+
+    train_images = train_dataset.data.numpy()
+    train_labels = train_dataset.targets.numpy()
+    val_images = val_dataset.data.numpy()
+    val_labels = val_dataset.targets.numpy()
+
+    images = np.vstack([train_images, val_images])
+    labels = np.concatenate([train_labels, val_labels]).tolist()
+    return images, labels
