@@ -222,6 +222,6 @@ def get_mnist() -> tuple[np.ndarray, list[int]]:
     val_images = val_dataset.data.numpy()
     val_labels = val_dataset.targets.numpy()
 
-    images = np.vstack([train_images, val_images]).reshape()
+    images = np.expand_dims(np.vstack([train_images, val_images]), axis=1)
     labels = np.concatenate([train_labels, val_labels]).tolist()
     return images, labels
