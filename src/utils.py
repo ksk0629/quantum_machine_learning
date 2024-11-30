@@ -225,6 +225,23 @@ def get_trained_parameters_path(
     return os.path.join(model_dir_path, filename)
 
 
+def get_classical_torch_model_path(
+    model_dir_path: str, file_prefix: str | None = None
+) -> str:
+    """Get classical_model.pth path.
+
+    :param str model_dir_path: path to directory
+    :param str | None file_prefix: file prefix, defaults to None
+    :return str: path to classical_model file path
+    """
+    filename = (
+        f"{file_prefix}classical_model.pth"
+        if file_prefix is not None
+        else "classical_model.pth"
+    )
+    return os.path.join(model_dir_path, filename)
+
+
 def get_sliding_window_single_channel_data(
     data: np.ndarray, window_size: tuple[int, int]
 ) -> np.ndarray:

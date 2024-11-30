@@ -204,6 +204,16 @@ class TestUtils:
             self.model_dir_path, "trained_parameters.pkl"
         )
 
+    def test_get_classical_torch_model_path(self):
+        """Normal test;
+        run get_classical_torch_model_path function.
+
+        Check if the return value is self.model_dir_path/classical_model.pth.
+        """
+        assert utils.get_classical_torch_model_path(
+            self.model_dir_path
+        ) == os.path.join(self.model_dir_path, "classical_model.pth")
+
     @pytest.mark.parametrize("window_size", [(2, 2), (3, 3)])
     def test_get_sliding_window_batch_data(self, window_size):
         """Normal test;
