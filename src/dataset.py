@@ -207,13 +207,13 @@ def get_mnist() -> tuple[np.ndarray, list[int]]:
     train_dataset = torchvision.datasets.MNIST(
         root="./data",
         train=True,
-        download=False,
+        download=True,
         transform=torchvision.transforms.ToTensor(),
     )
     val_dataset = torchvision.datasets.MNIST(
         root="./data",
         train=False,
-        download=False,
+        download=True,
         transform=torchvision.transforms.ToTensor(),
     )
 
@@ -222,6 +222,6 @@ def get_mnist() -> tuple[np.ndarray, list[int]]:
     val_images = val_dataset.data.numpy()
     val_labels = val_dataset.targets.numpy()
 
-    images = np.vstack([train_images, val_images])
+    images = np.vstack([train_images, val_images]).reshape()
     labels = np.concatenate([train_labels, val_labels]).tolist()
     return images, labels
