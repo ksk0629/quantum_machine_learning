@@ -21,6 +21,7 @@ numpy = "^2.1.2"
 matplotlib = "^3.9.2"
 pylatexenc = "^2.10"
 tqdm = "^4.67.0"
+torchvision = "^0.20.1"
 
 [tool.poetry.scripts]
 run_example = "src.example_package.example:main"
