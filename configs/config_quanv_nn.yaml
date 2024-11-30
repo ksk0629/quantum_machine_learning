@@ -1,0 +1,15 @@
+general:
+  seed: 901
+trainer_options:
+  epochs: 25
+training_options:
+  shots: 8096
+  model_dir_path: "./models/quanv_nn/mnist"
+  is_lookup_mode: True
+dataset_options:
+  name: mnist
+  train_size: 0.75
+  shuffle: True
+quanv_layer_options:
+  num_filters: 50
+  kernel_size: [3, 3]
