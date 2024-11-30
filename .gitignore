@@ -1,5 +1,6 @@
 # Config
 configs/local_config_quclassi.yaml
+configs/local_config_quanv_nn.yaml
 # models
 models/
 # data
