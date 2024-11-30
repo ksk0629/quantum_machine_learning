@@ -202,7 +202,9 @@ class QuanvLayer:
         for filter_index in range(self.num_filters):
             try:
                 if key in self.lookup_tables[filter_index]:
-                    processed_data[filter_index, 0] = self.lookup_tables[filter_index]
+                    processed_data[filter_index, 0] = self.lookup_tables[filter_index][
+                        key
+                    ]
                 else:
                     return None
             except IndexError:
