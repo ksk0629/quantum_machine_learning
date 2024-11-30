@@ -271,3 +271,24 @@ def get_sliding_window_batch_data(
             get_sliding_window_multi_channel_data(data=data, window_size=window_size)
         )
     return np.array(processed_batch_data)
+
+
+def encode_according_to_threshold(
+    data: np.ndarray, threshold: float, low_value: float, high_value: float
+) -> np.ndarray:
+    """Encode according to the given low_value and high_value using the given threshold.
+    Each datapoint being smaller than threshold is encoded into the given low_value,
+    otherwise, the given high_value.
+
+    :param np.ndarray data: data to be encoded
+    :param float threshold: threshold
+    :param float low_value: low value to be substituted
+    :param float high_value: high value to be substituted
+    :return np.ndarray: encoded data
+    """
+    low_indices = np.where(data < threshold)
+    high_indices = np.where(data >= threshold)
+    data[low_indices] = low_value
+    data[high_indices] = high_value
+
+    return data

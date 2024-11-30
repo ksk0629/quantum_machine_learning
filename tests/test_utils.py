@@ -238,3 +238,20 @@ class TestUtils:
                         except IndexError:
                             continue
                         assert np.allclose(window, cropped)
+
+    def test_encode_according_to_threshold(self):
+        """Normal test;
+        run encode_according_to_threshold.
+
+        Check if
+        - the data is encoded as it should be.
+        - the data shape and the encoded data shape is the same.
+        """
+        length = 2 * 3 * 4 * 4
+        data = np.arange(length).reshape((2, 3, 4, 4))
+        threshold = length // 2
+        encoded_data = utils.encode_according_to_threshold(
+            data=data, threshold=threshold, low_value=0, high_value=1
+        )
+        assert encoded_data.sum() == threshold
+        assert data.shape == encoded_data.shape
