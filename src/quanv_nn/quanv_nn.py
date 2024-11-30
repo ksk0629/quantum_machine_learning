@@ -1,4 +1,5 @@
 import numpy as np
+from qiskit import primitives
 import torch
 import torch.nn
 
@@ -19,10 +20,19 @@ class QuanvNN(torch.nn.Module):
         self.quanv_layer = quanv_layer
         self.classical_model = classical_model
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        x: torch.Tensor,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 8096,
+    ) -> torch.Tensor:
         """Process the give data.
 
         :param torch.Tensor x: input data, whose shape must be (batch, channels, height, width)
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
         :return torch.Tensor: processed data
         """
         # Encode the data to one for quanv_layer.
@@ -44,7 +54,7 @@ class QuanvNN(torch.nn.Module):
             for data_np in multi_channel_data_np:
                 # Process the data through the QuanvLayer.
                 processed_x_np = self.quanv_layer(
-                    data_np
+                    data_np, sampler=sampler, shots=shots
                 )  # shape = (num_filters, dim_data)
 
                 # Reshape the data as processed two-dimensional data.
@@ -66,11 +76,20 @@ class QuanvNN(torch.nn.Module):
         output = self.classical_model(processed_batch_data)
         return output
 
-    def classify(self, x: torch.Tensor) -> torch.Tensor:
+    def classify(
+        self,
+        x: torch.Tensor,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 8096,
+    ) -> torch.Tensor:
         """Classify the given data.
 
         :param torch.Tensor x: input data, whose shape must be (batch, channels, height, width)
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
         :return torch.Tensor: predicted label
         """
-        probabilities = self.forward(x)
+        probabilities = self.forward(x, sampler=sampler, shots=shots)
         return torch.argmax(probabilities, dim=1)
