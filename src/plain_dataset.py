@@ -1,3 +1,6 @@
+import torch
+
+
 class PlainDataset(torch.utils.data.Dataset):
     """PlainDataset class"""
 
