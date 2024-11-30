@@ -1,3 +1,4 @@
+import itertools
 import os
 
 import numpy as np
@@ -132,3 +133,27 @@ class TestQuanvLayer:
         filters_path = os.path.join(self.model_dir_path, "circuit.qpy")
         os.remove(filters_path)
         os.rmdir(self.model_dir_path)
+
+    def test_build_lookup_tables(self):
+        """Normal test;
+        run build_lookup_tables function.
+
+        Check if
+        - the length of self.quanv_layer.lookup_tables is the same as self.quanv_layer.num_filters.
+        - the number of keys of each look-up table is the same as the number of the patterns.
+        - no error happens when accessing the data in each look-up table.
+        """
+        pattern = [0, np.pi]
+        all_patterns = np.array(
+            list(itertools.product(pattern, repeat=self.quanv_layer.num_qubits))
+        )
+        self.quanv_layer.build_lookup_tables(patterns=all_patterns)
+
+        assert len(self.quanv_layer.lookup_tables) == self.quanv_layer.num_filters
+
+        for filter_index in range(self.quanv_layer.num_filters):
+            assert len(self.quanv_layer.lookup_tables[filter_index].keys()) == len(
+                all_patterns
+            )
+            for pattern in all_patterns:
+                self.quanv_layer.lookup_tables[filter_index][tuple(pattern.tolist())]

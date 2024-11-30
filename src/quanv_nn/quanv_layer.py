@@ -41,6 +41,7 @@ class QuanvLayer:
                 )
                 _c.measure_all()
                 self.filters.append(_c)
+            self.lookup_tables = []
 
     @property
     def num_qubits(self) -> int:
@@ -118,6 +119,11 @@ class QuanvLayer:
         :param int shots: number of shots
         :return np.ndarray: processed data through each filter, first index implies filter
         """
+        # Get the outputs from self.lookup_tables.
+        outputs_from_lookup_tables = self.__get_outputs_from_lookup_tables(data=data)
+        if outputs_from_lookup_tables is not None:
+            return outputs_from_lookup_tables
+
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for filter in self.filters:
@@ -133,6 +139,59 @@ class QuanvLayer:
         results = [result.data.meas.get_counts() for result in results]
         processed_data = np.empty((len(self.filters), 1))
         processed_data[:, 0] = list(map(src.utils.count_ones, results))
+
+        return processed_data
+
+    def build_lookup_tables(
+        self,
+        patterns: np.ndarray,
+        sampler: (
+            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
+        ) = primitives.StatevectorSampler(seed=901),
+        shots: int = 8096,
+    ):
+        """Build each look-up table to the given patterns.
+
+        :param np.ndarray patterns: input patterns to make look-up tables
+        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param int shots: number of shots
+        """
+        # Initialise the tables.
+        self.lookup_tables = []
+
+        # Process all patterns.
+        output_patterns = self.process(
+            batch_data=patterns, sampler=sampler, shots=shots
+        )
+
+        # Store the outputs.
+        for filter_index in range(self.num_filters):
+            target_output_patterns = output_patterns[filter_index]
+            lookup_table = dict()
+
+            for i_pattern, o_pattern in zip(patterns, target_output_patterns):
+                lookup_table[tuple(i_pattern.tolist())] = float(o_pattern)
+            self.lookup_tables.append(lookup_table)
+
+    def __get_outputs_from_lookup_tables(self, data: np.ndarray) -> np.ndarray | None:
+        """Get outputs from self.lookup_tables.
+
+        :param np.ndarray data: data used as key
+        :return np.ndarray | None: output from self.lookup_tables
+        """
+        # Initialise the output data.
+        processed_data = np.empty((len(self.filters), 1))
+        # Convert the data into the form of the key of each look-up table.
+        key = tuple(data.tolist())
+        for filter_index in range(self.num_filters):
+            try:
+                if key in self.lookup_tables[filter_index]:
+                    processed_data[filter_index, 0] = self.lookup_tables[filter_index]
+                else:
+                    return None
+            except IndexError:
+                # If thie error happens, possibly lookup_tables have not created.
+                return None
 
         return processed_data
 
