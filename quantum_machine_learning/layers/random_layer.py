@@ -4,8 +4,8 @@ import numpy as np
 import qiskit
 import qiskit.circuit
 
-from src.layers.base_layer import BaseLayer
-from src.s_swap_gate import SSwapGate
+from quantum_machine_learning.layers.base_layer import BaseLayer
+from quantum_machine_learning.s_swap_gate import SSwapGate
 
 
 class RandomLayer(BaseLayer):

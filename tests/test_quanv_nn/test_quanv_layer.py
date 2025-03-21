@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pytest
 
-from src.quanv_nn.quanv_layer import QuanvLayer
+from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
 
 
 class TestQuanvLayer:

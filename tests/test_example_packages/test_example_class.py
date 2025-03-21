@@ -1,6 +1,6 @@
 import pytest
 
-from src.example_package.example_class import ExampleClass
+from quantum_machine_learning.example_package.example_class import ExampleClass
 
 
 class TestExampleClassClass:

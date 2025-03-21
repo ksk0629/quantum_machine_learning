@@ -1,6 +1,6 @@
 import pytest
 
-from src.layers.swap_test_layer import SwapTestLayer
+from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
 
 
 class TestSwapTestLayer:

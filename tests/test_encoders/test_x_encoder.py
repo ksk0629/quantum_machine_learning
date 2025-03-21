@@ -1,6 +1,6 @@
 import pytest
 
-from src.encoders.x_encoder import XEncoder
+from quantum_machine_learning.encoders.x_encoder import XEncoder
 
 
 class TestXEncoder:

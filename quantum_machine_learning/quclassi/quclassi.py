@@ -5,12 +5,12 @@ import numpy as np
 import qiskit
 from qiskit import qpy, primitives
 
-from src.encoders.yz_encoder import YZEncoder
-from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
-from src.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
-from src.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
-from src.layers.swap_test_layer import SwapTestLayer
-import src.utils
+from quantum_machine_learning.encoders.yz_encoder import YZEncoder
+from quantum_machine_learning.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
+from quantum_machine_learning.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
+from quantum_machine_learning.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
+from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
+import quantum_machine_learning.utils
 
 
 class QuClassi:
@@ -181,14 +181,14 @@ class QuClassi:
             raise ValueError(msg)
 
         # Set data as the data_parameters.
-        data_parameters = src.utils.get_parameter_dict(
+        data_parameters = quantum_machine_learning.utils.get_parameter_dict(
             parameter_names=self.data_parameters, parameters=data
         )
 
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for trained_parameters in self.trained_parameters:
-            parameters = src.utils.get_parameter_dict(
+            parameters = quantum_machine_learning.utils.get_parameter_dict(
                 parameter_names=self.trainable_parameters, parameters=trained_parameters
             )
             parameters = {**parameters, **data_parameters}
@@ -201,7 +201,7 @@ class QuClassi:
         fidelities = {}
         results = job.result()
         for result, label in zip(results, self.labels):
-            fidelities[label] = src.utils.calculate_fidelity_from_swap_test(
+            fidelities[label] = quantum_machine_learning.utils.calculate_fidelity_from_swap_test(
                 result.data.c.get_counts()
             )
 
@@ -247,25 +247,25 @@ class QuClassi:
             "classical_data_size": self.classical_data_size,
             "labels": self.labels,
         }
-        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "wb") as pkl_file:
             pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
-        circuit_path = src.utils.get_circuit_path(model_dir_path)
+        circuit_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
         with open(circuit_path, "wb") as qpy_file:
             qpy.dump(self.circuit, qpy_file)
 
         # Save the parameters.
-        trainable_parameters_path = src.utils.get_trainable_parameters_path(
+        trainable_parameters_path = quantum_machine_learning.utils.get_trainable_parameters_path(
             model_dir_path
         )
         with open(trainable_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trainable_parameters, pkl_file)
-        data_parameters_path = src.utils.get_data_parameters_path(model_dir_path)
+        data_parameters_path = quantum_machine_learning.utils.get_data_parameters_path(model_dir_path)
         with open(data_parameters_path, "wb") as pkl_file:
             pickle.dump(self.data_parameters, pkl_file)
-        trained_parameters_path = src.utils.get_trained_parameters_path(model_dir_path)
+        trained_parameters_path = quantum_machine_learning.utils.get_trained_parameters_path(model_dir_path)
         with open(trained_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trained_parameters, pkl_file)
 
@@ -276,26 +276,26 @@ class QuClassi:
         :param str model_dir_path: path to the input directory.
         """
         # Load the basic information.
-        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "rb") as pkl_file:
             basic_info = pickle.load(pkl_file)
         loaded_quclassi = cls(**basic_info)
 
         # Load the circuit.
-        circuit_path = src.utils.get_circuit_path(model_dir_path)
+        circuit_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
         with open(circuit_path, "rb") as qpy_file:
             loaded_quclassi.circuit = qpy.load(qpy_file)[0]
 
         # Load the parameters.
-        trainable_parameters_path = src.utils.get_trainable_parameters_path(
+        trainable_parameters_path = quantum_machine_learning.utils.get_trainable_parameters_path(
             model_dir_path
         )
         with open(trainable_parameters_path, "rb") as pkl_file:
             loaded_quclassi.trainable_parameters = pickle.load(pkl_file)
-        data_parameters_path = src.utils.get_data_parameters_path(model_dir_path)
+        data_parameters_path = quantum_machine_learning.utils.get_data_parameters_path(model_dir_path)
         with open(data_parameters_path, "rb") as pkl_file:
             loaded_quclassi.data_parameters = pickle.load(pkl_file)
-        trained_parameters_path = src.utils.get_trained_parameters_path(model_dir_path)
+        trained_parameters_path = quantum_machine_learning.utils.get_trained_parameters_path(model_dir_path)
         with open(trained_parameters_path, "rb") as pkl_file:
             loaded_quclassi.trained_parameters = pickle.load(pkl_file)
 

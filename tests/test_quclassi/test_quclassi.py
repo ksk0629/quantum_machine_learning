@@ -4,7 +4,7 @@ import numpy as np
 import qiskit
 import pytest
 
-from src.quclassi.quclassi import QuClassi
+from quantum_machine_learning.quclassi.quclassi import QuClassi
 
 
 class TestQuClassi:

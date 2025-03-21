@@ -5,8 +5,8 @@ import pytest
 import torch
 import torch.nn as nn
 
-from src.quanv_nn.quanv_layer import QuanvLayer
-from src.quanv_nn.quanv_nn import QuanvNN
+from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
+from quantum_machine_learning.quanv_nn.quanv_nn import QuanvNN
 
 
 # This class is defined for the fixed data size, which is defined in the test class.

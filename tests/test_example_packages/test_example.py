@@ -1,6 +1,6 @@
 import pytest
 
-from src.example_package.example import add_one
+from quantum_machine_learning.example_package.example import add_one
 
 
 class TestAddNumber:

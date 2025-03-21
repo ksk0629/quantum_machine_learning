@@ -3,8 +3,8 @@ from qiskit import primitives
 import torch
 import torch.nn
 
-from src.quanv_nn.quanv_layer import QuanvLayer
-import src.utils as utils
+from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
+import quantum_machine_learning.utils as utils
 
 
 class QuanvNN(torch.nn.Module):

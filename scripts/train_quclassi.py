@@ -4,9 +4,9 @@ import yaml
 
 from qiskit import primitives
 
-from src.dataset import get_dataset
-from src.quclassi.train import train
-from src.utils import fix_seed, encode_through_arcsin
+from quantum_machine_learning.dataset import get_dataset
+from quantum_machine_learning.quclassi.train import train
+from quantum_machine_learning.utils import fix_seed, encode_through_arcsin
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

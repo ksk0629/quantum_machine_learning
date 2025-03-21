@@ -1,7 +1,7 @@
 import pytest
 import qiskit
 
-from src.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
+from quantum_machine_learning.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
 
 
 class TestSingleQubitUnitaryLayer:

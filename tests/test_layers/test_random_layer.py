@@ -3,7 +3,7 @@ import itertools
 import pytest
 import qiskit
 
-from src.layers.random_layer import RandomLayer
+from quantum_machine_learning.layers.random_layer import RandomLayer
 
 
 class TestRandomLayer:

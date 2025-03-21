@@ -5,9 +5,9 @@ import numpy as np
 import qiskit
 from qiskit import qpy, primitives
 
-from src.encoders.x_encoder import XEncoder
-from src.layers.random_layer import RandomLayer
-import src.utils
+from quantum_machine_learning.encoders.x_encoder import XEncoder
+from quantum_machine_learning.layers.random_layer import RandomLayer
+import quantum_machine_learning.utils
 
 
 class QuanvLayer:
@@ -143,7 +143,7 @@ class QuanvLayer:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for filter in self.filters:
-            parameters = src.utils.get_parameter_dict(
+            parameters = quantum_machine_learning.utils.get_parameter_dict(
                 parameter_names=filter.parameters, parameters=data
             )
             pubs.append((filter, parameters))
@@ -154,7 +154,7 @@ class QuanvLayer:
         results = job.result()
         results = [result.data.meas.get_counts() for result in results]
         processed_data = np.empty((len(self.filters), 1))
-        processed_data[:, 0] = list(map(src.utils.count_ones, results))
+        processed_data[:, 0] = list(map(quantum_machine_learning.utils.count_ones, results))
 
         return processed_data
 
@@ -226,12 +226,12 @@ class QuanvLayer:
             "kernel_size": self.kernel_size,
             "num_filters": self.num_filters,
         }
-        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "wb") as pkl_file:
             pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
-        filter_path = src.utils.get_circuit_path(model_dir_path)
+        filter_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
         with open(filter_path, "wb") as qpy_file:
             qpy.dump(self.filters, qpy_file)
 
@@ -247,14 +247,14 @@ class QuanvLayer:
         :param str model_dir_path: path to the input directory.
         """
         # Load the basic information.
-        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
+        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "rb") as pkl_file:
             basic_info = pickle.load(pkl_file)
         basic_info["is_loaded"] = True
         loaded_quanv_layer = cls(**basic_info)
 
         # Load the filters.
-        filter_path = src.utils.get_circuit_path(model_dir_path)
+        filter_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
         with open(filter_path, "rb") as qpy_file:
             loaded_quanv_layer.filters = qpy.load(qpy_file)
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import qiskit
 
-from src.s_swap_gate import SSwapGate
+from quantum_machine_learning.s_swap_gate import SSwapGate
 
 
 class TestSSwapGate:

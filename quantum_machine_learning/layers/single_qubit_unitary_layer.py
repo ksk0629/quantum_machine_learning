@@ -1,6 +1,6 @@
 import qiskit
 
-from src.layers.base_learnable_layer import BaseLearnableLayer
+from quantum_machine_learning.layers.base_learnable_layer import BaseLearnableLayer
 
 
 class SingleQubitUnitaryLayer(BaseLearnableLayer):

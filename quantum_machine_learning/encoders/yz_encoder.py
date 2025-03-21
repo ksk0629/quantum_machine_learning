@@ -1,6 +1,6 @@
 import qiskit
 
-from src.encoders.base_encoder import BaseEncoder
+from quantum_machine_learning.encoders.base_encoder import BaseEncoder
 
 
 class YZEncoder(BaseEncoder):

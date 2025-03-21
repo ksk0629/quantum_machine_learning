@@ -1,7 +1,7 @@
 import pytest
 import qiskit
 
-from src.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
+from quantum_machine_learning.layers.entanglement_unitary_layer import EntanglementUnitaryLayer
 
 
 class TestEntanglementUnitaryLayer:

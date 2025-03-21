@@ -6,8 +6,8 @@ import qiskit
 from qiskit import primitives
 from tqdm.auto import tqdm
 
-from src.quclassi.quclassi import QuClassi
-import src.utils
+from quantum_machine_learning.quclassi.quclassi import QuClassi
+import quantum_machine_learning.utils
 
 
 class QuClassiTrainer:
@@ -116,14 +116,14 @@ class QuClassiTrainer:
                         self.quclassi(data) for data in train_data
                     ]
                     self.train_accuracies.append(
-                        src.utils.calculate_accuracy(
+                        quantum_machine_learning.utils.calculate_accuracy(
                             predicted_labels=predicted_train_labels,
                             true_labels=train_labels,
                         )
                     )
                     predicted_val_labels = [self.quclassi(data) for data in val_data]
                     self.val_accuracies.append(
-                        src.utils.calculate_accuracy(
+                        quantum_machine_learning.utils.calculate_accuracy(
                             predicted_labels=predicted_val_labels,
                             true_labels=val_labels,
                         )
@@ -141,14 +141,14 @@ class QuClassiTrainer:
             self.quclassi.trained_parameters = self.current_parameters
             predicted_train_labels = [self.quclassi(data) for data in train_data]
             self.train_accuracies.append(
-                src.utils.calculate_accuracy(
+                quantum_machine_learning.utils.calculate_accuracy(
                     predicted_labels=predicted_train_labels,
                     true_labels=train_labels,
                 )
             )
             predicted_val_labels = [self.quclassi(data) for data in val_data]
             self.val_accuracies.append(
-                src.utils.calculate_accuracy(
+                quantum_machine_learning.utils.calculate_accuracy(
                     predicted_labels=predicted_val_labels,
                     true_labels=val_labels,
                 )
@@ -205,7 +205,7 @@ class QuClassiTrainer:
                     forward_difference_parameters = (
                         self.current_parameters[target_label_index] + forward_shift
                     )
-                    forward_difference_parameters = src.utils.get_parameter_dict(
+                    forward_difference_parameters = quantum_machine_learning.utils.get_parameter_dict(
                         parameter_names=self.quclassi.trainable_parameters,
                         parameters=forward_difference_parameters,
                     )
@@ -228,7 +228,7 @@ class QuClassiTrainer:
                     backward_difference_parameters = (
                         self.current_parameters[target_label_index] + backward_shift
                     )
-                    backward_difference_parameters = src.utils.get_parameter_dict(
+                    backward_difference_parameters = quantum_machine_learning.utils.get_parameter_dict(
                         parameter_names=self.quclassi.trainable_parameters,
                         parameters=backward_difference_parameters,
                     )
@@ -265,7 +265,7 @@ class QuClassiTrainer:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for _td in data:
-            data_parameters = src.utils.get_parameter_dict(
+            data_parameters = quantum_machine_learning.utils.get_parameter_dict(
                 parameter_names=self.quclassi.data_parameters, parameters=_td
             )
             parameters = {**trained_parameters, **data_parameters}
@@ -295,7 +295,7 @@ class QuClassiTrainer:
         results = job.result()
         for result in results:
             fidelities.append(
-                src.utils.calculate_fidelity_from_swap_test(result.data.c.get_counts())
+                quantum_machine_learning.utils.calculate_fidelity_from_swap_test(result.data.c.get_counts())
             )
         return fidelities
 
@@ -308,7 +308,7 @@ class QuClassiTrainer:
         self.quclassi.save(model_dir_path=model_dir_path)
 
         # Save the trained_parameters for each epoch.
-        trained_parameter_path = src.utils.get_trained_parameters_path(
+        trained_parameter_path = quantum_machine_learning.utils.get_trained_parameters_path(
             model_dir_path=model_dir_path
         )
 

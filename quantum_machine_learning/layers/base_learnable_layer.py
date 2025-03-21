@@ -1,6 +1,6 @@
 from abc import ABC
 
-from src.layers.base_layer import BaseLayer
+from quantum_machine_learning.layers.base_layer import BaseLayer
 
 
 class BaseLearnableLayer(BaseLayer, ABC):

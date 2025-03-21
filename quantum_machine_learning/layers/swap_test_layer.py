@@ -1,6 +1,6 @@
 import qiskit
 
-from src.layers.base_layer import BaseLayer
+from quantum_machine_learning.layers.base_layer import BaseLayer
 
 
 class SwapTestLayer(BaseLayer):

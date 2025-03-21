@@ -1,4 +1,4 @@
-from src.example_package.example_class import ExampleClass
+from quantum_machine_learning.example_package.example_class import ExampleClass
 
 
 def add_one(number: int) -> int:

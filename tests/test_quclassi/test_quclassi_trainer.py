@@ -5,8 +5,8 @@ import numpy as np
 import qiskit
 import pytest
 
-from src.quclassi.quclassi import QuClassi
-from src.quclassi.quclassi_trainer import QuClassiTrainer
+from quantum_machine_learning.quclassi.quclassi import QuClassi
+from quantum_machine_learning.quclassi.quclassi_trainer import QuClassiTrainer
 
 
 class TestQuClassiTrainer:

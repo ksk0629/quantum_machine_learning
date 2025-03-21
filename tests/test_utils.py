@@ -6,7 +6,7 @@ import pytest
 import qiskit_algorithms
 import torch
 
-import src.utils as utils
+import quantum_machine_learning.utils as utils
 
 
 class TestUtils:

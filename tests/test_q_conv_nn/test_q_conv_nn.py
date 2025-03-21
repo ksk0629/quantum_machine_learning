@@ -1,6 +1,6 @@
 import pytest
 
-from src.q_conv_nn.q_conv_nn import QConvNN
+from quantum_machine_learning.q_conv_nn.q_conv_nn import QConvNN
 
 
 class TestQConvNN:
