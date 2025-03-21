@@ -20,6 +20,8 @@ matplotlib = "^3.10.1"
 pylatexenc = "^2.10"
 tqdm = "^4.67.1"
 qiskit = "^1.4.2"
+torch = "^2.6.0"
+torchvision = "^0.21.0"
 
 [tool.poetry.scripts]
 run_example = "src.example_package.example:main"
