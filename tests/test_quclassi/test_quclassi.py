@@ -102,56 +102,6 @@ class TestQuClassi:
         with pytest.raises(ValueError):
             self.quclassi.build(structure)
 
-    def test_get_basic_info_path(self):
-        """Normal test;
-        Run get_basic_info_path function.
-
-        Check if the return value is self.model_dir_path/basic_info.pkl.
-        """
-        assert self.quclassi.get_basic_info_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "basic_info.pkl"
-        )
-
-    def test_get_circuit_path(self):
-        """Normal test;
-        Run get_circuit_path function.
-
-        Check if the return value is self.model_dir_path/circuit.qpy.
-        """
-        assert self.quclassi.get_circuit_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "circuit.qpy"
-        )
-
-    def test_get_trainable_parameters_path(self):
-        """Normal test;
-        Run get_trainable_parameters_path function.
-
-        Check if the return value is self.model_dir_path/trainable_parameters.pkl.
-        """
-        assert self.quclassi.get_trainable_parameters_path(
-            self.model_dir_path
-        ) == os.path.join(self.model_dir_path, "trainable_parameters.pkl")
-
-    def test_get_data_parameters_path(self):
-        """Normal test;
-        Run get_data_parameters_path function.
-
-        Check if the return value is self.model_dir_path/data_parameters.pkl.
-        """
-        assert self.quclassi.get_data_parameters_path(
-            self.model_dir_path
-        ) == os.path.join(self.model_dir_path, "data_parameters.pkl")
-
-    def test_get_trained_parameters_path(self):
-        """Normal test;
-        Run get_trained_parameters_path function.
-
-        Check if the return value is self.model_dir_path/trained_parameters.pkl.
-        """
-        assert self.quclassi.get_trained_parameters_path(
-            self.model_dir_path
-        ) == os.path.join(self.model_dir_path, "trained_parameters.pkl")
-
     def test_save(self):
         """Normal test;
         Run save function.

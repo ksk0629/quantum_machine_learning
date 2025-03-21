@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import datasets
+import torchvision
 
 
 def get_dataset(name: str) -> tuple[np.ndarray, list[str]]:
@@ -17,6 +18,8 @@ def get_dataset(name: str) -> tuple[np.ndarray, list[str]]:
             return get_pos_neg()
         case "get_large_small":
             return get_large_small()
+        case "mnist":
+            return get_mnist()
 
 
 def get_iris() -> tuple[np.ndarray, list[str]]:
@@ -91,3 +94,134 @@ def get_large_small(
     assert len(data) == len(labels)
 
     return data, labels
+
+
+def get_hor_ver(
+    num_images: int = 100,
+    image_shape: tuple[int, int] = (2, 4),
+    line_length: int = 2,
+    line_pixel_value: float = np.pi / 2,
+    min_noise_value: float = 0,
+    max_noise_value: float = np.pi / 4,
+) -> tuple[np.ndarray, list[str]]:
+    """Generate the line dataset.
+
+    :param tuple[int, int] image_shape: image shape, defaults to (2, 4)
+    :param int line_length: length of line, defaults to 2
+    :param float line_pixel_value: value of line, defaults to np.pi/2
+    :param float min_noise_value: minimum value for noise, defaults to 0
+    :param float max_noise_value: maximum value for noise, defaults to np.pi/4
+    :param int num_images: number of images
+    :return tuple[[np.ndarray, list[str]]: images and their labels
+    """
+
+    def __get_all_horizontal_patterns(
+        image_shape: tuple[int, int] = (2, 4),
+    ) -> np.ndarray:
+        """Get all horizontal patterns of the given image shape and length of the line as a flattened array.
+
+        :param tuple[int, int] image_shape: image shape, defaults to (2, 4)
+        :return np.ndarray: all horizontal patterns as flattened
+        """
+        # Make the trivial pattern, which the line is set from the head.
+        trivial_pattern = np.zeros(image_shape[1])
+        trivial_pattern[:line_length] = line_pixel_value
+        # Make the patterns for one line.
+        num_patterns_for_one_line = image_shape[1] - (line_length - 1)
+        patterns_for_one_line = np.zeros((num_patterns_for_one_line, image_shape[1]))
+        for index in range(num_patterns_for_one_line):
+            patterns_for_one_line[index, :] = np.roll(trivial_pattern, index)
+
+        # Put the patterns for one line to every line.
+        num_patterns = num_patterns_for_one_line * image_shape[0]
+        image_length = image_shape[0] * image_shape[1]
+        patterns = np.zeros((num_patterns, image_length))
+        for index in range(image_shape[0]):
+            start_row_index = index * num_patterns_for_one_line
+            end_row_index = start_row_index + num_patterns_for_one_line
+            start_column_index = index * image_shape[1]
+            end_column_index = start_column_index + image_shape[1]
+            patterns[
+                start_row_index:end_row_index, start_column_index:end_column_index
+            ] = patterns_for_one_line
+
+        return patterns
+
+    def __get_all_vertical_patterns(
+        image_shape: tuple[int, int] = (2, 4),
+    ) -> np.ndarray:
+        """Get all vertical patterns of the given image shape and length of the line as a flattened array by using get_all_horizontal_patterns.
+
+        :param tuple[int, int] image_shape: image shape, defaults to (2, 4)
+        :return np.ndarray: all vertical patterns as flattened
+        """
+        # Get all horizontal patterns of the transposed image shape.
+        new_image_shape = (image_shape[1], image_shape[0])
+        transposed_patterns = __get_all_horizontal_patterns(image_shape=new_image_shape)
+        # Transpose each horizontal pattern so that it is the original vertical pattern.
+        patterns = np.zeros(transposed_patterns.shape)
+        for index, transposed_pattern in enumerate(transposed_patterns):
+            reshaped_transposed_pattern = transposed_pattern.reshape(new_image_shape)
+            reshaped_pattern = reshaped_transposed_pattern.T
+            patterns[index, :] = reshaped_pattern.flatten()
+
+        return patterns
+
+    # Get all horizontal patterns.
+    hor_array = __get_all_horizontal_patterns(image_shape=image_shape)
+
+    # Create all vertical line patterns.
+    ver_array = __get_all_vertical_patterns(image_shape=image_shape)
+
+    # Generate random images.
+    images = []
+    labels = []
+    for _ in range(num_images):
+        rng = np.random.randint(0, 2)
+        if rng == 0:
+            labels.append("horizontal")
+            random_image = np.random.randint(0, hor_array.shape[0])
+            images.append(np.array(hor_array[random_image]))
+        elif rng == 1:
+            labels.append("vertical")
+            random_image = np.random.randint(0, ver_array.shape[0])
+            images.append(np.array(ver_array[random_image]))
+
+        # Create noise.
+        image_length = image_shape[0] * image_shape[1]
+        for i in range(image_length):
+            if images[-1][i] == 0:
+                images[-1][i] = np.random.uniform(
+                    low=min_noise_value, high=max_noise_value
+                )
+
+    return np.array(images), labels
+
+
+def get_mnist() -> tuple[np.ndarray, list[int]]:
+    """Get the MNIST dataset.
+
+    :return tuple[np.ndarray, list[int]]: MNIST dataset
+    """
+    # Get the MNIST datasets.
+    train_dataset = torchvision.datasets.MNIST(
+        root="./data",
+        train=True,
+        download=True,
+        transform=torchvision.transforms.ToTensor(),
+    )
+    val_dataset = torchvision.datasets.MNIST(
+        root="./data",
+        train=False,
+        download=True,
+        transform=torchvision.transforms.ToTensor(),
+    )
+
+    train_images = train_dataset.data.numpy()
+    train_labels = train_dataset.targets.numpy()
+    val_images = val_dataset.data.numpy()
+    val_labels = val_dataset.targets.numpy()
+
+    images = np.expand_dims(np.vstack([train_images, val_images]), axis=1)
+    labels = np.concatenate([train_labels, val_labels]).tolist()
+    return images, labels

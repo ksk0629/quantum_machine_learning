@@ -53,46 +53,6 @@ class QuClassi:
         """
         return self.num_data_qubits + self.num_train_qubits + 1
 
-    @staticmethod
-    def get_basic_info_path(model_dir_path: str):
-        """Get basic_info.pkl path.
-
-        :param str model_dir_path: path to directory
-        """
-        return os.path.join(model_dir_path, "basic_info.pkl")
-
-    @staticmethod
-    def get_circuit_path(model_dir_path: str):
-        """Get circuit.qpy path.
-
-        :param str model_dir_path: path to directory
-        """
-        return os.path.join(model_dir_path, "circuit.qpy")
-
-    @staticmethod
-    def get_trainable_parameters_path(model_dir_path: str):
-        """Get trainable_parameters.pkl path.
-
-        :param str model_dir_path: path to directory
-        """
-        return os.path.join(model_dir_path, "trainable_parameters.pkl")
-
-    @staticmethod
-    def get_data_parameters_path(model_dir_path: str):
-        """Get data_parameters.pkl path.
-
-        :param str model_dir_path: path to directory
-        """
-        return os.path.join(model_dir_path, "data_parameters.pkl")
-
-    @staticmethod
-    def get_trained_parameters_path(model_dir_path: str):
-        """Get trained_parameters.pkl path.
-
-        :param str model_dir_path: path to directory
-        """
-        return os.path.join(model_dir_path, "trained_parameters.pkl")
-
     def __call__(
         self,
         data: np.ndarray,
@@ -221,9 +181,9 @@ class QuClassi:
             raise ValueError(msg)
 
         # Set data as the data_parameters.
-        data_parameters = {
-            data_parameter: _d for data_parameter, _d in zip(self.data_parameters, data)
-        }
+        data_parameters = src.utils.get_parameter_dict(
+            parameter_names=self.data_parameters, parameters=data
+        )
 
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
@@ -287,23 +247,25 @@ class QuClassi:
             "classical_data_size": self.classical_data_size,
             "labels": self.labels,
         }
-        basic_info_path = self.get_basic_info_path(model_dir_path)
+        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "wb") as pkl_file:
             pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
-        circuit_path = self.get_circuit_path(model_dir_path)
+        circuit_path = src.utils.get_circuit_path(model_dir_path)
         with open(circuit_path, "wb") as qpy_file:
             qpy.dump(self.circuit, qpy_file)
 
         # Save the parameters.
-        trainable_parameters_path = self.get_trainable_parameters_path(model_dir_path)
+        trainable_parameters_path = src.utils.get_trainable_parameters_path(
+            model_dir_path
+        )
         with open(trainable_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trainable_parameters, pkl_file)
-        data_parameters_path = self.get_data_parameters_path(model_dir_path)
+        data_parameters_path = src.utils.get_data_parameters_path(model_dir_path)
         with open(data_parameters_path, "wb") as pkl_file:
             pickle.dump(self.data_parameters, pkl_file)
-        trained_parameters_path = self.get_trained_parameters_path(model_dir_path)
+        trained_parameters_path = src.utils.get_trained_parameters_path(model_dir_path)
         with open(trained_parameters_path, "wb") as pkl_file:
             pickle.dump(self.trained_parameters, pkl_file)
 
@@ -314,24 +276,26 @@ class QuClassi:
         :param str model_dir_path: path to the input directory.
         """
         # Load the basic information.
-        basic_info_path = cls.get_basic_info_path(model_dir_path)
+        basic_info_path = src.utils.get_basic_info_path(model_dir_path)
         with open(basic_info_path, "rb") as pkl_file:
             basic_info = pickle.load(pkl_file)
         loaded_quclassi = cls(**basic_info)
 
         # Load the circuit.
-        circuit_path = cls.get_circuit_path(model_dir_path)
+        circuit_path = src.utils.get_circuit_path(model_dir_path)
         with open(circuit_path, "rb") as qpy_file:
             loaded_quclassi.circuit = qpy.load(qpy_file)[0]
 
         # Load the parameters.
-        trainable_parameters_path = cls.get_trainable_parameters_path(model_dir_path)
+        trainable_parameters_path = src.utils.get_trainable_parameters_path(
+            model_dir_path
+        )
         with open(trainable_parameters_path, "rb") as pkl_file:
             loaded_quclassi.trainable_parameters = pickle.load(pkl_file)
-        data_parameters_path = cls.get_data_parameters_path(model_dir_path)
+        data_parameters_path = src.utils.get_data_parameters_path(model_dir_path)
         with open(data_parameters_path, "rb") as pkl_file:
             loaded_quclassi.data_parameters = pickle.load(pkl_file)
-        trained_parameters_path = cls.get_trained_parameters_path(model_dir_path)
+        trained_parameters_path = src.utils.get_trained_parameters_path(model_dir_path)
         with open(trained_parameters_path, "rb") as pkl_file:
             loaded_quclassi.trained_parameters = pickle.load(pkl_file)
 

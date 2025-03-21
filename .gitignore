@@ -1,10 +1,17 @@
 # Config
 configs/local_config_quclassi.yaml
+configs/local_config_quanv_nn.yaml
 # models
 models/
+# data
+data/
+notebooks/data
 
 # poetry
 poetry.lock
+
+# mac
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

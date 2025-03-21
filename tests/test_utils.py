@@ -1,3 +1,4 @@
+import os
 import random
 
 import numpy as np
@@ -13,6 +14,7 @@ class TestUtils:
     @classmethod
     def setup_class(cls):
         cls.seed = 91
+        cls.model_dir_path = "./../test"
 
     def test_fix_seed_with_self_args(self):
         """Normal test;
@@ -151,3 +153,131 @@ class TestUtils:
         result = utils.encode_through_arcsin(data)
         encoded_data = 2 * np.arcsin(np.sqrt(data))
         assert np.allclose(result, encoded_data)
+
+    def test_get_basic_info_path(self):
+        """Normal test;
+        Run get_basic_info_path function.
+
+        Check if the return value is self.model_dir_path/basic_info.pkl.
+        """
+        assert utils.get_basic_info_path(self.model_dir_path) == os.path.join(
+            self.model_dir_path, "basic_info.pkl"
+        )
+
+    def test_get_circuit_path(self):
+        """Normal test;
+        Run get_circuit_path function.
+
+        Check if the return value is self.model_dir_path/circuit.qpy.
+        """
+        assert utils.get_circuit_path(self.model_dir_path) == os.path.join(
+            self.model_dir_path, "circuit.qpy"
+        )
+
+    def test_get_trainable_parameters_path(self):
+        """Normal test;
+        Run get_trainable_parameters_path function.
+
+        Check if the return value is self.model_dir_path/trainable_parameters.pkl.
+        """
+        assert utils.get_trainable_parameters_path(self.model_dir_path) == os.path.join(
+            self.model_dir_path, "trainable_parameters.pkl"
+        )
+
+    def test_get_data_parameters_path(self):
+        """Normal test;
+        Run get_data_parameters_path function.
+
+        Check if the return value is self.model_dir_path/data_parameters.pkl.
+        """
+        assert utils.get_data_parameters_path(self.model_dir_path) == os.path.join(
+            self.model_dir_path, "data_parameters.pkl"
+        )
+
+    def test_get_trained_parameters_path(self):
+        """Normal test;
+        Run get_trained_parameters_path function.
+
+        Check if the return value is self.model_dir_path/trained_parameters.pkl.
+        """
+        assert utils.get_trained_parameters_path(self.model_dir_path) == os.path.join(
+            self.model_dir_path, "trained_parameters.pkl"
+        )
+
+    def test_get_classical_torch_model_path(self):
+        """Normal test;
+        run get_classical_torch_model_path function.
+
+        Check if the return value is self.model_dir_path/classical_model.pth.
+        """
+        assert utils.get_classical_torch_model_path(
+            self.model_dir_path
+        ) == os.path.join(self.model_dir_path, "classical_model.pth")
+
+    @pytest.mark.parametrize("window_size", [(2, 2), (3, 3)])
+    def test_get_sliding_window_batch_data(self, window_size):
+        """Normal test;
+        run get_sliding_window_batch_data.
+
+        Check if each sliding window is as expected.
+        """
+        batch_data = np.arange(5 * 2 * 16).reshape((5, 2, 4, 4))
+        sliding_window_batch_data = utils.get_sliding_window_batch_data(
+            batch_data=batch_data, window_size=window_size
+        )
+
+        for sliding_window_data, data in zip(sliding_window_batch_data, batch_data):
+
+            for sliding_window_single_channel, single_channel in zip(
+                sliding_window_data, data
+            ):
+                for row_index in range(len(single_channel)):
+                    for column_index in range(len(single_channel[row_index])):
+                        try:
+                            window = sliding_window_single_channel[row_index][
+                                column_index
+                            ]
+                            row_start = row_index
+                            row_end = row_start + window_size[0]
+                            column_start = column_index
+                            column_end = column_start + window_size[1]
+                            cropped = single_channel[
+                                row_start:row_end, column_start:column_end
+                            ]
+                            print(cropped)
+                        except IndexError:
+                            continue
+                        assert np.allclose(window, cropped)
+
+    def test_encode_according_to_threshold(self):
+        """Normal test;
+        run encode_according_to_threshold.
+
+        Check if
+        - the data is encoded as it should be.
+        - the data shape and the encoded data shape is the same.
+        """
+        length = 2 * 3 * 4 * 4
+        data = np.arange(1, length + 1).reshape((2, 3, 4, 4))
+        threshold = length // 2
+        encoded_data = utils.encode_according_to_threshold(
+            data=data, threshold=threshold, low_value=1, high_value=0
+        )
+        assert encoded_data.sum() == threshold
+        assert data.shape == encoded_data.shape
+
+    def test_calc_2d_output_shape(self):
+        """Normal test;
+        run calc_2d_output_shape.
+
+        Check if the returned shape is appropriate.
+        """
+        height = 50
+        width = 25
+        kernel_size = (5, 5)
+        (out_height, out_width) = utils.calc_2d_output_shape(
+            height=height, width=width, kernel_size=kernel_size
+        )
+
+        assert out_height == 46
+        assert out_width == 21
