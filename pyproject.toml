@@ -47,6 +47,7 @@ markers = [
     "preprocessor: marks tests for Preprocessor class",
     "postprocessor: marks tests for Postprocessor class",
     "path_getter: marks tests for PathGetter family class",
+    "gate: marks tests for Gate family class",
 ]
 pythonpath = "./quantum_machine_learning"
 testpaths = ["tests",]
