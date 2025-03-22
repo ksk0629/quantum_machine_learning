@@ -45,8 +45,8 @@ def preprocess_dataset(
     val_labels = np.array(val_labels)
 
     # Normalise the data.
-    train_data = Preprocessor.normalise_vectors(train_data)
-    val_data = Preprocessor.normalise_vectors(val_data)
+    train_data = Preprocessor.normalise_data(train_data)
+    val_data = Preprocessor.normalise_data(val_data)
 
     # Encode the data.
     train_data = encoding_method(train_data)

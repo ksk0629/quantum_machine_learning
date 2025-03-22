@@ -6,15 +6,15 @@ class Preprocessor:
     """Class for preprocessing data."""
 
     @staticmethod
-    def normalise_vectors(vectors: np.ndarray) -> np.ndarray:
-        """Normalise each vector, which correponds to each row of the given vectors.
+    def normalise_data(data: np.ndarray) -> np.ndarray:
+        """Normalise each datum, which correponds to each row of the given data.
         Say an input is [[1, 1], [2,2]].
         Then, the preprocessed one the will be [1/sqrt(2)[1, 1], 1/(2*sqrt(2))[2, 2]]
 
-        :param np.ndarray vectors: vectors to be normalised, the shape must be (any, any)
-        :return np.ndarray: normalised vectors
+        :param np.ndarray data: data to be normalised, the shape must be (any, any)
+        :return np.ndarray: normalised data
         """
-        return vectors / np.linalg.norm(vectors, axis=1, keepdims=1)
+        return data / np.linalg.norm(data, axis=1, keepdims=1)
 
     @staticmethod
     def scale_data(

@@ -15,13 +15,13 @@ class TestUtils:
         "vectors",
         [[[2, 3], [1, 1]], [[1, 1, 1]], [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]],
     )
-    def test_normalise_vectors(self, vectors):
+    def test_normalise_data(self, vectors):
         """Normal test;
-        Run normalise_vectors.
+        Run normalise_data.
 
         Check if the vectors are normalised.
         """
-        result = Preprocessor.normalise_vectors(vectors)
+        result = Preprocessor.normalise_data(vectors)
 
         normalised_vectors = []
         for _v in vectors:
