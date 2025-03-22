@@ -3,7 +3,6 @@ import random
 
 import numpy as np
 import qiskit_algorithms
-from sklearn.preprocessing import MinMaxScaler
 import torch
 
 
@@ -87,17 +86,6 @@ def get_parameter_dict(
         for parameter_name, parameter in zip(parameter_names, parameters)
     }
     return parameter_dict
-
-
-
-def scale_data(data: np.ndarray) -> np.ndarray:
-    """Scale each datam which corresponds to each row.
-
-    :param np.ndarray data: data
-    :return np.ndarray: scaled data
-    """
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    return scaler.fit_transform(data)
 
 
 def encode_through_arcsin(data: np.ndarray) -> np.ndarray:

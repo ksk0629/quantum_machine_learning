@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 class Preprocess:
@@ -14,3 +15,15 @@ class Preprocess:
         :return np.ndarray: normalised vectors
         """
         return vectors / np.linalg.norm(vectors, axis=1, keepdims=1)
+
+    @staticmethod
+    def scale_data(
+        data: np.ndarray,
+    ) -> np.ndarray:  # No test for now as this completely depends on scikit-learn.
+        """Scale each datum, which corresponds to each row, into the range [0, 1].
+
+        :param np.ndarray data: data to be scaled
+        :return np.ndarray: scaled data
+        """
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        return scaler.fit_transform(data)
