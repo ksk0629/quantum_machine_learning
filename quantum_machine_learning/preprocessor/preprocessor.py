@@ -86,3 +86,27 @@ class Preprocessor:
             )
 
         return np.array(sliding_window_data)
+
+    @staticmethod
+    def window_batch_data(
+        batch_data: np.ndarray, window_size: tuple[int, int]
+    ) -> np.ndarray:
+        """Window batch data data according to the number of each datum,
+        which means get batch data whose element is windowed.
+
+        :param np.ndarray batch_data: batch data whose shape is [batch, channels, height, width]
+        :param tuple[int, int] window_size: window size
+        :return np.ndarray: batch data whose each entry is sliding window
+        """
+        processed_batch_data = []
+        for data_3d in batch_data:
+            # Apply window_multi_channel_data to each datum.
+            #  Here, the data is given with the number of channels.
+            #  Thus, even if it is a single-channel data, that doesn't matter.
+            processed_batch_data.append(
+                Preprocessor.window_multi_channel_data(
+                    data_3d=data_3d, window_size=window_size
+                )
+            )
+
+        return np.array(processed_batch_data)

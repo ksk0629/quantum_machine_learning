@@ -5,6 +5,7 @@ import torch.nn
 
 from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
 import quantum_machine_learning.utils as utils
+from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 
 
 class QuanvNN(torch.nn.Module):
@@ -37,8 +38,8 @@ class QuanvNN(torch.nn.Module):
         """
         # Encode the data to one for quanv_layer.
         x_np = x.detach().cpu().numpy()
-        encoded_x_np = utils.get_sliding_window_batch_data(
-            x_np, self.quanv_layer.kernel_size
+        encoded_x_np = Preprocessor.window_batch_data(
+            batch_data=x_np, window_size=self.quanv_layer.kernel_size
         )
         data_size = self.quanv_layer.kernel_size[0] * self.quanv_layer.kernel_size[1]
         batch_size = x_np.shape[0] if len(x_np.shape) == 4 else 1

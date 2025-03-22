@@ -206,23 +206,6 @@ def get_classical_torch_model_path(
     return os.path.join(model_dir_path, filename)
 
 
-def get_sliding_window_batch_data(
-    batch_data: np.ndarray, window_size: tuple[int, int]
-) -> np.ndarray:
-    """Get the sliding window data.
-
-    :param np.ndarray batch_data: batch data whose shape is [batch, channels, height, width]
-    :param tuple[int, int] window_size: window size
-    :return np.ndarray: batch data whose each entry is sliding window
-    """
-    processed_batch_data = []
-    for data in batch_data:
-        processed_batch_data.append(
-            get_sliding_window_multi_channel_data(data=data, window_size=window_size)
-        )
-    return np.array(processed_batch_data)
-
-
 def encode_according_to_threshold(
     data: np.ndarray, threshold: float, low_value: float, high_value: float
 ) -> np.ndarray:
