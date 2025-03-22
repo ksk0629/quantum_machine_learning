@@ -12,20 +12,20 @@ class TestUtils:
 
     @pytest.mark.preprocessor
     @pytest.mark.parametrize(
-        "vectors",
+        "data",
         [[[2, 3], [1, 1]], [[1, 1, 1]], [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]],
     )
-    def test_normalise_data(self, vectors):
+    def test_normalise_data(self, data):
         """Normal test;
         Run normalise_data.
 
         Check if the vectors are normalised.
         """
-        result = Preprocessor.normalise_data(vectors)
+        result = Preprocessor.normalise_data(data)
 
         normalised_vectors = []
-        for _v in vectors:
-            normalised_vectors.append(_v / np.linalg.norm(_v))
+        for datum in data:
+            normalised_vectors.append(_v / np.linalg.norm(datum))
         normalised_vectors = np.array(normalised_vectors)
 
         assert np.allclose(result, normalised_vectors)
