@@ -38,37 +38,6 @@ def get_parameter_dict(
     return parameter_dict
 
 
-def encode_through_arcsin(data: np.ndarray) -> np.ndarray:
-    """Encode the given data through arcsin,
-    which is given in the paper https://arxiv.org/pdf/2103.11307.
-
-    :param np.ndarray data: data
-    :return np.ndarray: encoded data
-    """
-    return 2 * np.arcsin(np.sqrt(data))
-
-
-def encode_according_to_threshold(
-    data: np.ndarray, threshold: float, low_value: float, high_value: float
-) -> np.ndarray:
-    """Encode according to the given low_value and high_value using the given threshold.
-    Each datapoint being larger than threshold is encoded into the given high_value,
-    otherwise, the given high_value.
-
-    :param np.ndarray data: data to be encoded
-    :param float threshold: threshold
-    :param float low_value: low value to be substituted
-    :param float high_value: high value to be substituted
-    :return np.ndarray: encoded data
-    """
-    low_indices = np.where(data <= threshold)
-    high_indices = np.where(data > threshold)
-    data[low_indices] = low_value
-    data[high_indices] = high_value
-
-    return data
-
-
 def calc_2d_output_shape(
     height: int,
     width: int,

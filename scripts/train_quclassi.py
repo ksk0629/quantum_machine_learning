@@ -2,11 +2,12 @@ import argparse
 import shutil
 import yaml
 
+import numpy as np
 from qiskit import primitives
 
 from quantum_machine_learning.dataset_gallery import get_dataset
 from quantum_machine_learning.quclassi.train import train
-from quantum_machine_learning.utils import fix_seed, encode_through_arcsin
+from quantum_machine_learning.utils import fix_seed
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -31,7 +32,9 @@ if __name__ == "__main__":
 
     # Get the dataset.
     dataset_options = config["dataset_options"]
-    dataset_options["encoding_method"] = encode_through_arcsin
+    dataset_options["encoding_method"] = lambda data: 2 * np.arcsin(
+        np.sqrt(data)
+    )  # Ref: https://arxiv.org/pdf/2103.11307
     dataset_name = dataset_options["name"]
     del dataset_options["name"]
     data, labels = get_dataset(dataset_name)

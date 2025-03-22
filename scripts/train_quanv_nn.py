@@ -121,8 +121,29 @@ if __name__ == "__main__":
 
     # Get the dataset.
     dataset_options = config["dataset_options"]
+
+    def encode_according_to_threshold(
+        data: np.ndarray, threshold: float, low_value: float, high_value: float
+    ) -> np.ndarray:
+        """Encode according to the given low_value and high_value using the given threshold.
+        Each datapoint being larger than threshold is encoded into the given high_value,
+        otherwise, the given high_value.
+
+        :param np.ndarray data: data to be encoded
+        :param float threshold: threshold
+        :param float low_value: low value to be substituted
+        :param float high_value: high value to be substituted
+        :return np.ndarray: encoded data
+        """
+        low_indices = np.where(data <= threshold)
+        high_indices = np.where(data > threshold)
+        data[low_indices] = low_value
+        data[high_indices] = high_value
+
+        return data
+
     encode_method = partial(
-        utils.encode_according_to_threshold, threshold=0, low_value=0, high_value=np.pi
+        encode_according_to_threshold, threshold=0, low_value=0, high_value=np.pi
     )
     dataset_options["encoding_method"] = encode_method
     dataset_name = dataset_options["name"]

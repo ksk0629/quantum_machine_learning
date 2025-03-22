@@ -50,34 +50,6 @@ class TestUtils:
 
         assert result == parameter_dict
 
-    @pytest.mark.parametrize("data", [[[0.1, 0.9], [1, 1]], [[1, 1]]])
-    def test_encode_through_arcsin(self, data):
-        """Normal test;
-        Run encode_through_arcsin.
-
-        Check if the data is encoded as it should be.
-        """
-        result = utils.encode_through_arcsin(data)
-        encoded_data = 2 * np.arcsin(np.sqrt(data))
-        assert np.allclose(result, encoded_data)
-
-    def test_encode_according_to_threshold(self):
-        """Normal test;
-        run encode_according_to_threshold.
-
-        Check if
-        - the data is encoded as it should be.
-        - the data shape and the encoded data shape is the same.
-        """
-        length = 2 * 3 * 4 * 4
-        data = np.arange(1, length + 1).reshape((2, 3, 4, 4))
-        threshold = length // 2
-        encoded_data = utils.encode_according_to_threshold(
-            data=data, threshold=threshold, low_value=1, high_value=0
-        )
-        assert encoded_data.sum() == threshold
-        assert data.shape == encoded_data.shape
-
     def test_calc_2d_output_shape(self):
         """Normal test;
         run calc_2d_output_shape.
