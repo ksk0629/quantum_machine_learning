@@ -206,25 +206,6 @@ def get_classical_torch_model_path(
     return os.path.join(model_dir_path, filename)
 
 
-def get_sliding_window_multi_channel_data(
-    data: np.ndarray, window_size: tuple[int, int]
-) -> np.ndarray:
-    """Get the sliding window data.
-
-    :param np.ndarray data: three dimensional data
-    :param tuple[int, int] window_size: window size
-    :return np.ndarray: data whose each entry is sliding window
-    """
-    sliding_window_data = []
-    for single_channel in data:
-        sliding_window_data.append(
-            get_sliding_window_single_channel_data(
-                data=single_channel, window_size=window_size
-            )
-        )
-    return np.array(sliding_window_data)
-
-
 def get_sliding_window_batch_data(
     batch_data: np.ndarray, window_size: tuple[int, int]
 ) -> np.ndarray:

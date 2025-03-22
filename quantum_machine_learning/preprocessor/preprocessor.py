@@ -60,8 +60,29 @@ class Preprocessor:
     ) -> np.ndarray:
         """Window single channel data, which means get a windowed single channel data.
 
-        :param np.ndarray data_2d: two dimensional data
+        :param np.ndarray data_2d: two dimensional data (one single channel)
         :param tuple[int, int] window_size: window size
-        :return np.ndarray: three-dimensional data whose each entry is sliding window
+        :return np.ndarray: four-dimensional data whose each entry is sliding window
         """
         return np.lib.stride_tricks.sliding_window_view(data_2d, window_size)
+
+    @staticmethod
+    def window_multi_channel_data(
+        data_3d: np.ndarray, window_size: tuple[int, int]
+    ) -> np.ndarray:
+        """Window multi-channel data, which means get a windowed multi-channel data.
+
+        :param np.ndarray data_2d: three dimensional data (one multi-channel data)
+        :param tuple[int, int] window_size: window size
+        :return np.ndarray: five-dimensional data whose each entry is sliding window
+        """
+        sliding_window_data = []
+        for single_channel in data_3d:
+            # Apply window_single_channel_data to each channel.
+            sliding_window_data.append(
+                Preprocessor.window_single_channel_data(
+                    data_2d=single_channel, window_size=window_size
+                )
+            )
+
+        return np.array(sliding_window_data)
