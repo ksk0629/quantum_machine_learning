@@ -14,9 +14,3 @@ class Preprocess:
         :return np.ndarray: normalised vectors
         """
         return vectors / np.linalg.norm(vectors, axis=1, keepdims=1)
-
-
-class Hello:
-
-    def __init__(self):
-        pass
