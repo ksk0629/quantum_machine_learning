@@ -33,7 +33,6 @@ class TestQuanvNN:
     def setup_class(cls):
         cls.kernel_size = (2, 2)
         cls.num_filters = 2
-        cls.model_dir_path = "./test/"
         cls.quanv_layer = QuanvLayer(
             kernel_size=cls.kernel_size, num_filters=cls.num_filters
         )

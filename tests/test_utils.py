@@ -1,4 +1,3 @@
-import os
 import random
 
 import numpy as np
@@ -137,66 +136,6 @@ class TestUtils:
         result = utils.encode_through_arcsin(data)
         encoded_data = 2 * np.arcsin(np.sqrt(data))
         assert np.allclose(result, encoded_data)
-
-    def test_get_basic_info_path(self):
-        """Normal test;
-        Run get_basic_info_path function.
-
-        Check if the return value is self.model_dir_path/basic_info.pkl.
-        """
-        assert utils.get_basic_info_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "basic_info.pkl"
-        )
-
-    def test_get_circuit_path(self):
-        """Normal test;
-        Run get_circuit_path function.
-
-        Check if the return value is self.model_dir_path/circuit.qpy.
-        """
-        assert utils.get_circuit_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "circuit.qpy"
-        )
-
-    def test_get_trainable_parameters_path(self):
-        """Normal test;
-        Run get_trainable_parameters_path function.
-
-        Check if the return value is self.model_dir_path/trainable_parameters.pkl.
-        """
-        assert utils.get_trainable_parameters_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "trainable_parameters.pkl"
-        )
-
-    def test_get_data_parameters_path(self):
-        """Normal test;
-        Run get_data_parameters_path function.
-
-        Check if the return value is self.model_dir_path/data_parameters.pkl.
-        """
-        assert utils.get_data_parameters_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "data_parameters.pkl"
-        )
-
-    def test_get_trained_parameters_path(self):
-        """Normal test;
-        Run get_trained_parameters_path function.
-
-        Check if the return value is self.model_dir_path/trained_parameters.pkl.
-        """
-        assert utils.get_trained_parameters_path(self.model_dir_path) == os.path.join(
-            self.model_dir_path, "trained_parameters.pkl"
-        )
-
-    def test_get_classical_torch_model_path(self):
-        """Normal test;
-        run get_classical_torch_model_path function.
-
-        Check if the return value is self.model_dir_path/classical_model.pth.
-        """
-        assert utils.get_classical_torch_model_path(
-            self.model_dir_path
-        ) == os.path.join(self.model_dir_path, "classical_model.pth")
 
     def test_encode_according_to_threshold(self):
         """Normal test;
