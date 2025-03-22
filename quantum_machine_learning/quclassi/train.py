@@ -52,8 +52,8 @@ def preprocess_dataset(
     train_data = encoding_method(train_data)
     val_data = encoding_method(val_data)
     # Make the length of the each data even.
-    train_data = utils.pad_data(data=train_data)
-    val_data = utils.pad_data(data=val_data)
+    train_data = Preprocessor.evenise_data_dimension(data_2d=train_data)
+    val_data = Preprocessor.evenise_data_dimension(data_2d=val_data)
 
     return train_data, train_labels, val_data, val_labels
 

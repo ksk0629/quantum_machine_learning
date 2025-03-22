@@ -27,3 +27,29 @@ class Preprocessor:
         """
         scaler = MinMaxScaler(feature_range=(0, 1))
         return scaler.fit_transform(data)
+
+    @staticmethod
+    def evenise_data_dimension(
+        data: np.ndarray, filling_value: float = 0
+    ) -> np.ndarray:
+        """Make each dimension of datum in which the given data, even by adding filling value.
+
+        :param np.ndarray data: data of which dimension of each datum will be even
+        :param float filling_value: value to fill given data, defaults to 0
+        :return np.ndarray: data of which dimension of each datum is even
+        """
+        # Early return if the given data has the even number of dimension.
+        if data.shape[1] % 2 == 0:
+            return data
+
+        # Make a new shape whose number of data is the same and the dimension of each datum is the original plus 1.
+        new_shape = [0, 0]
+        new_shape[0] = data.shape[0]
+        new_shape[1] = data.shape[1] + 1
+        # Fill the additional data with the given value.
+        evenised_data = np.zeros(new_shape) + filling_value  # Fill all at once.
+        evenised_data[:, :-1] = (
+            data  # Insert original data in the first-original dimension.
+        )
+
+        return evenised_data
