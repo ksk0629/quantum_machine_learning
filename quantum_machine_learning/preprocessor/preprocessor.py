@@ -53,3 +53,15 @@ class Preprocessor:
         )
 
         return evenised_data
+
+    @staticmethod
+    def window_single_channel_data(
+        data_2d: np.ndarray, window_size: tuple[int, int]
+    ) -> np.ndarray:
+        """Window single channel data, which means get a windowed single channel data.
+
+        :param np.ndarray data_2d: two dimensional data
+        :param tuple[int, int] window_size: window size
+        :return np.ndarray: three-dimensional data whose each entry is sliding window
+        """
+        return np.lib.stride_tricks.sliding_window_view(data_2d, window_size)
