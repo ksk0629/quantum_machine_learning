@@ -25,7 +25,7 @@ class TestUtils:
 
         normalised_vectors = []
         for datum in data:
-            normalised_vectors.append(_v / np.linalg.norm(datum))
+            normalised_vectors.append(datum / np.linalg.norm(datum))
         normalised_vectors = np.array(normalised_vectors)
 
         assert np.allclose(result, normalised_vectors)
