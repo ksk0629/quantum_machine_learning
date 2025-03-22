@@ -7,8 +7,8 @@ import torch
 
 from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
 from quantum_machine_learning.quanv_nn.quanv_nn import QuanvNN
-from quantum_machine_learning.torch.torch_trainer import TorchTrainer
-from quantum_machine_learning.torch.plain_dataset import PlainDataset
+from quantum_machine_learning.torch_utils.torch_trainer import TorchTrainer
+from quantum_machine_learning.torch_utils.plain_dataset import PlainDataset
 
 
 def preprocess_dataset(
