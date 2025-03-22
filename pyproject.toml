@@ -44,8 +44,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [
-    "add_number: marks tests for add_number function",
-    "example_class: marks tests for ExmapleClass Class"
+    "preprocess: marks tests for Preprocess class",
 ]
 pythonpath = "./quantum_machine_learning"
 testpaths = ["tests",]
