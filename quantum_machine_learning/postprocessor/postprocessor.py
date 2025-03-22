@@ -50,7 +50,7 @@ class Postprocessor:
         # Calculate the probability zero.
         probability_zero = num_zeros / (num_zeros + num_ones)
         # Calculate the fidelity from the probability.
-        fidelity = 1 - 2 * probability_zero
+        fidelity = 2 * probability_zero - 1
         if fidelity < 0:
             fidelity = 0
 
