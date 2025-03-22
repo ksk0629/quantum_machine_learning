@@ -110,3 +110,51 @@ class TestUtils:
             data_2d=data_2d, window_size=(3, 3)
         )
         assert np.allclose(correct_windowed_data, windowed_data)
+
+    @pytest.mark.preprocessor
+    def test_window_multi_channel_data_with_2x2_window(self):
+        """Normal test;
+        Run window_multi_channel_data with two-dimensional window.
+
+        Check if the return value is windowed data.
+        """
+        data_3d = np.array(
+            [
+                [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],
+                [
+                    [17, 18, 19, 20],
+                    [21, 22, 23, 24],
+                    [25, 26, 27, 28],
+                    [29, 30, 31, 32],
+                ],
+                [
+                    [33, 34, 35, 36],
+                    [37, 38, 39, 40],
+                    [41, 42, 43, 44],
+                    [45, 46, 47, 48],
+                ],
+            ]
+        )
+        correct_windowed_data = np.array(
+            [
+                [
+                    [[[1, 2], [5, 6]], [[2, 3], [6, 7]], [[3, 4], [7, 8]]],
+                    [[[5, 6], [9, 10]], [[6, 7], [10, 11]], [[7, 8], [11, 12]]],
+                    [[[9, 10], [13, 14]], [[10, 11], [14, 15]], [[11, 12], [15, 16]]],
+                ],
+                [
+                    [[[17, 18], [21, 22]], [[18, 19], [22, 23]], [[19, 20], [23, 24]]],
+                    [[[21, 22], [25, 26]], [[22, 23], [26, 27]], [[23, 24], [27, 28]]],
+                    [[[25, 26], [29, 30]], [[26, 27], [30, 31]], [[27, 28], [31, 32]]],
+                ],
+                [
+                    [[[33, 34], [37, 38]], [[34, 35], [38, 39]], [[35, 36], [39, 40]]],
+                    [[[37, 38], [41, 42]], [[38, 39], [42, 43]], [[39, 40], [43, 44]]],
+                    [[[41, 42], [45, 46]], [[42, 43], [46, 47]], [[43, 44], [47, 48]]],
+                ],
+            ]
+        )
+        windowed_data = Preprocessor.window_multi_channel_data(
+            data_3d=data_3d, window_size=(2, 2)
+        )
+        assert np.allclose(correct_windowed_data, windowed_data)
