@@ -61,3 +61,19 @@ class TestUtils:
             # Also, the last elements must be the same as the filling value.
             fillings = np.zeros((result.shape[0],)) + filling_value
             assert np.allclose(result[:, -1], fillings)
+
+    @pytest.mark.preprocessor
+    def test_window_single_channel_data_with_2d_window(self):
+        """Normal test;
+        Run window_single_channel_data with two-dimensional window.
+
+        Check if the return value is windowed data.
+        """
+        data_2d = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        correct_windowed_data = np.array(
+            [[[[1, 2], [4, 5]], [[2, 3], [5, 6]]], [[[4, 5], [7, 8]], [[5, 6], [8, 9]]]]
+        )
+        windowed_data = Preprocessor.window_single_channel_data(
+            data_2d=data_2d, window_size=(2, 2)
+        )
+        assert np.allclose(correct_windowed_data, windowed_data)
