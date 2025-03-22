@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from quantum_machine_learning.preprocess.preprocess import Preprocess
+from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 
 
 class TestUtils:
@@ -10,7 +10,7 @@ class TestUtils:
     def setup_class(cls):
         pass
 
-    @pytest.mark.preprocess
+    @pytest.mark.preprocessor
     @pytest.mark.parametrize(
         "vectors",
         [[[2, 3], [1, 1]], [[1, 1, 1]], [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]],
@@ -21,7 +21,7 @@ class TestUtils:
 
         Check if the vectors are normalised.
         """
-        result = Preprocess.normalise_vectors(vectors)
+        result = Preprocessor.normalise_vectors(vectors)
 
         normalised_vectors = []
         for _v in vectors:

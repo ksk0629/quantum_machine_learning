@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from quantum_machine_learning.quclassi.quclassi import QuClassi
 from quantum_machine_learning.quclassi.quclassi_trainer import QuClassiTrainer
-from quantum_machine_learning.preprocess.preprocess import Preprocess
+from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 import quantum_machine_learning.utils as utils
 
 
@@ -45,8 +45,8 @@ def preprocess_dataset(
     val_labels = np.array(val_labels)
 
     # Normalise the data.
-    train_data = Preprocess.normalise_vectors(train_data)
-    val_data = Preprocess.normalise_vectors(val_data)
+    train_data = Preprocessor.normalise_vectors(train_data)
+    val_data = Preprocessor.normalise_vectors(val_data)
 
     # Encode the data.
     train_data = encoding_method(train_data)

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-class Preprocess:
+class Preprocessor:
     """Class for preprocessing data."""
 
     @staticmethod
