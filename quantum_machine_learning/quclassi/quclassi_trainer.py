@@ -317,7 +317,7 @@ class QuClassiTrainer:
         # Save the trained_parameters for each epoch.
         path_getter = QuClassiPathGetter(dir_path=model_dir_path)
         name, extension = os.path.splitext(
-            os.path.basename(path_getter.trained_parameter)
+            os.path.basename(path_getter.trained_parameters)
         )
         for index, parameters in enumerate(self.parameters_history):
             parameters_path = os.path.join(

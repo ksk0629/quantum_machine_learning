@@ -106,7 +106,9 @@ class TestQuanvNN:
         assert os.path.isfile(lookup_tables_path)
         os.remove(lookup_tables_path)
 
-        classical_model_path = os.path.join(self.model_dir_path, "classical_model.pth")
+        classical_model_path = os.path.join(
+            self.model_dir_path, "classical_torch_model.pth"
+        )
         assert os.path.isfile(classical_model_path)
         os.remove(classical_model_path)
 

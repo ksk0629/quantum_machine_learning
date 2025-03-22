@@ -34,5 +34,5 @@ class QuanvNNPathGetter(PathGetter):
         :return str: path to a classical_torch_model file
         """
         filename = "classical_torch_model"
-        extension = "pkl"
+        extension = "pth"
         return self._get_path(filename=filename, extension=extension)
