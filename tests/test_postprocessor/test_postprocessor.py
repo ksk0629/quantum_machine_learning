@@ -65,3 +65,27 @@ class TestPostprocessor:
         result = {"0": 3, "1": 1}
         fidelity = Postprocessor.calculate_fidelity_from_swap_test(result)
         assert fidelity == 1 / 2
+
+    @pytest.mark.postprocessor
+    def test_count_one_bits_of_most_frequent_result_with_only_0(self):
+        """Normal test;
+        Run count_one_bits_of_most_frequent_result with a result having only zero.
+
+        Check if
+        - the return value is 0.
+        """
+        result = {"0": 3, "00": 5, "000": 4}
+        num_ones = Postprocessor.count_one_bits_of_most_frequent_result(result)
+        assert num_ones == 0
+
+    @pytest.mark.postprocessor
+    def test_count_one_bits_of_most_frequent_result(self):
+        """Normal test;
+        Run count_one_bits_of_most_frequent_result with a result having some results.
+
+        Check if
+        - the return value is correct.
+        """
+        result = {"0": 3, "10": 5, "110": 4}
+        num_ones = Postprocessor.count_one_bits_of_most_frequent_result(result)
+        assert num_ones == 1
