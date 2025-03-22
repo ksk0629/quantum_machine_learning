@@ -9,6 +9,7 @@ from tqdm.auto import tqdm
 from quantum_machine_learning.quclassi.quclassi import QuClassi
 from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 import quantum_machine_learning.utils
+from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 
 
 class QuClassiTrainer:
@@ -300,7 +301,7 @@ class QuClassiTrainer:
         results = job.result()
         for result in results:
             fidelities.append(
-                quantum_machine_learning.utils.calculate_fidelity_from_swap_test(
+                Postprocessor.calculate_fidelity_from_swap_test(
                     result.data.c.get_counts()
                 )
             )

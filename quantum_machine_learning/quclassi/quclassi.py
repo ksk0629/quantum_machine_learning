@@ -18,6 +18,7 @@ from quantum_machine_learning.layers.entanglement_unitary_layer import (
 from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
 import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
+from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 
 
 class QuClassi:
@@ -208,10 +209,8 @@ class QuClassi:
         fidelities = {}
         results = job.result()
         for result, label in zip(results, self.labels):
-            fidelities[label] = (
-                quantum_machine_learning.utils.calculate_fidelity_from_swap_test(
-                    result.data.c.get_counts()
-                )
+            fidelities[label] = Postprocessor.calculate_fidelity_from_swap_test(
+                result.data.c.get_counts()
             )
 
         return fidelities
