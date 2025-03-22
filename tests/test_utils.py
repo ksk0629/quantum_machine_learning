@@ -39,45 +39,6 @@ class TestUtils:
         assert x_torch == torch.randint(low=low, high=high, size=(1,))
 
     @pytest.mark.parametrize(
-        "predicted_labels_and_true_labels", [[[1], [2, 3]], [[1, 2], [3]]]
-    )
-    def test_calculate_accuracy_with_invalid_args(
-        self, predicted_labels_and_true_labels
-    ):
-        """Abnormal test;
-        Run calculate_accuracy with an invalid arguments.
-
-        Check if ValueError happens.
-        """
-        (predicted_labels, true_labels) = predicted_labels_and_true_labels
-        with pytest.raises(ValueError):
-            utils.calculate_accuracy(
-                predicted_labels=predicted_labels, true_labels=true_labels
-            )
-
-    @pytest.mark.parametrize(
-        "predicted_labels_and_true_labels_and_accuracy",
-        [[[1], [1], 1], [[1, 2], [1, 3], 0.5], [[1, 2], [2, 1], 0]],
-    )
-    def test_calculate_accuracy_with_valid_args(
-        self, predicted_labels_and_true_labels_and_accuracy
-    ):
-        """Abnormal test;
-        Run calculate_accuracy with a valid arguments.
-
-        Check if the return value, which is an accuracy, is correct.
-        """
-        (predicted_labels, true_labels, true_accuracy) = (
-            predicted_labels_and_true_labels_and_accuracy
-        )
-        predicted_labels = np.array(predicted_labels)
-        true_labels = np.array(true_labels)
-        accuracy = utils.calculate_accuracy(
-            predicted_labels=predicted_labels, true_labels=true_labels
-        )
-        assert accuracy == true_accuracy
-
-    @pytest.mark.parametrize(
         "parameter_dict", [{"x": 1.2, "1": 2}, {"y": 3.1}, {"layers!": 901}]
     )
     def test_get_parameter_dict(self, parameter_dict):

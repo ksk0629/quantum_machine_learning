@@ -118,14 +118,14 @@ class QuClassiTrainer:
                         self.quclassi(data) for data in train_data
                     ]
                     self.train_accuracies.append(
-                        quantum_machine_learning.utils.calculate_accuracy(
+                        QuClassiTrainer.calculate_accuracy(
                             predicted_labels=predicted_train_labels,
                             true_labels=train_labels,
                         )
                     )
                     predicted_val_labels = [self.quclassi(data) for data in val_data]
                     self.val_accuracies.append(
-                        quantum_machine_learning.utils.calculate_accuracy(
+                        QuClassiTrainer.calculate_accuracy(
                             predicted_labels=predicted_val_labels,
                             true_labels=val_labels,
                         )
@@ -143,14 +143,14 @@ class QuClassiTrainer:
             self.quclassi.trained_parameters = self.current_parameters
             predicted_train_labels = [self.quclassi(data) for data in train_data]
             self.train_accuracies.append(
-                quantum_machine_learning.utils.calculate_accuracy(
+                QuClassiTrainer.calculate_accuracy(
                     predicted_labels=predicted_train_labels,
                     true_labels=train_labels,
                 )
             )
             predicted_val_labels = [self.quclassi(data) for data in val_data]
             self.val_accuracies.append(
-                quantum_machine_learning.utils.calculate_accuracy(
+                QuClassiTrainer.calculate_accuracy(
                     predicted_labels=predicted_val_labels,
                     true_labels=val_labels,
                 )
@@ -306,6 +306,24 @@ class QuClassiTrainer:
                 )
             )
         return fidelities
+
+    @staticmethod
+    def calculate_accuracy(
+        predicted_labels: np.ndarray, true_labels: np.ndarray
+    ) -> float:
+        """Calculate accuracy.
+
+        :param np.ndarray predicted_labels: predicted labels
+        :param np.ndarray true_labels: true labels
+        :raises ValueError: if predicted_labels and true_labels have the different lengths
+        :return float: accuracy
+        """
+        if len(predicted_labels) != len(true_labels):
+            msg = f"Given predicted_labels and true_labels must be the same lengths, but {len(predicted_labels)} and {len(true_labels)}."
+            raise ValueError(msg)
+
+        num_correct = (predicted_labels == true_labels).sum()
+        return num_correct / len(predicted_labels)
 
     def save(self, model_dir_path: str):
         """Save the circuit and parameters to the directory specified by the given model_dir_path.

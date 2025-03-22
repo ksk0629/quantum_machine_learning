@@ -28,6 +28,7 @@ class TestQuClassiTrainer:
         cls.trained_paramters = {"layer0[0]": 1, "layer0[1]": 1}
         cls.initial_parameters = np.array([[1, 1], [0, 0]])
 
+    @pytest.mark.quclassi
     def get_trainer(self):
         return QuClassiTrainer(
             quclassi=self.quclassi,
@@ -35,6 +36,7 @@ class TestQuClassiTrainer:
             epochs=self.epochs,
         )
 
+    @pytest.mark.quclassi
     def test_init_with_invalid_initial_parameters(self):
         """Abnormal test;
         Create the instance with an invalid initial_parameters.
@@ -47,6 +49,7 @@ class TestQuClassiTrainer:
                 quclassi=self.quclassi, initial_parameters=initial_parameters
             )
 
+    @pytest.mark.quclassi
     def test_init_with_valid_initial_parameters(self):
         """Abnormal test;
         Create the instance with a valid initial_parameters.
@@ -65,6 +68,7 @@ class TestQuClassiTrainer:
         )
         assert np.allclose(quclassi_trainer.current_parameters, self.initial_parameters)
 
+    @pytest.mark.quclassi
     def test_train_with_evaluation(self):
         """Normal test;
         Run train with eval=True.
@@ -90,6 +94,7 @@ class TestQuClassiTrainer:
             quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
         )
 
+    @pytest.mark.quclassi
     def test_train_without_evaluation(self):
         """Normal test;
         Run train without eval=True.
@@ -115,6 +120,7 @@ class TestQuClassiTrainer:
             quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
         )
 
+    @pytest.mark.quclassi
     def test_train_one_epoch(self):
         """Normal test;
         Run train_one_epoch.
@@ -129,6 +135,7 @@ class TestQuClassiTrainer:
             quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
         )
 
+    @pytest.mark.quclassi
     def test_run_sampler(self):
         """Normal test;
         Run run_sampler.
@@ -144,6 +151,7 @@ class TestQuClassiTrainer:
         assert isinstance(jobs, qiskit.primitives.primitive_job.PrimitiveJob)
         assert len(jobs.result()) == len(self.train_data)
 
+    @pytest.mark.quclassi
     def test_get_fidelities(self):
         """Normal test;
         Run get_fidelities.
@@ -160,6 +168,7 @@ class TestQuClassiTrainer:
         for fidelity in fidelities:
             assert 0 <= fidelity <= 1
 
+    @pytest.mark.quclassi
     def test_save(self):
         """Normal test;
         Run save after running train.
@@ -184,3 +193,44 @@ class TestQuClassiTrainer:
         for file in all_files:
             os.remove(file)
         os.rmdir(self.model_dir_path)
+
+    @pytest.mark.quclassi
+    @pytest.mark.parametrize(
+        "predicted_labels_and_true_labels", [[[1], [2, 3]], [[1, 2], [3]]]
+    )
+    def test_calculate_accuracy_with_invalid_args(
+        self, predicted_labels_and_true_labels
+    ):
+        """Abnormal test;
+        Run calculate_accuracy with an invalid arguments.
+
+        Check if ValueError happens.
+        """
+        (predicted_labels, true_labels) = predicted_labels_and_true_labels
+        with pytest.raises(ValueError):
+            QuClassiTrainer.calculate_accuracy(
+                predicted_labels=predicted_labels, true_labels=true_labels
+            )
+
+    @pytest.mark.quclassi
+    @pytest.mark.parametrize(
+        "predicted_labels_and_true_labels_and_accuracy",
+        [[[1], [1], 1], [[1, 2], [1, 3], 0.5], [[1, 2], [2, 1], 0]],
+    )
+    def test_calculate_accuracy_with_valid_args(
+        self, predicted_labels_and_true_labels_and_accuracy
+    ):
+        """Abnormal test;
+        Run calculate_accuracy with a valid arguments.
+
+        Check if the return value, which is an accuracy, is correct.
+        """
+        (predicted_labels, true_labels, true_accuracy) = (
+            predicted_labels_and_true_labels_and_accuracy
+        )
+        predicted_labels = np.array(predicted_labels)
+        true_labels = np.array(true_labels)
+        accuracy = QuClassiTrainer.calculate_accuracy(
+            predicted_labels=predicted_labels, true_labels=true_labels
+        )
+        assert accuracy == true_accuracy

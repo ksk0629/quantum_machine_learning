@@ -44,10 +44,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [
+    "quclassi: marks tests for QuClassi related classes",
     "preprocessor: marks tests for Preprocessor class",
     "postprocessor: marks tests for Postprocessor class",
-    "path_getter: marks tests for PathGetter family class",
-    "gate: marks tests for Gate family class",
+    "path_getter: marks tests for PathGetter family classes",
+    "gate: marks tests for Gate family classes",
 ]
 pythonpath = "./quantum_machine_learning"
 testpaths = ["tests",]

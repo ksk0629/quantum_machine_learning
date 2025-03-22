@@ -22,22 +22,6 @@ def fix_seed(seed: int):
     qiskit_algorithms.utils.algorithm_globals.random_seed = 12345
 
 
-def calculate_accuracy(predicted_labels: np.ndarray, true_labels: np.ndarray) -> float:
-    """Calculate accuracy.
-
-    :param np.ndarray predicted_labels: predicted labels
-    :param np.ndarray true_labels: true labels
-    :raises ValueError: if predicted_labels and true_labels have the different lengths
-    :return float: accuracy
-    """
-    if len(predicted_labels) != len(true_labels):
-        msg = f"Given predicted_labels and true_labels must be the same lengths, but {len(predicted_labels)} and {len(true_labels)}."
-        raise ValueError(msg)
-
-    num_correct = (predicted_labels == true_labels).sum()
-    return num_correct / len(predicted_labels)
-
-
 def get_parameter_dict(
     parameter_names: list[str], parameters: list[float]
 ) -> dict[str, float]:
