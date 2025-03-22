@@ -55,3 +55,19 @@ class Postprocessor:
             fidelity = 0
 
         return fidelity
+
+    @staticmethod
+    def count_one_bits_of_most_frequent_result(result: dict[str, int]) -> int:
+        """Count the number of ones in the most frequent outcome of the circuit result.
+
+        :param dict[str, int] result: qiskit circuit result
+        :return int: number of ones
+        """
+        # Sort the resuly by the frequency.
+        sorted_result = dict(sorted(result.items(), key=lambda item: -item[1]))
+        # Get the most frequent result.
+        most_likely_result = list(sorted_result.keys())[0]
+        # Count the number of ones.
+        num_ones = most_likely_result.count(Postprocessor.KEY_1)
+
+        return num_ones

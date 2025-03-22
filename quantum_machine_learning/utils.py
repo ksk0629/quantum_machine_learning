@@ -64,22 +64,6 @@ def encode_through_arcsin(data: np.ndarray) -> np.ndarray:
     return 2 * np.arcsin(np.sqrt(data))
 
 
-def count_ones(result: dict[str, int]) -> int:
-    """Count the number of ones in the most likely outcome of the circuit result.
-
-    :param dict[str, int] result: qiskit circuit result
-    :return int: number of ones
-    """
-    key_1 = "1"
-    # Sort the resuly by the frequency.
-    sorted_result = dict(sorted(result.items(), key=lambda item: -item[1]))
-    # Get the most likely result.
-    most_likely_result = list(sorted_result.keys())[0]
-    # Count the number of ones.
-    num_ones = most_likely_result.count(key_1)
-    return num_ones
-
-
 def encode_according_to_threshold(
     data: np.ndarray, threshold: float, low_value: float, high_value: float
 ) -> np.ndarray:

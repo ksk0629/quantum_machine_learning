@@ -9,6 +9,7 @@ from quantum_machine_learning.encoders.x_encoder import XEncoder
 from quantum_machine_learning.layers.random_layer import RandomLayer
 import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
+from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 
 
 class QuanvLayer:
@@ -156,7 +157,7 @@ class QuanvLayer:
         results = [result.data.meas.get_counts() for result in results]
         processed_data = np.empty((len(self.filters), 1))
         processed_data[:, 0] = list(
-            map(quantum_machine_learning.utils.count_ones, results)
+            map(Postprocessor.count_one_bits_of_most_frequent_result, results)
         )
 
         return processed_data
