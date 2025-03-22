@@ -4,7 +4,7 @@ import pytest
 from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 
 
-class TestUtils:
+class TestPreprocessor:
 
     @classmethod
     def setup_class(cls):
