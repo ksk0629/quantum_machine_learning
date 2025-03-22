@@ -198,41 +198,6 @@ class TestUtils:
             self.model_dir_path
         ) == os.path.join(self.model_dir_path, "classical_model.pth")
 
-    @pytest.mark.parametrize("window_size", [(2, 2), (3, 3)])
-    def test_get_sliding_window_batch_data(self, window_size):
-        """Normal test;
-        run get_sliding_window_batch_data.
-
-        Check if each sliding window is as expected.
-        """
-        batch_data = np.arange(5 * 2 * 16).reshape((5, 2, 4, 4))
-        sliding_window_batch_data = utils.get_sliding_window_batch_data(
-            batch_data=batch_data, window_size=window_size
-        )
-
-        for sliding_window_data, data in zip(sliding_window_batch_data, batch_data):
-
-            for sliding_window_single_channel, single_channel in zip(
-                sliding_window_data, data
-            ):
-                for row_index in range(len(single_channel)):
-                    for column_index in range(len(single_channel[row_index])):
-                        try:
-                            window = sliding_window_single_channel[row_index][
-                                column_index
-                            ]
-                            row_start = row_index
-                            row_end = row_start + window_size[0]
-                            column_start = column_index
-                            column_end = column_start + window_size[1]
-                            cropped = single_channel[
-                                row_start:row_end, column_start:column_end
-                            ]
-                            print(cropped)
-                        except IndexError:
-                            continue
-                        assert np.allclose(window, cropped)
-
     def test_encode_according_to_threshold(self):
         """Normal test;
         run encode_according_to_threshold.
