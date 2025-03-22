@@ -4,7 +4,7 @@ import yaml
 
 from qiskit import primitives
 
-from quantum_machine_learning.dataset import get_dataset
+from quantum_machine_learning.dataset_gallery import get_dataset
 from quantum_machine_learning.quclassi.train import train
 from quantum_machine_learning.utils import fix_seed, encode_through_arcsin
 

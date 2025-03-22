@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from quantum_machine_learning.dataset import get_dataset
+from quantum_machine_learning.dataset_gallery import get_dataset
 from quantum_machine_learning.quanv_nn.train import train
 import quantum_machine_learning.utils as utils
 
