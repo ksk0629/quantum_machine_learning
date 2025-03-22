@@ -1,4 +1,3 @@
-import os
 import random
 
 import numpy as np
@@ -112,98 +111,6 @@ def count_ones(result: dict[str, int]) -> int:
     # Count the number of ones.
     num_ones = most_likely_result.count(key_1)
     return num_ones
-
-
-def get_basic_info_path(model_dir_path: str, file_prefix: str | None = None) -> str:
-    """Get basic_info.pkl path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to basic information file
-    """
-    filename = (
-        f"{file_prefix}basic_info.pkl" if file_prefix is not None else "basic_info.pkl"
-    )
-    return os.path.join(model_dir_path, filename)
-
-
-def get_circuit_path(model_dir_path: str, file_prefix: str | None = None) -> str:
-    """Get circuit.qpy path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to circuit file path
-    """
-    filename = f"{file_prefix}circuit.qpy" if file_prefix is not None else "circuit.qpy"
-    return os.path.join(model_dir_path, filename)
-
-
-def get_trainable_parameters_path(
-    model_dir_path: str, file_prefix: str | None = None
-) -> str:
-    """Get trainable_parameters.pkl path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to trainable_parameters file path
-    """
-    filename = (
-        f"{file_prefix}trainable_parameters.pkl"
-        if file_prefix is not None
-        else "trainable_parameters.pkl"
-    )
-    return os.path.join(model_dir_path, filename)
-
-
-def get_data_parameters_path(
-    model_dir_path: str, file_prefix: str | None = None
-) -> str:
-    """Get data_parameters.pkl path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to data_parameters file path
-    """
-    filename = (
-        f"{file_prefix}data_parameters.pkl"
-        if file_prefix is not None
-        else "data_parameters.pkl"
-    )
-    return os.path.join(model_dir_path, filename)
-
-
-def get_trained_parameters_path(
-    model_dir_path: str, file_prefix: str | None = None
-) -> str:
-    """Get trained_parameters.pkl path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to trained_parameters file path
-    """
-    filename = (
-        f"{file_prefix}trained_parameters.pkl"
-        if file_prefix is not None
-        else "trained_parameters.pkl"
-    )
-    return os.path.join(model_dir_path, filename)
-
-
-def get_classical_torch_model_path(
-    model_dir_path: str, file_prefix: str | None = None
-) -> str:
-    """Get classical_model.pth path.
-
-    :param str model_dir_path: path to directory
-    :param str | None file_prefix: file prefix, defaults to None
-    :return str: path to classical_model file path
-    """
-    filename = (
-        f"{file_prefix}classical_model.pth"
-        if file_prefix is not None
-        else "classical_model.pth"
-    )
-    return os.path.join(model_dir_path, filename)
 
 
 def encode_according_to_threshold(

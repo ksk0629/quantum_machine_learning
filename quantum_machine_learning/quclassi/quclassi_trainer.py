@@ -7,6 +7,7 @@ from qiskit import primitives
 from tqdm.auto import tqdm
 
 from quantum_machine_learning.quclassi.quclassi import QuClassi
+from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 import quantum_machine_learning.utils
 
 
@@ -205,9 +206,11 @@ class QuClassiTrainer:
                     forward_difference_parameters = (
                         self.current_parameters[target_label_index] + forward_shift
                     )
-                    forward_difference_parameters = quantum_machine_learning.utils.get_parameter_dict(
-                        parameter_names=self.quclassi.trainable_parameters,
-                        parameters=forward_difference_parameters,
+                    forward_difference_parameters = (
+                        quantum_machine_learning.utils.get_parameter_dict(
+                            parameter_names=self.quclassi.trainable_parameters,
+                            parameters=forward_difference_parameters,
+                        )
                     )
                     forward_difference_fidelities = self.get_fidelities(
                         data=target_data,
@@ -228,9 +231,11 @@ class QuClassiTrainer:
                     backward_difference_parameters = (
                         self.current_parameters[target_label_index] + backward_shift
                     )
-                    backward_difference_parameters = quantum_machine_learning.utils.get_parameter_dict(
-                        parameter_names=self.quclassi.trainable_parameters,
-                        parameters=backward_difference_parameters,
+                    backward_difference_parameters = (
+                        quantum_machine_learning.utils.get_parameter_dict(
+                            parameter_names=self.quclassi.trainable_parameters,
+                            parameters=backward_difference_parameters,
+                        )
                     )
                     backward_difference_fidelities = self.get_fidelities(
                         data=target_data,
@@ -295,7 +300,9 @@ class QuClassiTrainer:
         results = job.result()
         for result in results:
             fidelities.append(
-                quantum_machine_learning.utils.calculate_fidelity_from_swap_test(result.data.c.get_counts())
+                quantum_machine_learning.utils.calculate_fidelity_from_swap_test(
+                    result.data.c.get_counts()
+                )
             )
         return fidelities
 
@@ -308,11 +315,10 @@ class QuClassiTrainer:
         self.quclassi.save(model_dir_path=model_dir_path)
 
         # Save the trained_parameters for each epoch.
-        trained_parameter_path = quantum_machine_learning.utils.get_trained_parameters_path(
-            model_dir_path=model_dir_path
+        path_getter = QuClassiPathGetter(dir_path=model_dir_path)
+        name, extension = os.path.splitext(
+            os.path.basename(path_getter.trained_parameter)
         )
-
-        name, extension = os.path.splitext(os.path.basename(trained_parameter_path))
         for index, parameters in enumerate(self.parameters_history):
             parameters_path = os.path.join(
                 model_dir_path, f"{name}_{index:0>{len(str(self.epochs))}}{extension}"

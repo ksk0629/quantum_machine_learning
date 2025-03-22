@@ -6,6 +6,7 @@ import torch.nn
 from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
 import quantum_machine_learning.utils as utils
 from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
+from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 
 
 class QuanvNN(torch.nn.Module):
@@ -101,7 +102,5 @@ class QuanvNN(torch.nn.Module):
         :param str model_dir_path: path to the output directory.
         """
         self.quanv_layer.save(model_dir_path=model_dir_path)
-        classical_model_path = utils.get_classical_torch_model_path(
-            model_dir_path=model_dir_path
-        )
-        torch.save(self.classical_model.state_dict(), classical_model_path)
+        path_getter = QuanvNNPathGetter(dir_path=model_dir_path)
+        torch.save(self.classical_model.state_dict(), path_getter.classical_torch_model)

@@ -8,6 +8,7 @@ from qiskit import qpy, primitives
 from quantum_machine_learning.encoders.x_encoder import XEncoder
 from quantum_machine_learning.layers.random_layer import RandomLayer
 import quantum_machine_learning.utils
+from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 
 
 class QuanvLayer:
@@ -154,7 +155,9 @@ class QuanvLayer:
         results = job.result()
         results = [result.data.meas.get_counts() for result in results]
         processed_data = np.empty((len(self.filters), 1))
-        processed_data[:, 0] = list(map(quantum_machine_learning.utils.count_ones, results))
+        processed_data[:, 0] = list(
+            map(quantum_machine_learning.utils.count_ones, results)
+        )
 
         return processed_data
 
@@ -221,18 +224,19 @@ class QuanvLayer:
         # Create the directory specified by the argument output_dir_path.
         os.makedirs(model_dir_path)
 
+        # Create PathGetter.
+        path_getter = QuanvNNPathGetter(dir_path=model_dir_path)
+
         # Save the basic information of this QuanvLayer.
         basic_info = {
             "kernel_size": self.kernel_size,
             "num_filters": self.num_filters,
         }
-        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
-        with open(basic_info_path, "wb") as pkl_file:
+        with open(path_getter.basic_info, "wb") as pkl_file:
             pickle.dump(basic_info, pkl_file)
 
         # Save the circuit.
-        filter_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
-        with open(filter_path, "wb") as qpy_file:
+        with open(path_getter.circuit, "wb") as qpy_file:
             qpy.dump(self.filters, qpy_file)
 
         # Save the look-up tables.
@@ -246,16 +250,17 @@ class QuanvLayer:
 
         :param str model_dir_path: path to the input directory.
         """
+        # Create PathGetter.
+        path_getter = QuanvNNPathGetter(dir_path=model_dir_path)
+
         # Load the basic information.
-        basic_info_path = quantum_machine_learning.utils.get_basic_info_path(model_dir_path)
-        with open(basic_info_path, "rb") as pkl_file:
+        with open(path_getter.basic_info, "rb") as pkl_file:
             basic_info = pickle.load(pkl_file)
         basic_info["is_loaded"] = True
         loaded_quanv_layer = cls(**basic_info)
 
         # Load the filters.
-        filter_path = quantum_machine_learning.utils.get_circuit_path(model_dir_path)
-        with open(filter_path, "rb") as qpy_file:
+        with open(path_getter.circuit, "rb") as qpy_file:
             loaded_quanv_layer.filters = qpy.load(qpy_file)
 
         # Save the look-up tables.
