@@ -89,14 +89,6 @@ def get_parameter_dict(
     return parameter_dict
 
 
-def normalise_data(data: np.ndarray) -> np.ndarray:
-    """Normalise each data, which correponds to each row of the given data.
-
-    :param np.ndarray data: data
-    :return np.ndarray: normalised data
-    """
-    return data / np.linalg.norm(data, axis=1, keepdims=1)
-
 
 def scale_data(data: np.ndarray) -> np.ndarray:
     """Scale each datam which corresponds to each row.
