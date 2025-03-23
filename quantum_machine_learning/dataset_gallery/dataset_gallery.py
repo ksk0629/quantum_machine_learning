@@ -4,7 +4,8 @@ import torchvision
 
 
 class DatasetGallery:
-    """Dataset Gallery class."""
+    """Dataset Gallery class.
+    For now, I will not create test for this class."""
 
     @staticmethod
     def get_dataset(
