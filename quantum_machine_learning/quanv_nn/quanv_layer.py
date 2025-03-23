@@ -30,7 +30,9 @@ class QuanvLayer:
 
         circuit = qiskit.QuantumCircuit(self.num_qubits, name="QuanvFilter")
         circuit.compose(
-            XEncoder(num_qubits=self.num_qubits)(), range(self.num_qubits), inplace=True
+            XEncoder(data_dimension=self.num_qubits),
+            range(self.num_qubits),
+            inplace=True,
         )
         circuit.barrier()
 
