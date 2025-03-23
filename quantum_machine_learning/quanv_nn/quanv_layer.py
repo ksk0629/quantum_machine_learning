@@ -10,6 +10,7 @@ from quantum_machine_learning.layers.random_layer import RandomLayer
 import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
+from quantum_machine_learning.utils.circuit_utils import CircuitUtils
 
 
 class QuanvLayer:
@@ -145,7 +146,7 @@ class QuanvLayer:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for filter in self.filters:
-            parameters = quantum_machine_learning.utils.get_parameter_dict(
+            parameters = CircuitUtils.get_parameter_dict(
                 parameter_names=filter.parameters, parameters=data
             )
             pubs.append((filter, parameters))

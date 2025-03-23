@@ -10,6 +10,7 @@ from quantum_machine_learning.quclassi.quclassi import QuClassi
 from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 import quantum_machine_learning.utils
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
+from quantum_machine_learning.utils.circuit_utils import CircuitUtils
 
 
 class QuClassiTrainer:
@@ -207,11 +208,9 @@ class QuClassiTrainer:
                     forward_difference_parameters = (
                         self.current_parameters[target_label_index] + forward_shift
                     )
-                    forward_difference_parameters = (
-                        quantum_machine_learning.utils.get_parameter_dict(
-                            parameter_names=self.quclassi.trainable_parameters,
-                            parameters=forward_difference_parameters,
-                        )
+                    forward_difference_parameters = CircuitUtils.get_parameter_dict(
+                        parameter_names=self.quclassi.trainable_parameters,
+                        parameters=forward_difference_parameters,
                     )
                     forward_difference_fidelities = self.get_fidelities(
                         data=target_data,
@@ -232,11 +231,9 @@ class QuClassiTrainer:
                     backward_difference_parameters = (
                         self.current_parameters[target_label_index] + backward_shift
                     )
-                    backward_difference_parameters = (
-                        quantum_machine_learning.utils.get_parameter_dict(
-                            parameter_names=self.quclassi.trainable_parameters,
-                            parameters=backward_difference_parameters,
-                        )
+                    backward_difference_parameters = CircuitUtils.get_parameter_dict(
+                        parameter_names=self.quclassi.trainable_parameters,
+                        parameters=backward_difference_parameters,
                     )
                     backward_difference_fidelities = self.get_fidelities(
                         data=target_data,
@@ -271,7 +268,7 @@ class QuClassiTrainer:
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for _td in data:
-            data_parameters = quantum_machine_learning.utils.get_parameter_dict(
+            data_parameters = CircuitUtils.get_parameter_dict(
                 parameter_names=self.quclassi.data_parameters, parameters=_td
             )
             parameters = {**trained_parameters, **data_parameters}

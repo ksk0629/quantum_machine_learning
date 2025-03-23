@@ -11,7 +11,8 @@ import torch.nn.functional as F
 
 from quantum_machine_learning.dataset_gallery import get_dataset
 from quantum_machine_learning.quanv_nn.train import train
-import quantum_machine_learning.utils as utils
+from quantum_machine_learning.utils.utils import Utils
+from quantum_machine_learning.utils.data_utils import DataUtils
 
 
 class cnn(nn.Module):
@@ -24,7 +25,7 @@ class cnn(nn.Module):
         self.conv1 = nn.Conv2d(
             in_channels=in_dim[0], out_channels=50, kernel_size=conv_kernel_size
         )
-        conv1_output_shape = utils.calc_2d_output_shape(
+        conv1_output_shape = DataUtils.calc_2d_output_shape(
             height=in_dim[1], width=in_dim[2], kernel_size=conv_kernel_size
         )
 
@@ -32,7 +33,7 @@ class cnn(nn.Module):
         pool_kernel_size = (2, 2)
         pool_stride = 2
         self.pool1 = nn.MaxPool2d(kernel_size=pool_kernel_size, stride=pool_stride)
-        pool1_output_shape = utils.calc_2d_output_shape(
+        pool1_output_shape = DataUtils.calc_2d_output_shape(
             height=conv1_output_shape[0],
             width=conv1_output_shape[1],
             kernel_size=pool_kernel_size,
@@ -44,7 +45,7 @@ class cnn(nn.Module):
         self.conv2 = nn.Conv2d(
             in_channels=50, out_channels=num_conv2_filter, kernel_size=conv_kernel_size
         )
-        conv2_output_shape = utils.calc_2d_output_shape(
+        conv2_output_shape = DataUtils.calc_2d_output_shape(
             height=pool1_output_shape[0],
             width=pool1_output_shape[1],
             kernel_size=conv_kernel_size,
@@ -52,7 +53,7 @@ class cnn(nn.Module):
 
         # Set the second pooling layer.
         self.pool2 = nn.MaxPool2d(kernel_size=pool_kernel_size, stride=pool_stride)
-        pool2_output_shape = utils.calc_2d_output_shape(
+        pool2_output_shape = DataUtils.calc_2d_output_shape(
             height=conv2_output_shape[0],
             width=conv2_output_shape[1],
             kernel_size=pool_kernel_size,
@@ -117,7 +118,7 @@ if __name__ == "__main__":
 
     # Fix the seed.
     seed = config["general"]["seed"]
-    utils.fix_seed(seed)
+    Utils.fix_seed(seed)
 
     # Get the dataset.
     dataset_options = config["dataset_options"]

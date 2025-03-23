@@ -19,6 +19,7 @@ from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
 import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
+from quantum_machine_learning.utils.circuit_utils import CircuitUtils
 
 
 class QuClassi:
@@ -189,14 +190,14 @@ class QuClassi:
             raise ValueError(msg)
 
         # Set data as the data_parameters.
-        data_parameters = quantum_machine_learning.utils.get_parameter_dict(
+        data_parameters = CircuitUtils.get_parameter_dict(
             parameter_names=self.data_parameters, parameters=data
         )
 
         # Create the combination of the circuit and parameters to run the circuits.
         pubs = []
         for trained_parameters in self.trained_parameters:
-            parameters = quantum_machine_learning.utils.get_parameter_dict(
+            parameters = CircuitUtils.get_parameter_dict(
                 parameter_names=self.trainable_parameters, parameters=trained_parameters
             )
             parameters = {**parameters, **data_parameters}

@@ -7,7 +7,7 @@ from qiskit import primitives
 
 from quantum_machine_learning.dataset_gallery import get_dataset
 from quantum_machine_learning.quclassi.train import train
-from quantum_machine_learning.utils import fix_seed
+from quantum_machine_learning.utils.utils import Utils
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Fix the seed.
     seed = config["general"]["seed"]
-    fix_seed(seed)
+    Utils.fix_seed(seed)
 
     # Get the dataset.
     dataset_options = config["dataset_options"]
