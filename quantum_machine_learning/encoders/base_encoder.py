@@ -1,23 +1,14 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import qiskit
 
 
-class BaseEncoder(ABC):
+class BaseEncoder(qiskit.circuit.library.BlueprintCircuit, ABC):
     """BaseEncoder class of which all encoders inherit this."""
 
-    def __init__(self):
-        pass
+    def __init__(self, *regs, name: str | None = None):
+        """Create a new encoder.
 
-    @abstractmethod
-    def get_circuit(self) -> qiskit.QuantumCircuit:
-        pass
-
-    def __call__(self) -> qiskit.QuantumCircuit:
-        return self.get_circuit()
-
-    @classmethod
-    def get(cls, *args) -> qiskit.QuantumCircuit:
-        encoder = cls(*args)
-        circuit = encoder.get_circuit()
-        return circuit
+        :param str | None name: name of this encoder, defaults to None
+        """
+        super().__init__(*regs, name=name)
