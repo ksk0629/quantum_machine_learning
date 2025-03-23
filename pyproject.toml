@@ -44,6 +44,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [
+    "encoder: marks tests for Encoder family classes",
     "quclassi: marks tests for QuClassi related classes",
     "preprocessor: marks tests for Preprocessor class",
     "postprocessor: marks tests for Postprocessor class",

@@ -1,4 +1,5 @@
 import pytest
+import qiskit
 
 from quantum_machine_learning.encoders.x_encoder import XEncoder
 
@@ -6,42 +7,30 @@ from quantum_machine_learning.encoders.x_encoder import XEncoder
 class TestXEncoder:
     @classmethod
     def setup_class(cls):
-        cls.num_qubits = 4
-        cls.x_encoder = XEncoder(
-            num_qubits=cls.num_qubits,
-        )
+        pass
 
-    def test_init(self):
+    @pytest.mark.encoder
+    @pytest.mark.parametrize("data_dimension", [2, 3])
+    def test_init(self, data_dimension):
         """Normal test;
-        Check if the x_encoder created in setup_class has
-        - num_qubits as same as self.num_qubits.
-        - num_params as same as self.num_qubits.
-        """
-        assert self.x_encoder.num_qubits == self.num_qubits
-        assert self.x_encoder.num_params == self.num_qubits
-
-    @pytest.mark.parametrize("num_qubits", [2, 4, 5, 10])
-    def test_get_circuit(self, num_qubits):
-        """Normal test;
-        Run get_circuit with various num_qubits.
+        Create an XEcnoder instance and chenge the data dimension.
 
         Check if
-        - the number of qubits of the circuit is the same as num_qubits.
-        - the number of paramters of the circuit is the same of num_qubits.
-        - each qubit has only one gate, rx.
+        - its data_dimension is the same as the given data_dimension.
+        - its num_parameters is the same as the given data_dimension.
+        - its parameters is an instance of qiskit.circuit.ParameterVector.
+        - the length of its parameters is the same as the given data_dimension.
+        - the above four things are preserved with the new_data_dimension after substituting new_data_dimension.
         """
-        x_encoder = XEncoder(num_qubits=num_qubits)
-        circuit = x_encoder().decompose()
+        x_encoder = XEncoder(data_dimension=data_dimension)
+        assert x_encoder.data_dimension == data_dimension
+        assert x_encoder.num_parameters == data_dimension
+        assert isinstance(x_encoder.parameters, qiskit.circuit.ParameterVector)
+        assert len(x_encoder.parameters) == data_dimension
 
-        # Check the number of qubits.
-        assert circuit.num_qubits == num_qubits
-        # Check the number of parameters.
-        assert len(circuit.parameters) == num_qubits
-
-        for index, instruction in enumerate(circuit.data):
-            # Check if the current gate is rx.
-            assert instruction.name == "rx"
-
-            # Check if the position of the gate is correct.
-            qubit_applied = instruction.qubits[0]._index
-            assert qubit_applied == index
+        new_data_dimension = 10
+        x_encoder.data_dimension = new_data_dimension
+        assert x_encoder.data_dimension == new_data_dimension
+        assert x_encoder.num_parameters == new_data_dimension
+        assert isinstance(x_encoder.parameters, qiskit.circuit.ParameterVector)
+        assert len(x_encoder.parameters) == new_data_dimension
