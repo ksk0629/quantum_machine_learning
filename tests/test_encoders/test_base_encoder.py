@@ -137,12 +137,11 @@ class TestXEncoder:
         pass
 
     @pytest.mark.encoder
-    def test_valid_child_class(self):
+    def test_valid_child_class_with_all_arguments(self):
         """Normal test;
-        Initialise the child class inheritating BaseEncoder for the test.
+        Initialise the child class inheritating BaseEncoder for the test, with all arguments.
 
         Check if
-        - its name is the given name.
         - its data_dimenstion is the given data_dimension.
         - the return value of its transformer is the return value of the given transformer.
         - the type of its parameters is list.
@@ -163,7 +162,6 @@ class TestXEncoder:
         data = [1, 2]
         transformed_data = transformer(data)
 
-        assert tester.name == name
         assert tester.data_dimension == data_dimension
         assert tester.transform(data) == transformed_data
         assert isinstance(tester.parameters, list)
@@ -177,6 +175,30 @@ class TestXEncoder:
 
         tester.transformer = None
         assert tester.transform(data) == data
+
+    @pytest.mark.encoder
+    def test_valid_child_class_without_unnecessary_arguments(self):
+        """Normal test;
+        Initialise the child class inheritating BaseEncoder for the test without arguments that have default value.
+
+        Check if
+        - its data_dimenstion is the given data_dimension.
+        - the return value of its transformer is the given data.
+        - the type of its parameters is list.
+        - the type of teh first element of its parameters is qiskit.circuit.ParameterVector.
+        - its num_parameters is 1.
+        """
+        # Create a BaseEncoderNormalTester instance.
+        data_dimension = 2
+        tester = BaseEncoderNormalTester(data_dimension=data_dimension)
+        # Set data.
+        data = [1, 2]
+
+        assert tester.data_dimension == data_dimension
+        assert tester.transform(data) == data
+        assert isinstance(tester.parameters, list)
+        assert isinstance(tester.parameters[0], qiskit.circuit.ParameterVector)
+        assert tester.num_parameters == 1
 
     @pytest.mark.encoder
     def test_without_num_encoding_qubits(self):
