@@ -88,7 +88,7 @@ class QuClassi:
         # >>> Data qubits creation >>>
         feature_map = qiskit.QuantumCircuit(self.num_data_qubits, name="Data")
         feature_map.compose(
-            YZEncoder(self.num_data_qubits)(),
+            YZEncoder(data_dimension=self.num_data_qubits * 2),
             range(self.num_data_qubits),
             inplace=True,
         )
