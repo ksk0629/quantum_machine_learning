@@ -22,6 +22,9 @@ class TestXEncoder:
         - the length of its parameters is 1.
         - the type of the first element of its parameters is qiskit.circuit.ParameterVector.
         - the length of the first element of its parameters is the same as the given data_dimension.
+        - the type of its data is qiskit.circuit.quantumcircuitdata.QuantumCircuitData.
+        - the length of its data is 1.
+        - the type of the first element of its data is qiskit.circuit.CircuitInstruction.
         - the above things are preserved with the new_data_dimension after substituting new_data_dimension.
         """
         x_encoder = XEncoder(data_dimension=data_dimension)
@@ -31,6 +34,11 @@ class TestXEncoder:
         assert len(x_encoder.parameters) == 1
         assert isinstance(x_encoder.parameters[0], qiskit.circuit.ParameterVector)
         assert len(x_encoder.parameters[0]) == data_dimension
+        assert isinstance(
+            x_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
+        )
+        assert len(x_encoder.data) == 1
+        assert isinstance(x_encoder.data[0], qiskit.circuit.CircuitInstruction)
 
         new_data_dimension = data_dimension + 1
         x_encoder.data_dimension = new_data_dimension
@@ -40,3 +48,8 @@ class TestXEncoder:
         assert len(x_encoder.parameters) == 1
         assert isinstance(x_encoder.parameters[0], qiskit.circuit.ParameterVector)
         assert len(x_encoder.parameters[0]) == new_data_dimension
+        assert isinstance(
+            x_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
+        )
+        assert len(x_encoder.data) == 1
+        assert isinstance(x_encoder.data[0], qiskit.circuit.CircuitInstruction)

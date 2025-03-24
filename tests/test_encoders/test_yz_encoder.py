@@ -29,6 +29,9 @@ class TestYZEncoder:
         - the length of the first element of its parameters is
             - the half of the given data_dimension if it is even.
             - the half of the 1 + the given data_dimension if it is odd.
+        - the type of its data is qiskit.circuit.quantumcircuitdata.QuantumCircuitData.
+        - the length of its data is 1.
+        - the type of the first element of its data is qiskit.circuit.CircuitInstruction.
         - the above things are preserved with the new_data_dimension after substituting new_data_dimension.
         """
         yz_encoder = YZEncoder(data_dimension=data_dimension)
@@ -36,6 +39,11 @@ class TestYZEncoder:
         assert len(yz_encoder.parameters) == 2
         assert isinstance(yz_encoder.parameters[0], qiskit.circuit.ParameterVector)
         assert isinstance(yz_encoder.parameters[1], qiskit.circuit.ParameterVector)
+        assert isinstance(
+            yz_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
+        )
+        assert len(yz_encoder.data) == 1
+        assert isinstance(yz_encoder.data[0], qiskit.circuit.CircuitInstruction)
         if data_dimension % 2 == 0:  # Even
             assert yz_encoder.num_parameters == data_dimension
             assert yz_encoder.num_encoding_qubits == data_dimension // 2
@@ -51,6 +59,11 @@ class TestYZEncoder:
         assert len(yz_encoder.parameters) == 2
         assert isinstance(yz_encoder.parameters[0], qiskit.circuit.ParameterVector)
         assert isinstance(yz_encoder.parameters[1], qiskit.circuit.ParameterVector)
+        assert isinstance(
+            yz_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
+        )
+        assert len(yz_encoder.data) == 1
+        assert isinstance(yz_encoder.data[0], qiskit.circuit.CircuitInstruction)
         if new_data_dimension % 2 == 0:  # Even
             assert yz_encoder.num_parameters == new_data_dimension
             assert yz_encoder.num_encoding_qubits == new_data_dimension // 2
