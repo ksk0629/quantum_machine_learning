@@ -18,6 +18,7 @@ class XEncoder(BaseEncoder):
 
         :param int data_dimension: the dimension of data
         :param str name: the name of the circuit
+        :param Callable[[list[float]], list[float]] | None transformer: the data transformer, defaults to None
         """
         super().__init__(
             data_dimension=data_dimension, name=name, transformer=transformer
