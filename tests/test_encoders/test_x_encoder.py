@@ -18,9 +18,11 @@ class TestXEncoder:
         Check if
         - its num_encoding_qubits is the same as the given data_dimension.
         - its num_parameters is the same as the given data_dimension.
-        - its parameters is an instance of qiskit.circuit.ParameterVector.
-        - the length of its parameters is the same as the given data_dimension.
-        - the above four things are preserved with the new_data_dimension after substituting new_data_dimension.
+        - the type of its parameters is list.
+        - the length of its parameters is 1.
+        - the type of the first element of its parameters is qiskit.circuit.ParameterVector.
+        - the length of the first element of its parameters is the same as the given data_dimension.
+        - the above things are preserved with the new_data_dimension after substituting new_data_dimension.
         """
         x_encoder = XEncoder(data_dimension=data_dimension)
         assert x_encoder.num_encoding_qubits == data_dimension
