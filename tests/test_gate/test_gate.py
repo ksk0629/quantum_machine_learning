@@ -12,19 +12,16 @@ class TestGate:
         pass
 
     @pytest.mark.gate
-    def test_sswap_init(self):
-        """Normal test;
-        Check if the SSwapGate created in setup_class is the instance of qiskit.circuit.Gate.
-        """
-        assert isinstance(SSwapGate(), qiskit.circuit.Gate)
-
-    @pytest.mark.gate
     def test_sswap_matrix_representation(self):
         """Normal test;
-        Check if the matrix representation of SSwapGate is correct.
+        Check if
+        - the type of the instance of SSWapGate is qiskit.circuit.Gate.
+        - the matrix representation of SSwapGate is correct.
         """
         circuit = qiskit.QuantumCircuit(2)
-        circuit.append(SSwapGate(), [0, 1])
+        s_swap_gate = SSwapGate()
+        assert isinstance(s_swap_gate, qiskit.circuit.Gate)
+        circuit.append(s_swap_gate, [0, 1])
 
         unitary = qiskit.quantum_info.Operator(circuit)
         correct_matrix = np.array(
