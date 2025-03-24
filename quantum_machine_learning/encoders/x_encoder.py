@@ -61,7 +61,7 @@ class XEncoder(BaseEncoder):
         circuit = qiskit.QuantumCircuit(*self.qregs)
 
         # Add the encoding part: the X-rotation.
-        for index, parameter in enumerate(self._parameters):
+        for index, parameter in enumerate(self.parameters[0]):
             circuit.rx(parameter, index)
 
         self.append(circuit.to_gate(), self.qubits)
