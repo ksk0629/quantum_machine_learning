@@ -32,7 +32,7 @@ class TestXEncoder:
         assert isinstance(x_encoder.parameters[0], qiskit.circuit.ParameterVector)
         assert len(x_encoder.parameters[0]) == data_dimension
 
-        new_data_dimension = 10
+        new_data_dimension = data_dimension + 1
         x_encoder.data_dimension = new_data_dimension
         assert x_encoder.num_encoding_qubits == new_data_dimension
         assert x_encoder.num_parameters == new_data_dimension
