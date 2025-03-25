@@ -2,6 +2,8 @@ from quantum_machine_learning.path_getter.base_path_getter import BasePathGetter
 
 
 class QuanvNNPathGetter(BasePathGetter):
+    """PathGetter class for QuanvNN."""
+
     def __init__(
         self, dir_path: str, prefix: None | str = None, postfix: None | str = None
     ):
