@@ -11,9 +11,9 @@ class Postprocessor:
     def calculate_fidelity_from_swap_test(result: dict[str, int]) -> float:
         """Calculate the quantum fidelity from the result of the CSWAP test.
         In the CSWAP test, the probability zero is obtained as
-         P(0) = 1/2 - (fidelity)/2.
+         P(0) = 1/2 + (fidelity)/2.
         Thus, the fidelity is calculated as
-         2*P(0) = 1 - (fidelity) <=> (fidelity) = 1 - 2*P(0).
+         2*P(0) = 1 + (fidelity) <=> (fidelity) = 2*P(0) - 1.
 
         :param dict[str, int] result: result of cswap test
         :raises ValueError: if the given result contains nothing or more than two keys
@@ -23,7 +23,7 @@ class Postprocessor:
         # Check the length of the given result.
         error_msg = f"""
             The argument result must be the dict whose keys are 
-            {Postprocessor.KEY_0} and {Postprocessor.KEY_1} as the result of CSWAP test, 
+            {Postprocessor.KEY_0} and/or {Postprocessor.KEY_1} as the result of CSWAP test, 
             but {result}.
         """
         if len(result) > 2 or len(result) == 0:
@@ -43,7 +43,7 @@ class Postprocessor:
         # Get the number of zeros.
         num_zeros = result[Postprocessor.KEY_0] if Postprocessor.KEY_0 in result else 0
         if num_zeros == 0:
-            # If there is no zero in the result, means those two quantum states are orthogonal.
+            # If there is no zero in the result, meaning those two quantum states are orthogonal.
             return 0
         # Get the number of ones.
         num_ones = result[Postprocessor.KEY_1] if Postprocessor.KEY_1 in result else 0
