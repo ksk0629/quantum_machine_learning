@@ -4,7 +4,6 @@ import torch
 import torch.nn
 
 from quantum_machine_learning.quanv_nn.quanv_layer import QuanvLayer
-import quantum_machine_learning.utils as utils
 from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 

@@ -7,7 +7,6 @@ from qiskit import qpy, primitives
 
 from quantum_machine_learning.encoders.x_encoder import XEncoder
 from quantum_machine_learning.layers.random_layer import RandomLayer
-import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 from quantum_machine_learning.utils.circuit_utils import CircuitUtils
