@@ -5,6 +5,12 @@ class QuanvNNPathGetter(BasePathGetter):
     def __init__(
         self, dir_path: str, prefix: None | str = None, postfix: None | str = None
     ):
+        """Initialise this PathGetter.
+
+        :param str dir_path: a path to the target directory
+        :param None | str prefix: a prefix, defaults to None
+        :param None | str postfix: a postfix, defaults to None
+        """
         super().__init__(dir_path=dir_path, prefix=prefix, postfix=postfix)
 
     @property
