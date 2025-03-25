@@ -6,18 +6,31 @@ from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
 class TestSwapTestLayer:
     @classmethod
     def setup_class(cls):
-        cls.control_qubit = 0
-        cls.qubit_pairs = [(1, 4), (2, 5), (3, 6)]
-        cls.swap_test_layer = SwapTestLayer(
-            control_qubit=cls.control_qubit,
-            qubit_pairs=cls.qubit_pairs,
-        )
+        pass
 
-    def test_init(self):
-        """Normal test
-        Check if the class that was prepared in setup_class has
-        - the same control_qubit as self.control_qubit.
-        - the same qubit_pairs as self.qubit_pairs.
+    @pytest.mark.layer
+    def test(self):
+        """Normal test;
+        Create an instance of SwapTestLayer.
+
+        Check if
+        - its control_qubit is the same as the given control_qubit.
+        - its qubit_pairs is the same as the given qubit_pairs.
+        - its control_qubits is the same as the new control_qubit after substituting a new control_qubit.
+        - its qubit_pairs is the same as the new qubit_pairs after substituting a new qubit_pairs.
         """
-        assert self.swap_test_layer.control_qubit == self.control_qubit
-        assert self.swap_test_layer.qubit_pairs == self.qubit_pairs
+        num_state_qubits = 5
+        control_qubit = 0
+        qubit_pairs = [(1, 3), (2, 4)]
+        layer = SwapTestLayer(
+            num_state_qubits, control_qubit=control_qubit, qubit_pairs=qubit_pairs
+        )
+        assert layer.control_qubit == control_qubit
+        assert layer.qubit_pairs == qubit_pairs
+
+        new_control_qubit = 1
+        new_qubit_pairs = [(2, 3)]
+        layer.control_qubit = new_control_qubit
+        layer.qubit_pairs = new_qubit_pairs
+        assert layer.control_qubit == new_control_qubit
+        assert layer.qubit_pairs == new_qubit_pairs
