@@ -1,7 +1,7 @@
-from quantum_machine_learning.path_getter.path_getter import PathGetter
+from quantum_machine_learning.path_getter.base_path_getter import BasePathGetter
 
 
-class QuanvNNPathGetter(PathGetter):
+class QuanvNNPathGetter(BasePathGetter):
     def __init__(
         self, dir_path: str, prefix: None | str = None, postfix: None | str = None
     ):
