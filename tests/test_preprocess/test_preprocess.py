@@ -272,7 +272,4 @@ class TestPreprocessor:
         windowed_batch_data = Preprocessor.window_batch_data(
             batch_data=batch_multi_channel_data, window_size=(2, 2)
         )
-        print(windowed_batch_data)
-        print("==========")
-        print(batch_correct_windowed_data)
         assert np.allclose(batch_correct_windowed_data, windowed_batch_data)
