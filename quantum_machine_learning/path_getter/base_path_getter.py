@@ -2,7 +2,7 @@ from abc import ABC
 import os
 
 
-class PathGetter(ABC):
+class BasePathGetter(ABC):
     """A base class to get fixed paths."""
 
     def __init__(
