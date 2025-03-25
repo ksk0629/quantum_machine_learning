@@ -1,86 +1,121 @@
+import math
+
 import pytest
 import qiskit
 
-from quantum_machine_learning.layers.dual_qubit_unitary_layer import DualQubitUnitaryLayer
+from quantum_machine_learning.layers.dual_qubit_unitary_layer import (
+    DualQubitUnitaryLayer,
+)
 
 
 class TestDualQubitUnitaryLayer:
     @classmethod
     def setup_class(cls):
-        cls.num_qubits = 4
-        cls.applied_qubit_pairs = [(0, 1), (0, 3)]
-        cls.param_prefix = "test_dual_qubit_unitary"
-        cls.dual_qubit_unitary_layer = DualQubitUnitaryLayer(
-            num_qubits=cls.num_qubits,
-            applied_qubit_pairs=cls.applied_qubit_pairs,
-            param_prefix=cls.param_prefix,
-        )
+        pass
 
-    def test_init(self):
-        """Normal test
-        Check if the class that was prepared in setup_class has
-        - num_qubits as same as self.num_qubits.
-        - applied_qubit_pairs as same as self.applied_qubit_pairs.
-        - param_prefix as same as self.param_prefix.
-        - num_params as double as the number of sell.applied_qubit_pairs.
+    @pytest.mark.layer
+    @pytest.mark.parametrize("num_state_qubits", [2, 3])
+    def test_normal(self, num_state_qubits):
+        """Normal test;
+        Create an instance of DualQubitUnitaryLayer class.
+
+        Check if
+        - the type of its yy_parameters is qiskit.circuit.ParameterVector.
+        - the length of its yy_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
+        - the type of its zz_parameters is qiskit.circuit.ParameterVector.
+        - the length of its zz_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
+        - its num_parameters is the double as the number of combinations of choosing two qubits in num_state_qubits qubits.
+        - the type of its parameters is list.
+        - the first element of its parameters is the same as its yy_parameters.
+        - the second element of its parameters is the same as its zz_parameters.
+        - the type of itself is qiskit.QuantumCircuit.
+        - the above things are still correct with a new num_state_qubits
+          after substituting the new num_state_qubits.
         """
-        assert self.dual_qubit_unitary_layer.num_qubits == self.num_qubits
-        assert (
-            self.dual_qubit_unitary_layer.applied_qubit_pairs
-            == self.applied_qubit_pairs
-        )
-        assert self.dual_qubit_unitary_layer.param_prefix == self.param_prefix
-        assert (
-            self.dual_qubit_unitary_layer.num_params
-            == len(self.applied_qubit_pairs) * 2
-        )
+        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
+        parameter_length = math.comb(num_state_qubits, 2)
+        assert isinstance(layer.yy_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.yy_parameters) == parameter_length
+        assert isinstance(layer.zz_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.zz_parameters) == parameter_length
+        assert layer.num_parameters == 2 * parameter_length
+        assert isinstance(layer.parameters, list)
+        assert layer.parameters[0] == layer.yy_parameters
+        assert layer.parameters[1] == layer.zz_parameters
+        assert isinstance(layer, qiskit.QuantumCircuit)
 
-    @pytest.mark.parametrize("num_qubits", [2, 5, 8])
-    @pytest.mark.parametrize(
-        "applied_qubit_pairs",
-        [[(0, 1)], [(0, 2), (0, 1), (0, 4)], [(0, 1), (0, 2), (0, 3), (0, 7)]],
-    )
-    def test_get_circuit(self, num_qubits, applied_qubit_pairs):
-        """Normal and abnormal test;
-        Run get_circuit with verious num_qubits and applied_qubit_pairs defined above.
+        new_num_state_qubits = num_state_qubits + 1
+        new_parameter_length = math.comb(new_num_state_qubits, 2)
+        layer.num_state_qubits = new_num_state_qubits
+        assert isinstance(layer.yy_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.yy_parameters) == new_parameter_length
+        assert isinstance(layer.zz_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.zz_parameters) == new_parameter_length
+        assert layer.num_parameters == 2 * new_parameter_length
+        assert isinstance(layer.parameters, list)
+        assert layer.parameters[0] == layer.yy_parameters
+        assert layer.parameters[1] == layer.zz_parameters
+        assert isinstance(layer, qiskit.QuantumCircuit)
 
-        Case 1: applied_qubit_pairs has a pair having a larger number than num_qubits
-            Check if qiskit.circuit.exceptions.CircuitError happens.
-        Case 2: All pairs in applied_qubit_pairs have two numbers being equal to or less than num_qubits.
-            Check if
-            - the number of parameters equals to double of the number of elements of applied_qubit_pairs.
-            - the number of gates equals to double of the number of elements of applied_qubit_pairs.
-            - each gate is either ryy or rzz.
-            - the number of ryy gates eqauls to the number of elements of applied_qubit_pairs.
+    @pytest.mark.layer
+    def test_with_one_num_state_qubits(self):
+        """Normal test;
+        Create an instance of DualQubitUnitaryLayer class with 1 state qubit.
+
+        Check if
+        - AttributeError happens when to_gate() runs.
+        - AttributeError happens when to_gate() runs after substituting a new odd number of state qubits.
         """
-        applied_qubits = []
-        for applied_qubit_pair in applied_qubit_pairs:
-            applied_qubits.append(applied_qubit_pair[0])
-            applied_qubits.append(applied_qubit_pair[1])
-        maximal_applied_qubit = max(applied_qubits)
+        num_state_qubits = 1
+        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
+        with pytest.raises(AttributeError):
+            layer.to_gate()
 
-        dual_qubit_unitary_layer = DualQubitUnitaryLayer(
-            num_qubits=num_qubits,
-            applied_qubit_pairs=applied_qubit_pairs,
-            param_prefix=self.param_prefix,
+        num_state_qubits = 2
+        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
+        layer.num_state_qubits = 1
+        with pytest.raises(AttributeError):
+            layer.to_gate()
+
+    @pytest.mark.layer
+    def test_with_qubit_applied_pairs(self):
+        """Normal test;
+        Create an instance of DualQubitUnitaryLayer class with qubit_applied_pairs.
+
+        Check if
+        - the length of its decomposed data is the same as the length of the given qubit_applied_pairs.
+        - the length of its yy_parameters is the same as the length of the given qubit_applied_pairs.
+        - the length of its zz_parameters is the same as the length of the given qubit_applied_pairs.
+        - each qubits in its decomposed data is the same as the each element of the given qubit_applied_pairs.
+        - the above things are still correct after substitutin a new qubit_applied_pairs.
+        """
+        num_state_qubits = 5
+        qubit_applied_pairs = [(0, 2), (0, 4)]
+        layer = DualQubitUnitaryLayer(
+            num_state_qubits=num_state_qubits, qubit_applied_pairs=qubit_applied_pairs
         )
+        assert len(layer.yy_parameters) == len(qubit_applied_pairs)
+        assert len(layer.zz_parameters) == len(qubit_applied_pairs)
+        for pair_index in range(len(qubit_applied_pairs)):
+            index = pair_index * 2
+            data = layer.decompose().data[index]
+            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
+            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
 
-        if maximal_applied_qubit > num_qubits - 1:
-            with pytest.raises(qiskit.circuit.exceptions.CircuitError):
-                dual_qubit_unitary_layer.get_circuit()
-        else:
-            circuit = dual_qubit_unitary_layer.get_circuit()
-            # Check the number of the parameters.
-            correct_num_parameters = 2 * len(applied_qubit_pairs)
-            assert len(circuit.parameters) == correct_num_parameters
-            # Check the number of the gates.
-            gate_data = circuit.decompose().data
-            correct_num_gates = 2 * len(applied_qubit_pairs)
-            assert len(gate_data) == correct_num_gates
-            # Check the kinds of the gates.
-            gate_names = set([gate.name for gate in gate_data])
-            assert gate_names == set(["ryy", "rzz"])
-            # Check the number of ryy gates.
-            correct_num_ryy_gates = len(applied_qubit_pairs)
-            num_ry_gates = len([gate for gate in gate_data if gate.name == "ryy"])
-            assert num_ry_gates == correct_num_ryy_gates
+            data = layer.decompose().data[index + 1]
+            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
+            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
+
+        new_qubit_applied_pairs = [(1, 2)]
+        layer.qubit_applied_pairs = new_qubit_applied_pairs
+        assert len(layer.yy_parameters) == len(new_qubit_applied_pairs)
+        assert len(layer.zz_parameters) == len(new_qubit_applied_pairs)
+        for pair_index in range(len(new_qubit_applied_pairs)):
+            index = pair_index * 2
+            data = layer.decompose().data[index]
+            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
+            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
+
+            data = layer.decompose().data[index + 1]
+            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
+            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]

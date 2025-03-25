@@ -1,73 +1,140 @@
+import math
+
 import qiskit
 
-from quantum_machine_learning.layers.base_learnable_layer import BaseLearnableLayer
+from quantum_machine_learning.layers.base_parametrised_layer import (
+    BaseParametrisedLayer,
+)
 
 
-class DualQubitUnitaryLayer(BaseLearnableLayer):
+class DualQubitUnitaryLayer(BaseParametrisedLayer):
     """DualQubitUnitaryLayer class, suggested in https://arxiv.org/pdf/2103.11307"""
 
     def __init__(
         self,
-        num_qubits: int,
-        applied_qubit_pairs: list[tuple[int, int]],
-        param_prefix: str,
+        num_state_qubits: int,
+        qubit_applied_pairs: list[tuple[int, int]] | None = None,
+        parameter_prefix: str | None = None,
+        name: str | None = "DualQubitUnitary",
     ):
-        """Initialise this layer.
+        """initialise the layer.
 
-        :param int num_qubits: number of qubits
-        :param list[int] applied_qubit_pairs: list of qubit pairs to which dual qubit unitary is applied
-        :param str param_prefix: parameter prefix
+        :param int num_state_qubits: the number of state qubits
+        :param list[tuple[int, int]] | None qubit_applied_pairs: pairs of two-qubit to be applied, defaults to None
+        :param str | None parameter_prefix: a prefix of the parameter names, defaults to None
+        :param str | None name: the name of this encoder, defaults to "DualQubitUnitary"
         """
-        self.num_qubits = num_qubits
-        self.applied_qubit_pairs = applied_qubit_pairs
-        super().__init__(param_prefix=param_prefix)
+        self._yy_parameters = None
+        self._zz_parameters = None
+        self._qubit_applied_pairs = None
+
+        super().__init__(
+            num_state_qubits=num_state_qubits,
+            parameter_prefix=parameter_prefix,
+            name=name,
+        )
+
+        self.num_state_qubits = num_state_qubits
+        self.qubit_applied_pairs = qubit_applied_pairs
 
     @property
-    def num_params(self) -> int:
-        return len(self.applied_qubit_pairs) * 2
+    def yy_parameters(self) -> qiskit.circuit.ParameterVector:
+        """Return the parameter vector for the YY-rotation of this circuit.
 
-    def __get_pattern(
-        self, params: qiskit.circuit.ParameterVector
-    ) -> qiskit.QuantumCircuit:
-        """Return the dual qubit unitary layer pattern.
-
-        :param qiskit.circuit.ParameterVector params: parameter vector
-        :return qiskit.QuantumCircuit: dual qubit unitary layer pattern
+        :return qiskit.circuit.ParameterVecotr: the YY-rotation parameter vector
         """
-        pattern = qiskit.QuantumCircuit(2)
-        pattern.ryy(params[0], 0, 1)
-        pattern.rzz(params[1], 0, 1)
+        return self._yy_parameters
 
-        return pattern
+    @property
+    def zz_parameters(self) -> qiskit.circuit.ParameterVector:
+        """Return the parameter vector for the ZZ-rotation of this circuit.
 
-    def get_circuit(
-        self,
-    ) -> qiskit.QuantumCircuit:
-        """Get the dual qubit unitary layer circuit.
-
-        :return qiskit.QuantumCircuit: dual qubit unitary layer circuit
+        :return qiskit.circuit.ParameterVecotr: the ZZ-rotation parameter vector
         """
-        # Get parameters.
-        params = qiskit.circuit.ParameterVector(
-            self.param_prefix, length=self.num_params
-        )
+        return self._zz_parameters
 
-        # Make a quantum circuit having the dual qubit unitary at the specified qubit pairs.
-        circuit = qiskit.QuantumCircuit(
-            self.num_qubits, name="Dual Qubit Unitary Layer"
-        )
-        for index, applied_qubit_pair in enumerate(self.applied_qubit_pairs):
-            param_start_index = index * 2
-            circuit.compose(
-                self.__get_pattern(
-                    params=params[param_start_index : 2 + param_start_index],
-                ),
-                applied_qubit_pair,
-                inplace=True,
+    @property
+    def qubit_applied_pairs(self) -> list[tuple[int, int]] | None:
+        """Return pairs of two-qubit to be applied.
+
+        :return list[tuple[int, int]] | None: pairs of two-qubit to be applied
+        """
+        return self._qubit_applied_pairs
+
+    @qubit_applied_pairs.setter
+    def qubit_applied_pairs(self, qubit_applied_pairs: list[tuple[int, int]] | None):
+        """Set the pairs of two-qubit to be applied and reset the register and parameters.
+
+        :param list[tuple[int, int]] | None qubit_applied_pairs: a new pairs of two-qubit to be applied
+        """
+        self._qubit_applied_pairs = qubit_applied_pairs
+        self._reset_parameters()
+        self._reset_register()
+
+    def _check_configuration(self, raise_on_failure=True) -> bool:
+        """Check if the current configuration is valid.
+
+        :param bool raise_on_failure: if raise an error or not, defaults to True
+        :return bool: if the configuration is valid
+        """
+        valid = True
+        if self.num_state_qubits == 1:
+            valid = False
+            if raise_on_failure:
+                error_msg = f"num_state_qubits must be larger than 1, but now {self.num_state_qubits}."
+                raise AttributeError(error_msg)
+        return valid
+
+    def _reset_register(self) -> None:
+        """Reset the register."""
+        qreg = qiskit.QuantumRegister(self.num_state_qubits)
+        self.qregs = [qreg]
+
+    def _reset_parameters(self) -> None:
+        """Reset the parameter vector."""
+        # Make the parameter name according to the prefix.
+        if self.parameter_prefix != "":
+            prefix = f"{self.parameter_prefix}_"
+        else:
+            prefix = ""
+        parameter_name = lambda name: f"{prefix}{name}"
+        # Set the parameters.
+        if self.qubit_applied_pairs is None:
+            length = math.comb(self.num_state_qubits, 2)
+            self._yy_parameters = qiskit.circuit.ParameterVector(
+                parameter_name("yy"), length=length
+            )
+            self._zz_parameters = qiskit.circuit.ParameterVector(
+                parameter_name("zz"), length=length
+            )
+        else:
+            self._yy_parameters = qiskit.circuit.ParameterVector(
+                parameter_name("yy"), length=len(self.qubit_applied_pairs)
+            )
+            self._zz_parameters = qiskit.circuit.ParameterVector(
+                parameter_name("zz"), length=len(self.qubit_applied_pairs)
             )
 
-        circuit_inst = circuit.to_instruction()
-        circuit = qiskit.QuantumCircuit(self.num_qubits)
-        circuit.append(circuit_inst, list(range(self.num_qubits)))
+        self._parameters = [self.yy_parameters, self.zz_parameters]
 
-        return circuit
+    def _build(self) -> None:
+        """Build the circuit."""
+        super()._build()
+
+        # Make the quantum circuit.
+        circuit = qiskit.QuantumCircuit(*self.qregs)
+
+        # Add the encoding part: the rotation Y and Z.
+        if self.qubit_applied_pairs is None:
+            index = 0
+            for i in range(self.num_state_qubits):
+                for j in range(i + 1, self.num_state_qubits):
+                    circuit.ryy(self.yy_parameters[index], i, j)
+                    circuit.rzz(self.zz_parameters[index], i, j)
+                    index += 1
+        else:
+            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
+                circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)
+                circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)
+
+        self.append(circuit.to_gate(), self.qubits)
