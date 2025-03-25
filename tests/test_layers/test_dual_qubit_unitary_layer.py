@@ -121,3 +121,24 @@ class TestDualQubitUnitaryLayer:
             data = layer.decompose().data[index + 1]
             assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
             assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
+
+    @pytest.mark.layer
+    def test_with_parameter_prefix(self):
+        """Normal test;
+        create an instance of DualQubitUnitaryLayer with specified parameter_prefix.
+
+        Check if
+        - its parameter_prefix is the same as the given parameter_prefix.
+        - its parameter_prefix is the same as the new given parameter_prefix
+          after substituting a new parameter_prefix.
+        """
+        num_state_qubits = 2
+        parameter_prefix = "prefix!"
+        layer = DualQubitUnitaryLayer(
+            num_state_qubits=num_state_qubits, parameter_prefix=parameter_prefix
+        )
+        assert layer.parameter_prefix == parameter_prefix
+
+        new_parameter_prefix = "new parameter_prefix!"
+        layer.parameter_prefix = new_parameter_prefix
+        assert layer.parameter_prefix == new_parameter_prefix
