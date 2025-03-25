@@ -28,6 +28,8 @@ class TestSwapTestLayer:
         assert layer.control_qubit == control_qubit
         assert layer.qubit_pairs == qubit_pairs
 
+        layer._build()  # For the coverage
+
         new_control_qubit = 1
         new_qubit_pairs = [(2, 3)]
         layer.control_qubit = new_control_qubit
