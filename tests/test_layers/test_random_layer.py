@@ -6,6 +6,7 @@ import qiskit
 from quantum_machine_learning.layers.random_layer import (
     GateInfo,
     SelectOptions,
+    SelectedGate,
     RandomLayer,
 )
 
@@ -99,3 +100,19 @@ class TestRandomLayer:
             RandomLayer(
                 num_state_qubits=num_state_qubits, available_gates=available_gates
             )
+
+    @pytest.mark.layer
+    def test_selected_gates(self):
+        """Normal test;
+        Create an instance of RandomLayer.
+
+        Check if
+        - the type of its selected_gates is list after building the circuit.
+        - the type of each element of its selected_gates is SelectedGate.
+        """
+        num_state_qubits = 5
+        layer = RandomLayer(num_state_qubits=num_state_qubits)
+        layer._build()
+        assert isinstance(layer.selected_gates, list)
+        for selected_gate in layer.selected_gates:
+            assert isinstance(selected_gate, SelectedGate)
