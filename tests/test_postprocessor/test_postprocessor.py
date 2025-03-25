@@ -66,6 +66,18 @@ class TestPostprocessor:
         assert fidelity == 1 / 2
 
     @pytest.mark.postprocessor
+    def test_calculate_fidelity_from_swap_test_with_larger_zero(self):
+        """Normal test;
+        Run calculate_fidelity_from_swap_test with a result having the number of zeros more than of ones.
+
+        Check if
+        - the return value is 0.
+        """
+        result = {"0": 1, "1": 3}
+        fidelity = Postprocessor.calculate_fidelity_from_swap_test(result)
+        assert fidelity == 0
+
+    @pytest.mark.postprocessor
     def test_count_one_bits_of_most_frequent_result_with_only_0(self):
         """Normal test;
         Run count_one_bits_of_most_frequent_result with a result having only zero.
