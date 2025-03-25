@@ -81,3 +81,21 @@ class TestRandomLayer:
             num_state_qubits=num_state_qubits, select_options=select_options
         )
         assert layer.select_options == select_options
+
+    @pytest.mark.layer
+    def test_invalid_available_gates(self):
+        """Abnormal test;
+        Attempt to set a list of non GateInfo class.
+
+        Check if ValueError happens.
+        """
+        num_state_qubits = 5
+        available_gates = [
+            [GateInfo(qiskit.circuit.library.XGate, 1, 0)],
+            1,  # Invalid
+            [GateInfo(qiskit.circuit.library.XGate, 1, 0)],
+        ]
+        with pytest.raises(ValueError):
+            RandomLayer(
+                num_state_qubits=num_state_qubits, available_gates=available_gates
+            )
