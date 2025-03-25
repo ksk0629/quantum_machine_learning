@@ -71,3 +71,6 @@ skip_covered = true  # Only show files that are not 100% covered.
 exclude_lines = [
     "@(abc\\.)?abstractmethod", # Skip @abstractmethod
 ]
+omit = [
+    "./tests/mocks.py"  # Skip the mock class file.
+]
