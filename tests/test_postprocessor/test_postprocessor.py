@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
@@ -43,7 +42,7 @@ class TestPostprocessor:
         assert fidelity == 1
 
     @pytest.mark.postprocessor
-    def test_calculate_fidelity_from_swap_test_with_zero(self):
+    def test_calculate_fidelity_from_swap_test_with_one(self):
         """Normal test;
         Run calculate_fidelity_from_swap_test with a result having only one observed.
 
