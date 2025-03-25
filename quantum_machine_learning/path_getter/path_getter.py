@@ -10,9 +10,9 @@ class PathGetter(ABC):
     ):
         """Initialise this path getter.
 
-        :param str dir_path: _description_
-        :param None | str prefix: _description_, defaults to None
-        :param None | str postfix: _description_, defaults to None
+        :param str dir_path: a path to the target directory
+        :param None | str prefix: a prefix, defaults to None
+        :param None | str postfix: a postfix, defaults to None
         """
         self._dir_path = dir_path
         self._prefix = prefix
