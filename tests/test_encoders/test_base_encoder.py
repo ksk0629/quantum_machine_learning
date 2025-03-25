@@ -145,9 +145,9 @@ class TestXEncoder:
         - its data_dimenstion is the given data_dimension.
         - the return value of its transformer is the return value of the given transformer.
         - the type of its parameters is list.
-        - its num_parameters is 0.
         - the type of teh first element of its parameters is qiskit.circuit.ParameterVector.
         - its num_parameters is 1.
+        - its num_parameters is 0 after substituting None to its _parameters.
         - its transformer is the same as the given transformer.
         - the return value of its transformer after substituting a new transformer is
           the return value of the given new transformer.
@@ -171,6 +171,8 @@ class TestXEncoder:
         assert isinstance(tester.parameters[0], qiskit.circuit.ParameterVector)
         assert tester.num_parameters == 1
         assert tester.transformer == transformer
+
+        tester._parameters = None
         assert tester.num_parameters == 0
 
         new_transformer = lambda x_list: [x * 3 for x in x_list]
