@@ -273,3 +273,25 @@ class TestPreprocessor:
             batch_data=batch_multi_channel_data, window_size=(2, 2)
         )
         assert np.allclose(batch_correct_windowed_data, windowed_batch_data)
+
+    @pytest.mark.preprocessor
+    @pytest.mark.parametrize(
+        "data",
+        [
+            [[2, 3], [4, 100]],
+            [[10000, 3, -1]],
+            [[-2, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]],
+        ],
+    )
+    def test_scale_data(self, data):
+        """Normal test;
+        Run scale_data.
+
+        Check if
+        - all elements of the return value is in [0, 1].
+        """
+        scaled_data = Preprocessor.scale_data(data)
+        max_datum = np.max(scaled_data)
+        assert max_datum <= 1
+        min_datum = np.min(scaled_data)
+        assert min_datum >= 0
