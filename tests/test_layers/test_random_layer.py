@@ -3,7 +3,11 @@ import itertools
 import pytest
 import qiskit
 
-from quantum_machine_learning.layers.random_layer import RandomLayer
+from quantum_machine_learning.layers.random_layer import (
+    GateInfo,
+    SelectOptions,
+    RandomLayer,
+)
 
 
 class TestRandomLayer:
@@ -11,32 +15,69 @@ class TestRandomLayer:
     def setup_class(cls):
         pass
 
-    @pytest.mark.parametrize("num_qubits", [1, 2, 3, 4, 5, 10])
-    def test_init(self, num_qubits):
-        """Normal test
-        Create RandomLayer instance with several num_qubits arguments.
+    @pytest.mark.layer
+    def test_available_gates(self):
+        """Normal test;
+        Create an instance of RandomLayer with/without avialble_gates.
 
         Check if
-        - random_layer.num_qubits is the same as the num_qubits argument.
-        - the return value od random_layer() is instance of qiskit.QuantumCircuit.
-        - the number of gates applied to the returned circuit is appropriate.
-        - each gate applied to the returned circuit is either one or two qubit gate.
+        - the type of its available_gates is list without giving the available_gates argument.
+        - the types of all the elements is GateInfo without giving the avialable_gates argument.
+        - its available_gates is the same as the given available_gates.
+        - the type of its available_gates is list after substituting None to available_gates of an instance created with some avilable_gates.
+        - the types of all the elements is GateInfo after substituting None to available_gates of an instance created with some avilable_gates.
         """
-        random_layer = RandomLayer(
-            num_qubits=num_qubits,
+        num_state_qubits = 5
+        layer = RandomLayer(num_state_qubits=num_state_qubits)
+        assert isinstance(layer.available_gates, list)
+        for available_gate in layer.available_gates:
+            assert isinstance(available_gate, GateInfo)
+
+        available_gates = [GateInfo(qiskit.circuit.library.XGate, 1, 0)]
+        layer = RandomLayer(
+            num_state_qubits=num_state_qubits, available_gates=available_gates
         )
-        assert random_layer.num_qubits == num_qubits
+        assert layer.available_gates == available_gates
 
-        circuit = random_layer()
-        assert isinstance(circuit, qiskit.QuantumCircuit)
+        layer.available_gates = None
+        assert isinstance(layer.available_gates, list)
+        for available_gate in layer.available_gates:
+            assert isinstance(available_gate, GateInfo)
 
-        decomposed_data = circuit.decompose().data
-        num_gates = len(decomposed_data)
-        maximum_num_two_qubit_gates = len(
-            list(itertools.combinations(range(num_qubits), 2))
+    @pytest.mark.layer
+    def test_threshold(self):
+        """Normal test;
+        Create an instance of RandomLayer with/without threshold.
+
+        Check if
+        - its threshold is 0.5 without giving a threshold argument.
+        - its threshold is the same as the given threshold.
+        """
+        num_state_qubits = 5
+        layer = RandomLayer(num_state_qubits=num_state_qubits)
+        assert layer.threshold == 0.5
+
+        threshold = 0.1
+        layer = RandomLayer(num_state_qubits=num_state_qubits, threshold=threshold)
+        assert layer.threshold == threshold
+
+    @pytest.mark.layer
+    def test_select_options(self):
+        """Normal test;
+        Create an instance of RandomLayer with/without select_options.
+
+        Check if
+        - the type of its select_options is SelectOptions.
+        - its select_options is SelectOptions({1: 2 * num_state_qubits**2, 2: 1}, {1: 0, 2: 1}) withtout giving a select_options argument.
+        - its select_options is the same as the given select_options.
+        """
+        num_state_qubits = 5
+        layer = RandomLayer(num_state_qubits=num_state_qubits)
+        select_options = SelectOptions({1: 2 * num_state_qubits**2, 2: 1}, {1: 0, 2: 1})
+        assert layer.select_options == select_options
+
+        select_options = SelectOptions({1: 1, 2: 2}, {1: 1, 2: 2})
+        layer = RandomLayer(
+            num_state_qubits=num_state_qubits, select_options=select_options
         )
-        maximum_num_one_qubit_gate = 2 * num_qubits
-        assert num_gates <= maximum_num_one_qubit_gate + maximum_num_two_qubit_gates
-
-        for gate in decomposed_data:
-            assert gate.operation.num_qubits in (1, 2)
+        assert layer.select_options == select_options
