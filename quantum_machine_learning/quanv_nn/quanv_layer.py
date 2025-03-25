@@ -40,7 +40,7 @@ class QuanvLayer:
         if not is_loaded:
             for _ in range(self.num_filters):
                 _c = circuit.compose(
-                    RandomLayer(num_qubits=self.num_qubits)(),
+                    RandomLayer(num_state_qubits=self.num_qubits),
                     range(self.num_qubits),
                     inplace=False,
                 )

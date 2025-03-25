@@ -25,7 +25,7 @@ class TestQuClassiTrainer:
 
         cls.epochs = 2
         cls.batch_size = 3
-        cls.trained_paramters = {"layer0[0]": 1, "layer0[1]": 1}
+        cls.trained_paramters = {"layer0_y[0]": 1, "layer0_z[0]": 1}
         cls.initial_parameters = np.array([[1, 1], [0, 0]])
 
     @pytest.mark.quclassi

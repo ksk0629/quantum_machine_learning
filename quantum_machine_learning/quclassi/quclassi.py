@@ -96,9 +96,9 @@ class QuClassi:
 
         # >>> Train qubits creation >>>
         # Get applied_qubits pattern.
-        applied_qubits = list(range(self.num_train_qubits))
+        qubits_applied = list(range(self.num_train_qubits))
         # Get applied_qubit_pairs pattern.
-        applied_qubit_pairs = [
+        qubit_applied_pairs = [
             (qubit, qubit + 1) for qubit in range(self.num_data_qubits - 1)
         ]
 
@@ -106,25 +106,25 @@ class QuClassi:
         ansatz = qiskit.QuantumCircuit(self.num_train_qubits, name="Train")
         num_layers = 0
         for letter in structure:
-            param_prefix = f"layer{num_layers}"
+            parameter_prefix = f"layer{num_layers}"
             match letter:
                 case "s":
                     layer = SingleQubitUnitaryLayer(
-                        num_qubits=self.num_train_qubits,
-                        applied_qubits=applied_qubits,
-                        param_prefix=param_prefix,
+                        num_state_qubits=self.num_train_qubits,
+                        qubits_applied=qubits_applied,
+                        parameter_prefix=parameter_prefix,
                     )
                 case "d":
                     layer = DualQubitUnitaryLayer(
-                        num_qubits=self.num_train_qubits,
-                        applied_qubit_pairs=applied_qubit_pairs,
-                        param_prefix=param_prefix,
+                        num_state_qubits=self.num_train_qubits,
+                        qubit_applied_pairs=qubit_applied_pairs,
+                        parameter_prefix=parameter_prefix,
                     )
                 case "e":
                     layer = EntanglementUnitaryLayer(
-                        num_qubits=self.num_train_qubits,
-                        applied_qubit_pairs=applied_qubit_pairs,
-                        param_prefix=param_prefix,
+                        num_state_qubits=self.num_train_qubits,
+                        qubit_applied_pairs=qubit_applied_pairs,
+                        parameter_prefix=parameter_prefix,
                     )
                 case _:
                     # Raise ValueError if structure argument contains other than "s", "d" or "e",
@@ -134,7 +134,7 @@ class QuClassi:
                     raise ValueError(msg)
             # Add the layer to the ansatz.
             ansatz.compose(
-                layer(),
+                layer,
                 range(self.num_train_qubits),
                 inplace=True,
             )
@@ -160,8 +160,12 @@ class QuClassi:
         qubit_pairs = [
             qubit_pair for qubit_pair in zip(ansatz_qubits, feature_map_qubits)
         ]
-        swap_test_layer = SwapTestLayer(0, qubit_pairs)
-        circuit.compose(swap_test_layer(), range(self.num_qubits), inplace=True)
+        swap_test_layer = SwapTestLayer(
+            num_state_qubits=circuit.num_qubits,
+            control_qubit=0,
+            qubit_pairs=qubit_pairs,
+        )
+        circuit.compose(swap_test_layer, range(self.num_qubits), inplace=True)
 
         circuit.measure(0, 0)
         # <<< Whole circuit creation <<<
