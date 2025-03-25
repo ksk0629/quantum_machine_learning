@@ -1,72 +1,10 @@
 import pytest
 import qiskit
 
-from quantum_machine_learning.layers.base_parametrised_layer import (
-    BaseParametrisedLayer,
+from tests.mocks import (
+    BaseParametrisedLayerNormalTester,
+    BaseParametrisedLayerTesterWithoutResetParameters,
 )
-
-
-class BaseParametrisedLayerNormalTester(BaseParametrisedLayer):
-    """This is a normal test class for BaseParametrisedLayer.
-    Thus, the docstrings will be omitted hereby.
-    """
-
-    def __init__(
-        self,
-        num_state_qubits: int,
-        parameter_prefix: str | None = None,
-        name: str | None = None,
-    ):
-        super().__init__(
-            num_state_qubits=num_state_qubits,
-            parameter_prefix=parameter_prefix,
-            name=name,
-        )
-
-    def _reset_register(self) -> None:
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
-
-    def _reset_parameters(self) -> None:
-        pass
-
-    def _check_configuration(self, raise_on_failure=True) -> bool:
-        return True
-
-    def _build(self) -> None:
-        super()._build()
-        circuit = qiskit.QuantumCircuit(*self.qregs)
-        self.append(circuit.to_gate(), self.qubits)
-
-
-class BaseParametrisedLayerTesterWithoutResetParameters(BaseParametrisedLayer):
-    """This is an abnormal test class for BaseParametrisedLayer without implementing _reset_parameters method.
-    Thus, the docstrings will be omitted hereby.
-    """
-
-    def __init__(
-        self,
-        num_state_qubits: int,
-        parameter_prefix: str | None = None,
-        name: str | None = None,
-    ):
-        super().__init__(
-            num_state_qubits=num_state_qubits,
-            parameter_prefix=parameter_prefix,
-            name=name,
-        )
-
-    def _reset_register(self) -> None:
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
-
-    def _check_configuration(self, raise_on_failure=True) -> bool:
-        return True
-
-    def _build(self) -> None:
-        super()._build()
-        circuit = qiskit.QuantumCircuit(*self.qregs)
-        self.append(circuit.to_gate(), self.qubits)
 
 
 class TestBaseParametrisedLayer:
@@ -124,3 +62,16 @@ class TestBaseParametrisedLayer:
         new_parameter_prefix = "new!" + parameter_prefix
         tester.parameter_prefix = new_parameter_prefix
         assert tester.parameter_prefix == new_parameter_prefix
+
+    @pytest.mark.layer
+    def test_without_reset_parameters(self):
+        """Abnormal test;
+        Create an instance of a child class of BaseParametrisedLayer without implementing _reset_parameters.
+
+        Check if TypeError happens.
+        """
+        with pytest.raises(TypeError):
+            num_state_qubits = 2
+            BaseParametrisedLayerTesterWithoutResetParameters(
+                num_state_qubits=num_state_qubits
+            )
