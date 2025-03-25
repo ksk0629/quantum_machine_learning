@@ -1,75 +1,93 @@
 import pytest
 import qiskit
 
-from quantum_machine_learning.layers.single_qubit_unitary_layer import SingleQubitUnitaryLayer
+from quantum_machine_learning.layers.single_qubit_unitary_layer import (
+    SingleQubitUnitaryLayer,
+)
 
 
 class TestSingleQubitUnitaryLayer:
     @classmethod
     def setup_class(cls):
-        cls.num_qubits = 4
-        cls.applied_qubits = [0, 1, 2, 3]
-        cls.param_prefix = "test_single_qubit_unitary"
-        cls.single_qubit_unitary_layer = SingleQubitUnitaryLayer(
-            num_qubits=cls.num_qubits,
-            applied_qubits=cls.applied_qubits,
-            param_prefix=cls.param_prefix,
-        )
+        pass
 
-    def test_init(self):
-        """Normal test
-        Check if the class that was prepared in setup_class has
-        - num_qubits as same as self.num_qubits.
-        - applied_qubits as same as self.applied_qubits.
-        - param_prefix as same as self.param_prefix.
-        - num_params as double as the number of self.applied_qubits.
+    @pytest.mark.layer
+    @pytest.mark.parametrize("num_state_qubits", [2, 3])
+    def test_normal(self, num_state_qubits):
+        """Normal test;
+        Create an instance of SingleQubitUnitaryLayer class.
+
+        Check if
+        - the type of its y_parameters is qiskit.circuit.ParameterVector.
+        - the length of its y_parameters is the same as the given num_state_qubits.
+        - the type of its z_parameters is qiskit.circuit.ParameterVector.
+        - the length of its z_parameters is the same as the given num_state_qubits.
+        - its num_parameters is the double as the given num_state_qubits.
+        - the type of its parameters is list.
+        - the first element of its parameters is the same as its y_parameters.
+        - the second element of its parameters is the same as its z_parameters.
+        - the type of itself is qiskit.QuantumCircuit.
+        - the above things are still correct with a new num_state_qubits
+          after substituting the new num_state_qubits.
         """
-        assert self.single_qubit_unitary_layer.num_qubits == self.num_qubits
-        assert self.single_qubit_unitary_layer.applied_qubits == self.applied_qubits
-        assert self.single_qubit_unitary_layer.param_prefix == self.param_prefix
-        assert (
-            self.single_qubit_unitary_layer.num_params == len(self.applied_qubits) * 2
-        )
+        layer = SingleQubitUnitaryLayer(num_state_qubits=num_state_qubits)
+        assert isinstance(layer.y_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.y_parameters) == num_state_qubits
+        assert isinstance(layer.z_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.z_parameters) == num_state_qubits
+        assert layer.num_parameters == 2 * num_state_qubits
+        assert isinstance(layer.parameters, list)
+        assert layer.parameters[0] == layer.y_parameters
+        assert layer.parameters[1] == layer.z_parameters
+        assert isinstance(layer, qiskit.QuantumCircuit)
 
-    @pytest.mark.parametrize("num_qubits", [2, 5, 8])
-    @pytest.mark.parametrize("applied_qubits", [[0, 1], [1], [0, 2, 4], [1, 3, 5, 7]])
-    def test_get_circuit(self, num_qubits, applied_qubits):
-        """Normal and abnormal test;
-        Run get_circuit with verious num_qubits and applied_qubits defined above.
+        new_num_state_qubits = num_state_qubits + 1
+        layer.num_state_qubits = new_num_state_qubits
+        assert isinstance(layer.y_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.y_parameters) == new_num_state_qubits
+        assert isinstance(layer.z_parameters, qiskit.circuit.ParameterVector)
+        assert len(layer.z_parameters) == new_num_state_qubits
+        assert layer.num_parameters == 2 * new_num_state_qubits
+        assert isinstance(layer.parameters, list)
+        assert layer.parameters[0] == layer.y_parameters
+        assert layer.parameters[1] == layer.z_parameters
+        assert isinstance(layer, qiskit.QuantumCircuit)
 
-        Case 1: applied_qubits has a larger number than num_qubits
-            Check if qiskit.circuit.exceptions.CircuitError happens.
-        Case 2: All elements in applied_qubits is equal to or less than num_qubits.
-            Check if
-            - the number of parameters equals to double of the number of elements of applied_qubits.
-            - the number of gates equals to double of the number of elements of applied_qubits.
-            - each gate is either ry or rz.
-            - the number of ry gates eqauls to the number of elements of applied_qubits.
+    @pytest.mark.layer
+    def test_with_qubits_applied(self):
+        """Normal test;
+        Create an instance of SingleQubitUnitaryLayer class with qubits_applied.
+
+        Check if
+        - the length of its decomposed data is the same as the length of the given qubits_applied.
+        - the length of its y_parameters is the same as the length of the given qubits_applied.
+        - the length of its z_parameters is the same as the length of the given qubits_applied.
+        - each qubits in its decomposed data is the same as the each element of the given qubits_applied.
+        - the above things are still correct after substitutin a new qubits_applied.
         """
-        maximal_applied_qubit = max(applied_qubits)
-
-        single_qubit_unitary_layer = SingleQubitUnitaryLayer(
-            num_qubits=num_qubits,
-            applied_qubits=applied_qubits,
-            param_prefix=self.param_prefix,
+        num_state_qubits = 5
+        qubits_applied = [0, 3, 4]
+        layer = SingleQubitUnitaryLayer(
+            num_state_qubits=num_state_qubits, qubits_applied=qubits_applied
         )
+        assert len(layer.y_parameters) == len(qubits_applied)
+        assert len(layer.z_parameters) == len(qubits_applied)
+        for qubit_index in range(len(qubits_applied)):
+            data_index = qubit_index * 2
+            data = layer.decompose().data[data_index]
+            assert data.qubits[0]._index == qubits_applied[qubit_index]
 
-        if maximal_applied_qubit > num_qubits - 1:
-            with pytest.raises(qiskit.circuit.exceptions.CircuitError):
-                single_qubit_unitary_layer.get_circuit()
-        else:
-            circuit = single_qubit_unitary_layer.get_circuit()
-            # Check the number of the parameters.
-            correct_num_parameters = 2 * len(applied_qubits)
-            assert len(circuit.parameters) == correct_num_parameters
-            # Check the number of the gates.
-            gate_data = circuit.decompose().data
-            correct_num_gates = 2 * len(applied_qubits)
-            assert len(gate_data) == correct_num_gates
-            # Check the kinds of the gates.
-            gate_names = set([gate.name for gate in gate_data])
-            assert gate_names == set(["ry", "rz"])
-            # Check the number of ry gates.
-            correct_num_ry_gates = len(applied_qubits)
-            num_ry_gates = len([gate for gate in gate_data if gate.name == "ry"])
-            assert num_ry_gates == correct_num_ry_gates
+            data = layer.decompose().data[data_index + 1]
+            assert data.qubits[0]._index == qubits_applied[qubit_index]
+
+        new_qubit_applied = [1]
+        layer.qubits_applied = new_qubit_applied
+        assert len(layer.y_parameters) == len(new_qubit_applied)
+        assert len(layer.z_parameters) == len(new_qubit_applied)
+        for qubit_index in range(len(new_qubit_applied)):
+            data_index = qubit_index * 2
+            data = layer.decompose().data[data_index]
+            assert data.qubits[0]._index == new_qubit_applied[qubit_index]
+
+            data = layer.decompose().data[data_index + 1]
+            assert data.qubits[0]._index == new_qubit_applied[qubit_index]
