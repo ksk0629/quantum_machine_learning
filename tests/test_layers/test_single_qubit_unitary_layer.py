@@ -41,6 +41,8 @@ class TestSingleQubitUnitaryLayer:
         assert layer.parameters[1] == layer.z_parameters
         assert isinstance(layer, qiskit.QuantumCircuit)
 
+        layer._build()  # For the coverage
+
         new_num_state_qubits = num_state_qubits + 1
         layer.num_state_qubits = new_num_state_qubits
         assert isinstance(layer.y_parameters, qiskit.circuit.ParameterVector)

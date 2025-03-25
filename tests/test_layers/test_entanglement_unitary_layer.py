@@ -44,6 +44,8 @@ class TestEntanglementUnitaryLayer:
         assert layer.parameters[1] == layer.cz_parameters
         assert isinstance(layer, qiskit.QuantumCircuit)
 
+        layer._build()  # For the coverage
+
         new_num_state_qubits = num_state_qubits + 1
         new_parameter_length = math.comb(new_num_state_qubits, 2)
         layer.num_state_qubits = new_num_state_qubits
