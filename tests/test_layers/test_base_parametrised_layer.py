@@ -86,6 +86,7 @@ class TestBaseParametrisedLayer:
         - the type of itself is qiskit.QuantumCircuit.
         - its num_state_qubits, after substituting a new num_state_qubits,
           is the same as the new given num_state_qubits.
+        - its num_parameters is 0 after substituting None to its _parameters.
         """
         tester = BaseParametrisedLayerNormalTester(num_state_qubits=num_state_qubits)
         assert tester.num_state_qubits == num_state_qubits
@@ -95,6 +96,9 @@ class TestBaseParametrisedLayer:
         new_num_state_qubits = num_state_qubits + 1
         tester.num_state_qubits = new_num_state_qubits
         assert tester.num_state_qubits == new_num_state_qubits
+
+        tester._parameters = None
+        assert tester.num_parameters == 0
 
     @pytest.mark.layer
     def test_normal_inheritation_with_given_parameter_prefix(self):
