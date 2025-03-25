@@ -44,6 +44,8 @@ class TestDualQubitUnitaryLayer:
         assert layer.parameters[1] == layer.zz_parameters
         assert isinstance(layer, qiskit.QuantumCircuit)
 
+        layer._build()  # For the coverage
+
         new_num_state_qubits = num_state_qubits + 1
         new_parameter_length = math.comb(new_num_state_qubits, 2)
         layer.num_state_qubits = new_num_state_qubits
@@ -87,7 +89,7 @@ class TestDualQubitUnitaryLayer:
         - the length of its yy_parameters is the same as the length of the given qubit_applied_pairs.
         - the length of its zz_parameters is the same as the length of the given qubit_applied_pairs.
         - each qubits in its decomposed data is the same as the each element of the given qubit_applied_pairs.
-        - the above things are still correct after substitutin a new qubit_applied_pairs.
+        - the above things are still correct after substituting a new qubit_applied_pairs.
         """
         num_state_qubits = 5
         qubit_applied_pairs = [(0, 2), (0, 4)]
