@@ -71,7 +71,7 @@ class DatasetGallery:
 
     @staticmethod
     def get_pm_numbers(
-        dimension: int = 4, num_data: int = 100, highest=1
+        dimension: int = 4, num_data: int = 100, highest: int = 1
     ) -> tuple[np.ndarray, list[str]]:
         """Get a positive-negative numbers dataset, which is randomly generated.
         The label of each data is "positive" if the summation of the data is non-negative.
@@ -92,7 +92,7 @@ class DatasetGallery:
 
     @staticmethod
     def get_ls_numbers(
-        dimension: int = 4, num_data: int = 100, highest=1
+        dimension: int = 4, num_data: int = 100, highest: int = 1
     ) -> tuple[np.ndarray, list[str]]:
         """Get a large-small numbers dataset, which is randomly generated.
         The label of each data is "large" if all the entries of the data are larger than or equal to
@@ -227,7 +227,7 @@ class DatasetGallery:
         return np.array(images), labels
 
     @staticmethod
-    def get_mnist() -> tuple[np.ndarray, list[int]]:
+    def get_mnist() -> tuple[np.ndarray, list[str]]:
         """Get the MNIST dataset.
 
         :return tuple[np.ndarray, list[int]]: MNIST dataset
@@ -253,4 +253,5 @@ class DatasetGallery:
 
         images = np.expand_dims(np.vstack([train_images, val_images]), axis=1)
         labels = np.concatenate([train_labels, val_labels]).tolist()
+        labels = [str(label) for label in labels]
         return images, labels
