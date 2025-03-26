@@ -9,7 +9,7 @@ class BaseEncoder(qiskit.circuit.library.BlueprintCircuit, ABC):
 
     def __init__(
         self,
-        *regs,
+        *regs: qiskit.QuantumCircuit,
         data_dimension: int,
         name: str | None = None,
         transformer: Callable[[list[float]], list[float]] | None = None
@@ -22,21 +22,21 @@ class BaseEncoder(qiskit.circuit.library.BlueprintCircuit, ABC):
         """
         super().__init__(*regs, name=name)
 
-        self._parameters = None
-        self._transformer = transformer
-        self._data_dimension = None
+        self._parameters: list[qiskit.circuit.ParameterVector] | None = None
+        self._transformer: Callable[[list[float]], list[float]] | None = transformer
+        self._data_dimension: int | None = None
         self.data_dimension = data_dimension
 
     @property
-    def data_dimension(self) -> int:
+    def data_dimension(self) -> int | None:
         """Return the dimension of data.
 
-        :return int: the dimension of data
+        :return int | None: the dimension of data
         """
         return self._data_dimension
 
     @data_dimension.setter
-    def data_dimension(self, data_dimension: int):
+    def data_dimension(self, data_dimension: int) -> None:
         """Set the new dimension of data and reset the register and parameters.
 
         :param int data_dimension: the dimension of data
@@ -65,18 +65,18 @@ class BaseEncoder(qiskit.circuit.library.BlueprintCircuit, ABC):
 
     @property
     @abstractmethod
-    def num_encoding_qubits(self) -> int:
+    def num_encoding_qubits(self) -> int | None:
         """Return the number of qubits to be encoded.
 
-        :return int: the number of encoding qubits
+        :return int | None: the number of encoding qubits
         """
         pass
 
     @property
-    def parameters(self) -> list[qiskit.circuit.ParameterVector]:
+    def parameters(self) -> list[qiskit.circuit.ParameterVector] | None:
         """Return the parameter vector of this circuit.
 
-        :return list[qiskit.circuit.ParameterVecotr]: the parameter vector
+        :return list[qiskit.circuit.ParameterVecotr] | None: the parameter vector
         """
         return self._parameters
 

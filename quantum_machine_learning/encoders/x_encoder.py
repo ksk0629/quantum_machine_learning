@@ -25,14 +25,14 @@ class XEncoder(BaseEncoder):
         )
 
     @property
-    def num_encoding_qubits(self) -> int:
+    def num_encoding_qubits(self) -> int | None:
         """Return the number of qubits to be encoded.
 
-        :return int: the number of encoding qubits
+        :return int | None: the number of encoding qubits
         """
         return self.data_dimension
 
-    def _check_configuration(self, raise_on_failure=True) -> bool:
+    def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
         :param bool raise_on_failure: if raise an error or not, defaults to True
@@ -61,7 +61,7 @@ class XEncoder(BaseEncoder):
         circuit = qiskit.QuantumCircuit(*self.qregs)
 
         # Add the encoding part: the X-rotation.
-        for index, parameter in enumerate(self.parameters[0]):
+        for index, parameter in enumerate(self.parameters[0]):  # type: ignore
             circuit.rx(parameter, index)
 
         self.append(circuit.to_gate(), self.qubits)
