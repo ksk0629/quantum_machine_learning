@@ -1,9 +1,4 @@
-import random
-
-import numpy as np
 import pytest
-import qiskit_algorithms
-import torch
 
 from quantum_machine_learning.utils.data_utils import DataUtils
 
