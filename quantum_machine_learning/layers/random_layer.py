@@ -58,11 +58,11 @@ class RandomLayer(BaseLayer):
         :param SelectOptions | None select_options: a select options for gates
         :param str | None name: the name of this encoder, defaults to "RandomLayers"
         """
-        self._selected_gates = None
-        self._connection_probabilities = None
-        self._available_gates = None
-        self._threshold = None
-        self._select_options = None
+        self._selected_gates: list[SelectedGate] | None = None
+        self._connection_probabilities: dict[list[int], float] | None = None
+        self._available_gates: list[GateInfo] | None = None
+        self._threshold: float | None = None
+        self._select_options: SelectOptions | None = None
 
         super().__init__(num_state_qubits=num_state_qubits, name=name)
 
@@ -71,7 +71,7 @@ class RandomLayer(BaseLayer):
         self.select_options = select_options
 
     @property
-    def available_gates(self) -> list[GateInfo]:
+    def available_gates(self) -> list[GateInfo] | None:
         """Return available gates.
         If it is None, then return the standard availalbe gates defined here.
 
@@ -95,7 +95,7 @@ class RandomLayer(BaseLayer):
             ]
 
     @available_gates.setter
-    def available_gates(self, available_gates: list[GateInfo]):
+    def available_gates(self, available_gates: list[GateInfo] | None) -> None:
         """Set the new available gates if valid and reset the register.
 
         :param list[GateInfo] available_gates: a new available gates
@@ -111,18 +111,18 @@ class RandomLayer(BaseLayer):
         self._reset_register()
 
     @property
-    def threshold(self) -> float:
+    def threshold(self) -> float | None:
         """Return the threshold of connection probability.
 
-        :return float: threshold
+        :return float | None: threshold
         """
         return self._threshold
 
     @threshold.setter
-    def threshold(self, threshold: float):
+    def threshold(self, threshold: float | None) -> None:
         """Set the new threshold and reset the register.
 
-        :param float threshold: a new threshold
+        :param float | None threshold: a new threshold
         """
         self._threshold = threshold
         self._reset_register()
@@ -143,7 +143,7 @@ class RandomLayer(BaseLayer):
             return SelectOptions(max_num_gates, min_num_gate)
 
     @select_options.setter
-    def select_options(self, select_options: SelectOptions):
+    def select_options(self, select_options: SelectOptions | None) -> None:
         """Set the new select options for gates of each number of qubits and reset the register.
 
         :param SelectOptions select_options: a new select options of gates of each number of qubits
@@ -152,10 +152,10 @@ class RandomLayer(BaseLayer):
         self._reset_register()
 
     @property
-    def connection_probabilities(self) -> dict[list[int], float]:
+    def connection_probabilities(self) -> dict[list[int], float] | None:
         """Return the connection probabilities between qubits.
 
-        :return dict[list[int], float]: the connection probabilities
+        :return dict[list[int], float] | None: the connection probabilities
         """
         return self._connection_probabilities
 
@@ -166,7 +166,7 @@ class RandomLayer(BaseLayer):
         """
         # Initialise the connection probabilities.
         connection_probabilities = dict()
-        all_qubits = list(range(self.num_state_qubits))
+        all_qubits = list(range(self.num_state_qubits))  # type: ignore
         for n in range(1, self.num_state_qubits + 1):
             for conbination in itertools.combinations(all_qubits, n):
                 # Set the connection probability.
@@ -175,14 +175,14 @@ class RandomLayer(BaseLayer):
         self._connection_probabilities = connection_probabilities
 
     @property
-    def selected_gates(self) -> list[SelectedGate]:
+    def selected_gates(self) -> list[SelectedGate] | None:
         """Return the selected gates.
 
-        :return list[SelectedGate]: the selected gate
+        :return list[SelectedGate] | None: the selected gate
         """
         return self._selected_gates
 
-    def _set_gates_based_on_probabilities(self, target_num_qubits: int):
+    def _set_gates_based_on_probabilities(self, target_num_qubits: int) -> None:
         """Select gates based on probabilities based on the connection probabilities.
 
         :param int target_num_qubits: the target number of qubits
@@ -193,7 +193,7 @@ class RandomLayer(BaseLayer):
             avilable_gate
             for avilable_gate in self.available_gates
             if avilable_gate.num_qubits == target_num_qubits
-        ]
+        ]  # type: ignore
         # End if there is no target_available_gates.
         if len(target_available_gates) == 0:
             return
@@ -230,7 +230,7 @@ class RandomLayer(BaseLayer):
                 SelectedGate(selected_gate, shuffled_target_qubits)
             )
 
-    def _check_configuration(self, raise_on_failure=True) -> bool:
+    def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
         :param bool raise_on_failure: if raise an error or not, defaults to True
@@ -253,7 +253,7 @@ class RandomLayer(BaseLayer):
 
         # Get gates randomly in available gates.
         self._selected_gates = []
-        for n in range(1, self.num_state_qubits + 1):
+        for n in range(1, self.num_state_qubits + 1):  # type: ignore
             if n in self.select_options.max_num_gates:
                 max_num = self.select_options.max_num_gates[n]
             else:
@@ -279,7 +279,7 @@ class RandomLayer(BaseLayer):
         circuit = qiskit.QuantumCircuit(*self.qregs)
 
         # Apply the gates to the circuit.
-        for selected_gate in self._selected_gates:
+        for selected_gate in self._selected_gates:  # type: ignore
             circuit.append(selected_gate.gate, selected_gate.qubits)
 
         self.append(circuit.to_gate(), self.qubits)

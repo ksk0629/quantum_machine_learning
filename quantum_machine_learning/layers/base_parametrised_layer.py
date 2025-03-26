@@ -10,7 +10,7 @@ class BaseParametrisedLayer(BaseLayer, ABC):
 
     def __init__(
         self,
-        *regs,
+        *regs: qiskit.QuantumRegister,
         num_state_qubits: int,
         parameter_prefix: str | None = None,
         name: str | None = None
@@ -18,19 +18,20 @@ class BaseParametrisedLayer(BaseLayer, ABC):
         """Initialise the BaseLayer.
 
         :param int num_state_qubits: the number of state qubits
-        :param str parameter_prefix | None: a prefix of the parameter names, defaults to None
+        :param str | None parameter_prefix: a prefix of the parameter names, defaults to None
         :param str | None name: the name of this encoder, defaults to None
         """
-        self._parameter_prefix = None
+        self._parameters: list[qiskit.circuit.ParameterVector] | None = None
+        self._parameter_prefix: str | None = None
 
         super().__init__(*regs, num_state_qubits=num_state_qubits, name=name)
-        self.parameter_prefix = parameter_prefix
+        self.parameter_prefix = parameter_prefix  # type: ignore
 
     @property
-    def num_state_qubits(self) -> int:
+    def num_state_qubits(self) -> int | None:
         """Return the number of the state qubits
 
-        :return int: the number of the state qubits
+        :return int | None: the number of the state qubits
         """
         return self._num_state_qubits
 
@@ -45,7 +46,7 @@ class BaseParametrisedLayer(BaseLayer, ABC):
         self._reset_parameters()
 
     @property
-    def prameter_prefix(self) -> str:
+    def parameter_prefix(self) -> str:
         """Return the parameter prefix.
         If it is None, then return the empty string.
 
@@ -56,18 +57,18 @@ class BaseParametrisedLayer(BaseLayer, ABC):
         else:
             return self._parameter_prefix
 
-    @prameter_prefix.setter
-    def parameter_prefix(self, parameter_prefix: str) -> None:
+    @parameter_prefix.setter
+    def parameter_prefix(self, parameter_prefix: str | None) -> None:
         """Set a new prefix of the parameter names and reset the parameters and register.
 
-        :param str parameter_prefix: a new prefix oh the parameter names
+        :param str | None parameter_prefix: a new prefix oh the parameter names
         """
         self._parameter_prefix = parameter_prefix
         self._reset_parameters()
         self._reset_register()
 
     @property
-    def parameters(self) -> list[qiskit.circuit.ParameterVector]:
+    def parameters(self) -> list[qiskit.circuit.ParameterVector] | None:
         """Return the parameter vector of this circuit.
 
         :return list[qiskit.circuit.ParameterVecotr]: the parameter vector

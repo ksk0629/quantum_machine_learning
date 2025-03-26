@@ -24,9 +24,9 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         :param str | None parameter_prefix: a prefix of the parameter names, defaults to None
         :param str | None name: the name of this encoder, defaults to "DualQubitUnitary"
         """
-        self._yy_parameters = None
-        self._zz_parameters = None
-        self._qubit_applied_pairs = None
+        self._yy_parameters: qiskit.circuit.ParameterVector | None = None
+        self._zz_parameters: qiskit.circuit.ParameterVector | None = None
+        self._qubit_applied_pairs: list[tuple[int, int]] | None = None
 
         super().__init__(
             num_state_qubits=num_state_qubits,
@@ -38,18 +38,18 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         self.qubit_applied_pairs = qubit_applied_pairs
 
     @property
-    def yy_parameters(self) -> qiskit.circuit.ParameterVector:
+    def yy_parameters(self) -> qiskit.circuit.ParameterVector | None:
         """Return the parameter vector for the YY-rotation of this circuit.
 
-        :return qiskit.circuit.ParameterVecotr: the YY-rotation parameter vector
+        :return qiskit.circuit.ParameterVecotr | None: the YY-rotation parameter vector
         """
         return self._yy_parameters
 
     @property
-    def zz_parameters(self) -> qiskit.circuit.ParameterVector:
+    def zz_parameters(self) -> qiskit.circuit.ParameterVector | None:
         """Return the parameter vector for the ZZ-rotation of this circuit.
 
-        :return qiskit.circuit.ParameterVecotr: the ZZ-rotation parameter vector
+        :return qiskit.circuit.ParameterVecotr | None: the ZZ-rotation parameter vector
         """
         return self._zz_parameters
 
@@ -62,7 +62,9 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         return self._qubit_applied_pairs
 
     @qubit_applied_pairs.setter
-    def qubit_applied_pairs(self, qubit_applied_pairs: list[tuple[int, int]] | None):
+    def qubit_applied_pairs(
+        self, qubit_applied_pairs: list[tuple[int, int]] | None
+    ) -> None:
         """Set the pairs of two-qubit to be applied and reset the register and parameters.
 
         :param list[tuple[int, int]] | None qubit_applied_pairs: a new pairs of two-qubit to be applied
@@ -71,7 +73,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         self._reset_parameters()
         self._reset_register()
 
-    def _check_configuration(self, raise_on_failure=True) -> bool:
+    def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
         :param bool raise_on_failure: if raise an error or not, defaults to True
@@ -100,7 +102,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
         if self.qubit_applied_pairs is None:
-            length = math.comb(self.num_state_qubits, 2)
+            length = math.comb(self.num_state_qubits, 2)  # type:ignore
             self._yy_parameters = qiskit.circuit.ParameterVector(
                 parameter_name("yy"), length=length
             )
@@ -127,14 +129,14 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         # Add the encoding part: the rotation Y and Z.
         if self.qubit_applied_pairs is None:
             index = 0
-            for i in range(self.num_state_qubits):
-                for j in range(i + 1, self.num_state_qubits):
-                    circuit.ryy(self.yy_parameters[index], i, j)
-                    circuit.rzz(self.zz_parameters[index], i, j)
+            for i in range(self.num_state_qubits):  # type: ignore
+                for j in range(i + 1, self.num_state_qubits):  # type: ignore
+                    circuit.ryy(self.yy_parameters[index], i, j)  # type: ignore
+                    circuit.rzz(self.zz_parameters[index], i, j)  # type: ignore
                     index += 1
         else:
-            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
-                circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)
-                circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)
+            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
+                circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)  # type: ignore
+                circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)  # type: ignore
 
         self.append(circuit.to_gate(), self.qubits)

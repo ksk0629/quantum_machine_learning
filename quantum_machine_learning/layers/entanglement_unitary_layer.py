@@ -1,6 +1,7 @@
 import math
 
 import qiskit
+import qiskit.circuit
 
 from quantum_machine_learning.layers.base_parametrised_layer import (
     BaseParametrisedLayer,
@@ -24,9 +25,9 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         :param str parameter_prefix | None: a prefix of the parameter names, defaults to None
         :param str | None name: the name of this encoder, defaults to "EntanglementUnitary"
         """
-        self._cy_parameters = None
-        self._cz_parameters = None
-        self._qubit_applied_pairs = None
+        self._cy_parameters: qiskit.circuit.ParameterVector | None = None
+        self._cz_parameters: qiskit.circuit.ParameterVector | None = None
+        self._qubit_applied_pairs: list[tuple[int, int]] | None = None
 
         super().__init__(
             num_state_qubits=num_state_qubits,
@@ -38,18 +39,18 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         self.qubit_applied_pairs = qubit_applied_pairs
 
     @property
-    def cy_parameters(self) -> qiskit.circuit.ParameterVector:
+    def cy_parameters(self) -> qiskit.circuit.ParameterVector | None:
         """Return the parameter vector for the controlled Y-rotation of this circuit.
 
-        :return qiskit.circuit.ParameterVecotr: the controlled Y-rotation parameter vector
+        :return qiskit.circuit.ParameterVecotr | None: the controlled Y-rotation parameter vector
         """
         return self._cy_parameters
 
     @property
-    def cz_parameters(self) -> qiskit.circuit.ParameterVector:
+    def cz_parameters(self) -> qiskit.circuit.ParameterVector | None:
         """Return the parameter vector for the controlled Z-rotation of this circuit.
 
-        :return qiskit.circuit.ParameterVecotr: the controlled Z-rotation parameter vector
+        :return qiskit.circuit.ParameterVecotr | None: the controlled Z-rotation parameter vector
         """
         return self._cz_parameters
 
@@ -62,7 +63,9 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         return self._qubit_applied_pairs
 
     @qubit_applied_pairs.setter
-    def qubit_applied_pairs(self, qubit_applied_pairs: list[tuple[int, int]] | None):
+    def qubit_applied_pairs(
+        self, qubit_applied_pairs: list[tuple[int, int]] | None
+    ) -> None:
         """Set the pairs of two-qubit to be applied and reset the register and parameters.
 
         :param list[tuple[int, int]] | None qubit_applied_pairs: a new pairs of two-qubit to be applied
@@ -71,7 +74,7 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         self._reset_parameters()
         self._reset_register()
 
-    def _check_configuration(self, raise_on_failure=True) -> bool:
+    def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
         :param bool raise_on_failure: if raise an error or not, defaults to True
@@ -100,7 +103,7 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
         if self.qubit_applied_pairs is None:
-            length = math.comb(self.num_state_qubits, 2)
+            length = math.comb(self.num_state_qubits, 2)  # type: ignore
             self._cy_parameters = qiskit.circuit.ParameterVector(
                 parameter_name("cy"), length=length
             )
@@ -127,14 +130,14 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         # Add the encoding part: the rotation controlled Y and Z rotations.
         if self.qubit_applied_pairs is None:
             index = 0
-            for i in range(self.num_state_qubits):
-                for j in range(i + 1, self.num_state_qubits):
-                    circuit.cry(self.cy_parameters[index], i, j)
-                    circuit.crz(self.cz_parameters[index], i, j)
+            for i in range(self.num_state_qubits):  # type: ignore
+                for j in range(i + 1, self.num_state_qubits):  # type: ignore
+                    circuit.cry(self.cy_parameters[index], i, j)  # type: ignore
+                    circuit.crz(self.cz_parameters[index], i, j)  # type: ignore
                     index += 1
         else:
-            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
-                circuit.cry(self.cy_parameters[index], qubit_1, qubit_2)
-                circuit.crz(self.cz_parameters[index], qubit_1, qubit_2)
+            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
+                circuit.cry(self.cy_parameters[index], qubit_1, qubit_2)  # type: ignore
+                circuit.crz(self.cz_parameters[index], qubit_1, qubit_2)  # type: ignore
 
         self.append(circuit.to_gate(), self.qubits)

@@ -6,23 +6,28 @@ import qiskit
 class BaseLayer(qiskit.circuit.library.BlueprintCircuit, ABC):
     """BaseLayer abstract class, which is all quantum layers inherit this."""
 
-    def __init__(self, *regs, num_state_qubits: int, name: str | None = None):
+    def __init__(
+        self,
+        *regs: qiskit.QuantumRegister,
+        num_state_qubits: int,
+        name: str | None = None
+    ):
         """Initialise the BaseLayer.
 
         :param int num_state_qubits: the number of state qubits
         :param str | None name: the name of this encoder, defaults to None
         """
-        self._num_state_qubits = None
+        self._num_state_qubits: int | None = None
 
         super().__init__(*regs, name=name)
 
         self.num_state_qubits = num_state_qubits
 
     @property
-    def num_state_qubits(self) -> int:
+    def num_state_qubits(self) -> int | None:
         """Return the number of the state qubits
 
-        :return int: the number of the state qubits
+        :return int | None: the number of the state qubits
         """
         return self._num_state_qubits
 
