@@ -16,7 +16,6 @@ from quantum_machine_learning.layers.entanglement_unitary_layer import (
     EntanglementUnitaryLayer,
 )
 from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
-import quantum_machine_learning.utils
 from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 from quantum_machine_learning.utils.circuit_utils import CircuitUtils
