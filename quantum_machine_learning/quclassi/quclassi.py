@@ -357,7 +357,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             raise AttributeError(error_msg)
 
         # Build the circuit if not yet.
-        if not self._is_build:
+        if not self._is_built:
             self._build()
 
         # Create a circuit with measurement.
