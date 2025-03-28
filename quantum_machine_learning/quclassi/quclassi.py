@@ -361,7 +361,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :return str: the predicted label
         """
         # Raise the error if the parameter values haven't been set.
-        if self.parameter_values is None:
+        if self.parameter_values == {}:
             error_msg = "No parameter values are found. Set the parameter values first."
             raise AttributeError(error_msg)
         # Raise the error if the data shape does not meet the using_classical_data_size.
