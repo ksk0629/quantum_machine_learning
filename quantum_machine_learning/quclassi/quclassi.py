@@ -353,12 +353,20 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param qiskit.providers.Backend backend: a backend
         :param int shots: the number of shots, defaults to 9010
         :raises AttributeError: if the parameter values haven't been set
+        :raises ValueError: if the shape of the given datum is not the same as the using classical data size
         :return str: the predicted label
         """
         # Raise the error if the parameter values haven't been set.
         if self.parameter_values is None:
             error_msg = "No parameter values are found. Set the parameter values first."
             raise AttributeError(error_msg)
+        # Raise the error if the data shape does not meet the using_classical_data_size.
+        if len(datum) != self.using_classical_data_size:
+            error_msg = f"""
+            The size of given datum must be {self.using_classical_data_size}.
+            However, it is {len(datum)}.
+            """
+            raise ValueError(error_msg)
 
         # Build the circuit if not yet.
         if not self._is_built:

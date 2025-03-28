@@ -4,6 +4,7 @@ import string
 import tempfile
 
 import qiskit
+import qiskit_aer
 import pytest
 
 from quantum_machine_learning.quclassi.quclassi import QuClassi
@@ -47,7 +48,7 @@ class TestQuClassi:
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [[1, 2], [3, 4]], "b": [[3, 4], [5, 6]]}
+        initial_parameters = {"a": [[1, 2, 3, 4]], "b": [[3, 4, 5, 6]]}
         quclassi = QuClassi(
             classical_data_size=classical_data_size,
             structure=structure,
@@ -79,7 +80,7 @@ class TestQuClassi:
         assert quclassi.parameter_values == dict()
 
         new_parameter_values = initial_parameters
-        new_parameter_values["c"] = [[7, 8], [9, 10]]
+        new_parameter_values["c"] = [[7, 8, 9, 10]]
         quclassi.parameter_values = new_parameter_values
         assert quclassi.parameter_values == new_parameter_values
 
@@ -181,7 +182,7 @@ class TestQuClassi:
             classical_data_size=classical_data_size, labels=labels, structure=structure
         )
 
-        parameter_values = {"a": [[1, 2], [3, 4]]}
+        parameter_values = {"a": [[1, 2, 3, 4]]}
         with pytest.raises(AttributeError):
             # If labels is None, AttributeError must happen.
             # Also, if the keys of the parameter values are not the same labels,
@@ -198,7 +199,25 @@ class TestQuClassi:
         - the length of the return value is the same as of the given data.
         - each element fo the return value is in the given labels.
         """
-        pass
+        classical_data_size = 3
+        structure = "s"
+        labels = ["a", "b"]
+        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size,
+            structure=structure,
+            labels=labels,
+            initial_parameters=initial_parameters,
+        )
+
+        data = [[1, 2, 3, 0], [4, 5, 6, 0], [7, 8, 9, 0]]
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        shots = 8192
+
+        predicted_labels = quclassi.classify(data=data, backend=backend, shots=shots)
+        assert isinstance(predicted_labels, list)
+        assert len(predicted_labels) == len(data)
+        assert all(label in labels for label in predicted_labels)
 
     @pytest.mark.quclassi
     def test_invalid_classify(self):
