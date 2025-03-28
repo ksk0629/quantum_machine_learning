@@ -21,6 +21,10 @@ from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 
 @dataclasses.dataclass
 class QuClassiInfo:
+    """QuClassi information data class.
+    This class provides the enough information to save and load QuClassi class.
+    """
+
     classical_data_size: int
     structure: str
     labels: list[str]
