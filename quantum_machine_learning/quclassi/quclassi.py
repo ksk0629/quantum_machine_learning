@@ -467,7 +467,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param str model_dir_path: a path to the output directory.
         """
         # Raise the error if the parameter values haven't been set.
-        if self.parameter_values is None:
+        if self.parameter_values == dict():
             error_msg = "No parameter values are found. Set the parameter values first."
             raise AttributeError(error_msg)
 
