@@ -187,3 +187,55 @@ class TestQuClassi:
             # Also, if the keys of the parameter values are not the same labels,
             # Attribute Error must happens.
             quclassi.parameter_values = parameter_values
+
+    @pytest.mark.quclassi
+    def test_classify(self):
+        """Normal test;
+        run classify method.
+
+        Check if
+        - the type of the return value is list.
+        - the length of the return value is the same as of the given data.
+        - each element fo the return value is in the given labels.
+        """
+        pass
+
+    @pytest.mark.quclassi
+    def test_invalid_classify(self):
+        """Abnormal test;
+        run classify method without setting the parameter values.
+
+        Check if AttributeError happens.
+        """
+        pass
+
+    @pytest.mark.quclassi
+    def test_save(self):
+        """Normal test;
+        run the save method.
+
+        Check if
+        - a yaml file is generated.
+        - the yaml file contains
+            - classical_data_size
+            - structure
+            - labels
+            - initial_parameters
+            - name
+        """
+
+    @pytest.mark.quclassi
+    def test_invalid_save(self):
+        """Abnormal test;
+        run the save method without setting the parameter values.
+
+        Check if AttributeError happens.
+        """
+
+    @pytest.mark.quclassi
+    def test_load(self):
+        """Normal test;
+        run the load method after making a suitable yaml file.
+
+        Check if the loaded QuClassi has the same class variables as the given yaml file.
+        """
