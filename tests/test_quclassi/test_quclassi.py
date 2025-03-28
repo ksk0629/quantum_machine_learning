@@ -116,14 +116,13 @@ class TestQuClassi:
         classical_data_size = 3
         labels = ["a", "b"]
         for conb in itertools.permutations(all_letters):
-            for structure_letters in conb:
-                structure = "".join(structure_letters)
-                quclassi = QuClassi(
-                    classical_data_size=classical_data_size,
-                    structure=structure,
-                    labels=labels,
-                )
-                assert quclassi.structure == structure
+            structure = "".join(list(conb))
+            quclassi = QuClassi(
+                classical_data_size=classical_data_size,
+                structure=structure,
+                labels=labels,
+            )
+            assert quclassi.structure == structure
 
     @pytest.mark.quclassi
     @pytest.mark.parametrize(
@@ -148,7 +147,7 @@ class TestQuClassi:
         """Abormal test;
         Create an instance of QuClassi with several invalid structures.
 
-        Check if AttributeError happens.
+        Check if ValueError happens.
         """
         classical_data_size = 3
         labels = ["a", "b"]
@@ -158,14 +157,13 @@ class TestQuClassi:
                 continue
             invalid_all_letters = all_letters + i
             for conb in itertools.permutations(invalid_all_letters):
-                for structure_letters in conb:
-                    structure = str(structure_letters)
-                    with pytest.raises(AttributeError):
-                        QuClassi(
-                            classical_data_size=classical_data_size,
-                            structure=structure,
-                            labels=labels,
-                        )
+                structure = "".join(list(conb))
+                with pytest.raises(ValueError):
+                    QuClassi(
+                        classical_data_size=classical_data_size,
+                        structure=structure,
+                        labels=labels,
+                    )
 
     @pytest.mark.quclassi
     @pytest.mark.parametrize("labels", [None, ["b"]])
