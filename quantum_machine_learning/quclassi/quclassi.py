@@ -270,14 +270,17 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self._ansatz = qiskit.QuantumCircuit(self._train_qreg, name="train")
         self._feature_map = qiskit.QuantumCircuit(self._data_qreg, name="data")
 
+        self._is_built = False
+
     def _build(self) -> None:
         """Build this circuit."""
         super()._build()
 
         # >>> Data qubits creation >>>
-        feature_map = self._feature_map.compose(
+        self._feature_map.compose(
             YZEncoder(data_dimension=self.using_classical_data_size),
             range(self.num_data_qubits),
+            inplace=True,
         )
         # <<< Data qubits creation <<<
 
@@ -290,7 +293,6 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         ]
 
         # Create the train qubits part.
-        ansatz = self._ansatz.copy()
         for index, letter in enumerate(self.structure):
             parameter_prefix = f"layer{index}"
             # Do not need to think about what if the letter might not match either of them
@@ -316,7 +318,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
                     )
 
             # Add the layer to the ansatz.
-            ansatz.compose(
+            self._ansatz.compose(
                 layer,
                 range(self.num_train_qubits),
                 inplace=True,
@@ -325,8 +327,8 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         # >>> Whole circuit creation >>>
         circuit = qiskit.QuantumCircuit(*self.qregs)
-        circuit.compose(ansatz.to_gate(), self._train_qreg, inplace=True)
-        circuit.compose(feature_map.to_gate(), self._data_qreg, inplace=True)
+        circuit.compose(self._ansatz.to_gate(), self._train_qreg, inplace=True)
+        circuit.compose(self._feature_map.to_gate(), self._data_qreg, inplace=True)
 
         # Add the swap test.
         swap_test_layer = qiskit.QuantumCircuit(*self.qregs, name="SwapTest")
@@ -368,16 +370,19 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         circuit.add_register(creg)
         circuit.measure(self._ancilla_qreg, creg)
 
+        # Transplie the circuits.
+        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
+            optimization_level=3, backend=backend, seed_transpiler=901
+        )
+        transpiled_circuit = pass_manager.run(circuit)
+
         # Load the data to the parameters.
         data_parameters = {
             data_parameter: d for data_parameter, d in zip(self.data_parameters, datum)
         }
 
         # Create primitive unified blocks.
-        #  [0] will correspond to the first label
-        #  ...
-        #  [n] will correspond to the n-1 label ...
-        primitive_unified_blocks = []  # [0] -> label
+        primitive_unified_blocks = []
         for parameter_values in self.parameter_values.values():
             # Set the parameter values.
             trained_parameters = {
@@ -386,26 +391,25 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
                     self.trainable_parameters, parameter_values
                 )
             }
+
             # Add this primitive unified block to the dict.
-            primitive_unified_block = (
-                circuit,
-                {**trained_parameters, **data_parameters},
+            primitive_unified_block = transpiled_circuit.assign_parameters(
+                {**trained_parameters, **data_parameters}
             )
             primitive_unified_blocks.append(primitive_unified_block)
 
-        # Transplie the backend.
-        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
-            optimization_level=3, backend=backend
-        )
         # Run the circuits.
-        jobs = pass_manager.run(primitive_unified_blocks, shots=shots)
+        jobs = backend.run(primitive_unified_blocks, shots=shots)
 
         # Get the fidelities corresponding to each label.
         fidelities = {}
-        results = jobs.result()
+        results = jobs.result().results
         for result, label in zip(results, self.labels):
+            digit_result = {
+                str(int(key, 16)): value for key, value in result.data.counts.items()
+            }  # The keys are initially expressed in hex.
             fidelities[label] = Postprocessor.calculate_fidelity_from_swap_test(
-                result.data.creg.get_counts()  # creg is after QuClassi.CREG_NAME
+                digit_result
             )
 
         # Find the label whose value is the larest fidelity.
