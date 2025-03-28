@@ -217,7 +217,9 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self._parameter_values = parameter_values
 
     @property
-    def trainable_parameters(self) -> qiskit.circuit.ParameterExpression | None:
+    def trainable_parameters(
+        self,
+    ) -> qiskit.circuit.parametertable.ParameterView | None:
         """Return the trainable parameters.
 
         :return qiskit.circuit.ParameterExpression | None: trainable_parameters
@@ -228,7 +230,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             return self._ansatz.parameters
 
     @property
-    def data_parameters(self) -> qiskit.circuit.ParameterExpression | None:
+    def data_parameters(self) -> qiskit.circuit.parametertable.ParameterView | None:
         """Return the data parameters.
 
         :return qiskit.circuit.ParameterExpression | None: data_parameters

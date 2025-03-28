@@ -41,8 +41,8 @@ class TestQuClassi:
         - its parameter values are empty dict after substituting a new structure.
         - its parameter values are the same as the new parameter values
           after substituting new parameter values.
-        - the type of its trainable_parameters is qiskit.circuit.ParameterExpression.
-        - the type of its data_parameters is qiskit.circuit.ParameterExpression.
+        - the type of its trainable_parameters is qiskit.circuit.parametertable.ParameterView.
+        - the type of its data_parameters is qiskit.circuit.parametertable.ParameterView.
         """
         classical_data_size = 3
         structure = "s"
@@ -84,9 +84,11 @@ class TestQuClassi:
         assert quclassi.parameter_values == new_parameter_values
 
         assert isinstance(
-            quclassi.trainable_parameters, qiskit.circuit.ParameterExpression
+            quclassi.trainable_parameters, qiskit.circuit.parametertable.ParameterView
         )
-        assert isinstance(quclassi.data_parameters, qiskit.circuit.ParameterExpression)
+        assert isinstance(
+            quclassi.data_parameters, qiskit.circuit.parametertable.ParameterView
+        )
 
     @pytest.mark.quclassi
     @pytest.mark.parametrize(
