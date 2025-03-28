@@ -434,19 +434,29 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         data: list[list[float]],
         backend: qiskit.providers.Backend,
         shots: int = 9010,
+        optimisation_level: int = 2,
+        seed: int = 901,
     ) -> list[str]:
         """Classify the given data.
 
         :param list[list[float]] data: data to be classcified
         :param qiskit.providers.Backend backend: a backend
         :param int shots: the number of shots, defaults to 9010
+        :param int optimisation_level: the level of the optimisation, defaults to 2
+        :param int seed: a random seed, defaults to 901
         :return list[str]: the classified labels
         """
         # Classify each datum.
         predicted_labels = []
         for datum in data:
             predicted_labels.append(
-                self._classify_datum(datum=datum, backend=backend, shots=shots)
+                self._classify_datum(
+                    datum=datum,
+                    backend=backend,
+                    shots=shots,
+                    optimisation_level=optimisation_level,
+                    seed=seed,
+                )
             )
 
         return predicted_labels
