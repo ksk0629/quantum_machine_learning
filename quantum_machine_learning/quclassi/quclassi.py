@@ -346,12 +346,16 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         datum: list[float],
         backend: qiskit.providers.Backend,
         shots: int = 9010,
+        optimisation_level: int = 2,
+        seed: int = 901,
     ) -> str:
         """Classify one datum and return the label name.
 
         :param list[float] datum: a datum to be classified
         :param qiskit.providers.Backend backend: a backend
         :param int shots: the number of shots, defaults to 9010
+        :param int optimisation_level: the level of the optimisation, defaults to 2
+        :param int seed: a random seed, defaults to 901
         :raises AttributeError: if the parameter values haven't been set
         :raises ValueError: if the shape of the given datum is not the same as the using classical data size
         :return str: the predicted label
@@ -380,7 +384,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         # Transplie the circuits.
         pass_manager = qiskit.transpiler.generate_preset_pass_manager(
-            optimization_level=3, backend=backend, seed_transpiler=901
+            optimization_level=optimisation_level, backend=backend, seed_transpiler=seed
         )
         transpiled_circuit = pass_manager.run(circuit)
 
