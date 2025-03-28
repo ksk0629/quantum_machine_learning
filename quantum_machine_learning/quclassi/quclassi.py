@@ -433,3 +433,50 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             )
 
         return predicted_labels
+
+    def save(self, model_dir_path: str):
+        """Save this QuClassi.
+
+        :param str model_dir_path: a path to the output directory.
+        """
+        # Raise the error if the parameter values haven't been set.
+        if self.parameter_values is None:
+            error_msg = "No parameter values are found. Set the parameter values first."
+            raise AttributeError(error_msg)
+
+        # Create the directory specified by the argument output_dir_path.
+        os.makedirs(model_dir_path, exist_ok=True)
+
+        # Store the necessary data to load this QuClassi.
+        #  Note that, there is no need to save the circuit itself
+        #  because the circuit is uniquely determined from the variables.
+        quclassi_info = QuClassiInfo(
+            classical_data_size=self._classical_data_size,
+            structure=self._structure,
+            labels=self._labels,
+            initial_parameters=self._parameter_values,
+            name=self.name,
+        )
+
+        # Save the information as the yaml file.
+        yaml_path = os.path.join(model_dir_path, QuClassi.model_filename)
+        with open(yaml_path, "w", encoding=QuClassi.encoding) as yaml_file:
+            yaml.dump(
+                dataclasses.asdict(quclassi_info), yaml_file, default_flow_style=False
+            )
+
+    @classmethod
+    def load(cls, model_dir_path: str):
+        """Load a QuClassi stored in the given directory path.
+
+        :param str model_dir_path: a path to the input directory.
+        """
+        # Read the information from the yaml file.
+        yaml_path = os.path.join(model_dir_path, QuClassi.model_filename)
+        with open(yaml_path, "r", encoding=QuClassi.encoding) as yaml_file:
+            quclassi_info = yaml.safe_load(yaml_file)
+
+        # Laod the model.
+        quclassi = cls(**quclassi_info)
+
+        return quclassi
