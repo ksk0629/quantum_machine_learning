@@ -141,7 +141,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
     @structure.setter
     def structure(self, structure: str) -> None:
-        """Set the new structure if it's valid and reset the registers.
+        """Set the new structure if it's valid, set the parameter values None and reset the registers.
 
         :param str structure: a new structure
         :raises ValueError: if a new structure is not constructed with acceptable letters
@@ -155,6 +155,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             raise ValueError(error_msg)
 
         self._structure = structure
+        self.parameter_values = None
 
         self._reset_register()
 
