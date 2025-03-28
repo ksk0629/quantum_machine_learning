@@ -1,11 +1,8 @@
 import dataclasses
 import os
-import pickle
 from typing import Final
 
-import numpy as np
 import qiskit
-from qiskit import qpy, primitives
 import qiskit.circuit
 import yaml
 
@@ -19,10 +16,7 @@ from quantum_machine_learning.layers.dual_qubit_unitary_layer import (
 from quantum_machine_learning.layers.entanglement_unitary_layer import (
     EntanglementUnitaryLayer,
 )
-from quantum_machine_learning.layers.swap_test_layer import SwapTestLayer
-from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
-from quantum_machine_learning.utils.circuit_utils import CircuitUtils
 
 
 @dataclasses.dataclass
