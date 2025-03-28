@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import numpy as np
 import qiskit
@@ -10,41 +11,47 @@ from quantum_machine_learning.quclassi.quclassi import QuClassi
 class TestQuClassi:
     @classmethod
     def setup_class(cls):
-        cls.classical_data_size = 5
-        cls.labels = ["A", "B", "C"]
-        cls.trained_parameters = [
-            np.arange((cls.classical_data_size // 2 + 1) * 2),
-            np.arange((cls.classical_data_size // 2 + 1) * 2) * 2,
-            np.arange((cls.classical_data_size // 2 + 1) * 2) * 3,
-        ]
-
-        cls.data = np.arange((cls.classical_data_size // 2 + 1) * 4)
-        cls.structure = "s"
-        cls.model_dir_path = "./test/"
-        cls.quclassi = QuClassi(
-            classical_data_size=cls.classical_data_size, labels=cls.labels
-        )
+        pass
 
     def test_init(self):
         """Normal test;
+        create an instance of QuClassi with valid arguments.
 
-        Check if self.quclassi has
-        - classical_data_size as same as self.classical_data_size.
-        - labels as same as self.labels.
-        - num_data_qubits as the smallest integer that is greater than or equal to
-          self.classical_data_size.
-        - num_train_qubits as the smallest integer that is greater than or equal to
-          self.classical_data_size.
-        - num_qubits as same as double of the smallest integer that is greater than
-          or equal to self.classical_data_size plus one.
+        Check if
+        - its classical_data_size is the same as the given classical_data_size.
+        - its structure is the same as the given structure.
+        - its labels are the same as the given labels.
+        - its parameter values are the same as the given initial_parameters.
+        - the things above are correct after substituting a new values.
+        - the type of its trainable_parameters is qiskit.circuit.ParameterExpression.
+        - the type of its data_parameters is qiskit.circuit.ParameterExpression.
         """
-        assert self.quclassi.classical_data_size == self.classical_data_size
-        assert self.quclassi.labels == self.labels
-        num_data_qubits = int(np.ceil(self.classical_data_size / 2))
-        assert self.quclassi.num_data_qubits == num_data_qubits
-        num_train_qubits = int(np.ceil(self.classical_data_size / 2))
-        assert self.quclassi.num_train_qubits == num_train_qubits
-        assert self.quclassi.num_qubits == num_train_qubits + num_data_qubits + 1
+        classical_data_size = 3
+        structure = "s"
+        labels = ["a", "b"]
+        initial_parameters = {"a": [[1, 2], [3, 4]], "b": [[3, 4], [5, 6]]}
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size,
+            structure=structure,
+            labels=labels,
+            initial_parameters=initial_parameters,
+        )
+        assert quclassi.classical_data_size == classical_data_size
+        assert quclassi.structure == structure
+        assert quclassi.labels == labels
+        assert quclassi.parameter_values == initial_parameters
+
+        new_classical_data_size = classical_data_size + 1
+        quclassi.classical_data_size = new_classical_data_size
+        assert quclassi.classical_data_size == new_classical_data_size
+
+        new_structure = structure + "d" + "e"
+        quclassi.structure = new_structure
+        assert quclassi.structure == new_structure
+
+        new_labels = labels + ["c"]
+        quclassi.labels = new_labels
+        assert quclassi.labels == new_labels
 
     @pytest.mark.parametrize(
         "structure",
