@@ -36,20 +36,20 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
     """QuClassi class."""
 
     # Define the constants used in this class.
-    single_qubit_unitary: Final[str] = "s"
-    dual_qubit_unitary: Final[str] = "d"
-    entanglement_unitary: Final[str] = "e"
-    acceptable_structure: Final[tuple[str, str, str]] = [
-        single_qubit_unitary,
-        dual_qubit_unitary,
-        entanglement_unitary,
+    SINGLE_QUBIT_UNITARY: Final[str] = "s"
+    DUAL_QUBIT_UNITARY: Final[str] = "d"
+    ENTANGLEMENT_UNITARY: Final[str] = "e"
+    ACCEPTABLE_STRUCTURE: Final[tuple[str, str, str]] = [
+        SINGLE_QUBIT_UNITARY,
+        DUAL_QUBIT_UNITARY,
+        ENTANGLEMENT_UNITARY,
     ]
     # Define the classical register name.
-    creg_name: Final[str] = "creg"
+    CREG_NAME: Final[str] = "creg"
     # Define the model file name to save and load.
-    model_filename: Final[str] = "model.yaml"
+    MODEL_FILENAME: Final[str] = "model.yaml"
     # Define the encoding method to save and load.
-    encoding: Final[str] = "utf-8"
+    ENCODING: Final[str] = "utf-8"
 
     def __init__(
         self,
@@ -146,10 +146,10 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param str structure: a new structure
         :raises ValueError: if a new structure is not constructed with acceptable letters
         """
-        valid = all(s in QuClassi.acceptable_structure for s in structure)
+        valid = all(s in QuClassi.ACCEPTABLE_STRUCTURE for s in structure)
         if not valid:
             error_msg = f"""
-            A given structure must be constructed with only {QuClassi.acceptable_structure}.
+            A given structure must be constructed with only {QuClassi.ACCEPTABLE_STRUCTURE}.
             However, it is '{structure}'.
             """
             raise ValueError(error_msg)
@@ -293,19 +293,19 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             # Do not need to think about what if the letter might not match either of them
             # since QuClassi checks the structure when it's set.
             match letter:
-                case QuClassi.single_qubit_unitary:
+                case QuClassi.SINGLE_QUBIT_UNITARY:
                     layer = SingleQubitUnitaryLayer(
                         num_state_qubits=self.num_train_qubits,
                         qubits_applied=qubits_applied,
                         parameter_prefix=parameter_prefix,
                     )
-                case QuClassi.dual_qubit_unitary:
+                case QuClassi.DUAL_QUBIT_UNITARY:
                     layer = DualQubitUnitaryLayer(
                         num_state_qubits=self.num_train_qubits,
                         qubit_applied_pairs=qubit_applied_pairs,
                         parameter_prefix=parameter_prefix,
                     )
-                case QuClassi.entanglement_unitary:
+                case QuClassi.ENTANGLEMENT_UNITARY:
                     layer = EntanglementUnitaryLayer(
                         num_state_qubits=self.num_train_qubits,
                         qubit_applied_pairs=qubit_applied_pairs,
@@ -360,7 +360,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             self._build()
 
         # Create a circuit with measurement.
-        creg = qiskit.ClassicalRegister(1, name=QuClassi.creg_name)
+        creg = qiskit.ClassicalRegister(1, name=QuClassi.CREG_NAME)
         circuit = self.copy()
         circuit.add_register(creg)
         circuit.measure(self._ancilla_qreg, creg)
@@ -402,7 +402,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         results = jobs.result()
         for result, label in zip(results, self.labels):
             fidelities[label] = Postprocessor.calculate_fidelity_from_swap_test(
-                result.data.creg.get_counts()  # creg is after QuClassi.creg_name
+                result.data.creg.get_counts()  # creg is after QuClassi.CREG_NAME
             )
 
         # Find the label whose value is the larest fidelity.
@@ -457,8 +457,8 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         )
 
         # Save the information as the yaml file.
-        yaml_path = os.path.join(model_dir_path, QuClassi.model_filename)
-        with open(yaml_path, "w", encoding=QuClassi.encoding) as yaml_file:
+        yaml_path = os.path.join(model_dir_path, QuClassi.MODEL_FILENAME)
+        with open(yaml_path, "w", encoding=QuClassi.ENCODING) as yaml_file:
             yaml.dump(
                 dataclasses.asdict(quclassi_info), yaml_file, default_flow_style=False
             )
@@ -470,8 +470,8 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param str model_dir_path: a path to the input directory.
         """
         # Read the information from the yaml file.
-        yaml_path = os.path.join(model_dir_path, QuClassi.model_filename)
-        with open(yaml_path, "r", encoding=QuClassi.encoding) as yaml_file:
+        yaml_path = os.path.join(model_dir_path, QuClassi.MODEL_FILENAME)
+        with open(yaml_path, "r", encoding=QuClassi.ENCODING) as yaml_file:
             quclassi_info = yaml.safe_load(yaml_file)
 
         # Laod the model.
