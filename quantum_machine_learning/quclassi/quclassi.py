@@ -359,15 +359,15 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         self.append(circuit.to_gate(), self.qubits)
 
-    def _classify_datum(
+    def _get_fidelities(
         self,
         datum: list[float],
         backend: qiskit.providers.Backend,
         shots: int = 8192,
         optimisation_level: int = 2,
         seed: int = 901,
-    ) -> str:
-        """Classify one datum and return the label name.
+    ) -> dict[str, float]:
+        """Get fidelities between the given datum and the quantum states representing each label.
 
         :param list[float] datum: a datum to be classified
         :param qiskit.providers.Backend backend: a backend
@@ -376,7 +376,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int seed: a random seed, defaults to 901
         :raises AttributeError: if the parameter values haven't been set
         :raises ValueError: if the shape of the given datum is not the same as the using classical data size
-        :return str: the predicted label
+        :return dict[str, float]: the fidelities for each label
         """
         # Raise the error if the parameter values haven't been set.
         if self.parameter_values == {}:
@@ -435,6 +435,33 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             fidelities[label] = Postprocessor.calculate_fidelity_from_swap_test(
                 digit_result
             )
+
+        return fidelities
+
+    def _classify_datum(
+        self,
+        datum: list[float],
+        backend: qiskit.providers.Backend,
+        shots: int = 8192,
+        optimisation_level: int = 2,
+        seed: int = 901,
+    ) -> str:
+        """Classify one datum and return the label name.
+
+        :param list[float] datum: a datum to be classified
+        :param qiskit.providers.Backend backend: a backend
+        :param int shots: the number of shots, defaults to 8192
+        :param int optimisation_level: the level of the optimisation, defaults to 2
+        :param int seed: a random seed, defaults to 901
+        :return str: the predicted label
+        """
+        fidelities = self._get_fidelities(
+            datum=datum,
+            backend=backend,
+            shots=shots,
+            optimisation_level=optimisation_level,
+            seed=seed,
+        )
 
         # Find the label whose value is the larest fidelity.
         predicted_label = max(fidelities, key=fidelities.get)
