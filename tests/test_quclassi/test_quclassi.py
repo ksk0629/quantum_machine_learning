@@ -94,6 +94,19 @@ class TestQuClassi:
 
     @pytest.mark.quclassi
     def test_none(self):
+        """Normal and abnormal tests;
+        Give None to QuClassi.
+
+        Check if
+        - its classical_data_size is zero.
+        - its structure is the empty string.
+        - its tarinable_parameters is None.
+        - its data_parameters is None.
+        - AttributeError happens when _build() method is called
+          because of the classical data size is None.
+        - AttributeError happens when _build() method is called
+          because of the labels is None.
+        """
         classical_data_size = None
         structure = None
         labels = None
@@ -110,10 +123,12 @@ class TestQuClassi:
         assert quclassi.data_parameters is None
 
         with pytest.raises(AttributeError):
+            # AttributeError must happen because of the classical data size being None.
             quclassi._build()
 
         quclassi.classical_data_size = 4
         with pytest.raises(AttributeError):
+            # AttributeError must happen because of the labels being None.
             quclassi._build()
 
     @pytest.mark.quclassi
