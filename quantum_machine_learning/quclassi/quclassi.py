@@ -2,6 +2,7 @@ import dataclasses
 import os
 from typing import Final
 
+import numpy as np
 import qiskit
 import qiskit.circuit
 import yaml
@@ -346,7 +347,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self,
         datum: list[float],
         backend: qiskit.providers.Backend,
-        shots: int = 9010,
+        shots: int = 8192,
         optimisation_level: int = 2,
         seed: int = 901,
     ) -> str:
@@ -354,7 +355,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         :param list[float] datum: a datum to be classified
         :param qiskit.providers.Backend backend: a backend
-        :param int shots: the number of shots, defaults to 9010
+        :param int shots: the number of shots, defaults to 8192
         :param int optimisation_level: the level of the optimisation, defaults to 2
         :param int seed: a random seed, defaults to 901
         :raises AttributeError: if the parameter values haven't been set
@@ -434,7 +435,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self,
         data: list[list[float]],
         backend: qiskit.providers.Backend,
-        shots: int = 9010,
+        shots: int = 8192,
         optimisation_level: int = 2,
         seed: int = 901,
     ) -> list[str]:
@@ -442,7 +443,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         :param list[list[float]] data: data to be classcified
         :param qiskit.providers.Backend backend: a backend
-        :param int shots: the number of shots, defaults to 9010
+        :param int shots: the number of shots, defaults to 8192
         :param int optimisation_level: the level of the optimisation, defaults to 2
         :param int seed: a random seed, defaults to 901
         :return list[str]: the classified labels
