@@ -150,6 +150,7 @@ class TestQuClassi:
                 structure=structure,
                 labels=labels,
             )
+            quclassi._build()
             assert quclassi.structure == structure
 
     @pytest.mark.quclassi
