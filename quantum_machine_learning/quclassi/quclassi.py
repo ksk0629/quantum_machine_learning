@@ -438,6 +438,59 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         return fidelities
 
+    def _get_probabilities(
+        self,
+        datum: list[float],
+        backend: qiskit.providers.Backend,
+        shots: int = 8192,
+        optimisation_level: int = 2,
+        seed: int = 901,
+    ) -> dict[str, float]:
+        """Get the probabilities, calculated through the softmax function,
+        of belonging the given datum to each label.
+
+        :param list[float] datum: a datum to be classified
+        :param qiskit.providers.Backend backend: a backend
+        :param int shots: the number of shots, defaults to 8192
+        :param int optimisation_level: the level of the optimisation, defaults to 2
+        :param int seed: a random seed, defaults to 901
+        :return str: the predicted label
+        """
+        # Get the fidelities.
+        fidelities = self._get_fidelities(
+            datum=datum,
+            backend=backend,
+            shots=shots,
+            optimisation_level=optimisation_level,
+            seed=seed,
+        )
+
+        # Make the dictionary of the fidelities a vector.
+        fidelity_vector = [fidelity for fidelity in fidelities.values()]
+
+        # Calculate the probabilities using the softmax function.
+        softmax = lambda x: np.exp(x) / sum(np.exp(x))
+        probability_vector = softmax(fidelity_vector)
+
+        # For developer: The summation of the entries of the probability vector must be one.
+        total_probability = np.sum(probability_vector)
+        development_error = f"FOR DEVELOPER: The summation of the entries of the probability vector must be 1, but {total_probability}."
+        assert np.abs(total_probability - 1) < 1e-10, development_error
+
+        # For developer: The dimension of the probability vector must be the same as the length of the labels.
+        dim_probability_vector = len(probability_vector)
+        num_labels = len(self.labels)
+        development_error = f"FOR DEVELOPER: The dimension of the probability vector must be the same as the length of the label, but {dim_probability_vector} vs {num_labels}."
+        assert dim_probability_vector == num_labels, development_error
+
+        # Make the probability vector a dictionary.
+        probabilities = {
+            label: probability
+            for label, probability in zip(self.labels, probability_vector)
+        }
+
+        return probabilities
+
     def _classify_datum(
         self,
         datum: list[float],
@@ -455,7 +508,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int seed: a random seed, defaults to 901
         :return str: the predicted label
         """
-        fidelities = self._get_fidelities(
+        probabilities = self._get_probabilities(
             datum=datum,
             backend=backend,
             shots=shots,
@@ -463,8 +516,8 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             seed=seed,
         )
 
-        # Find the label whose value is the larest fidelity.
-        predicted_label = max(fidelities, key=fidelities.get)
+        # Find the most likely label.
+        predicted_label = max(probabilities, key=probabilities.get)
 
         return predicted_label
 
