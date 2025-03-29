@@ -93,6 +93,30 @@ class TestQuClassi:
         )
 
     @pytest.mark.quclassi
+    def test_none(self):
+        classical_data_size = None
+        structure = None
+        labels = None
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size, structure=structure, labels=labels
+        )
+
+        assert quclassi.classical_data_size == 0
+        assert quclassi.structure == ""
+
+        quclassi._ansatz = None
+        assert quclassi.trainable_parameters is None
+        quclassi._feature_map = None
+        assert quclassi.data_parameters is None
+
+        with pytest.raises(AttributeError):
+            quclassi._build()
+
+        quclassi.classical_data_size = 4
+        with pytest.raises(AttributeError):
+            quclassi._build()
+
+    @pytest.mark.quclassi
     @pytest.mark.parametrize(
         "all_letters",
         [
