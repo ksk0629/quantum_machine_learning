@@ -242,6 +242,22 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         else:
             return self._feature_map.parameters
 
+    @property
+    def with_measurement(self) -> qiskit.QuantumCircuit | None:
+        """Return this QuClassi circuit with measurement.
+
+        :return qiskit.QuantumCircuit | None: this quclassi with measurement
+        """
+        if self._ancilla_qreg is None:
+            return None
+
+        creg = qiskit.ClassicalRegister(1, name=QuClassi.CREG_NAME)
+        circuit = self.copy()
+        circuit.add_register(creg)
+        circuit.measure(self._ancilla_qreg, creg)
+
+        return circuit
+
     def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
@@ -378,17 +394,11 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         if not self._is_built:
             self._build()
 
-        # Create a circuit with measurement.
-        creg = qiskit.ClassicalRegister(1, name=QuClassi.CREG_NAME)
-        circuit = self.copy()
-        circuit.add_register(creg)
-        circuit.measure(self._ancilla_qreg, creg)
-
         # Transplie the circuits.
         pass_manager = qiskit.transpiler.generate_preset_pass_manager(
             optimization_level=optimisation_level, backend=backend, seed_transpiler=seed
         )
-        transpiled_circuit = pass_manager.run(circuit)
+        transpiled_circuit = pass_manager.run(self.with_measurement)
 
         # Load the data to the parameters.
         data_parameters = {
