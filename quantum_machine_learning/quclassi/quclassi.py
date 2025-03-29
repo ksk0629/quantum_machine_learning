@@ -197,7 +197,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :raises AttributeError: if the labels hasn't been set yet
         :raises AttributeError: if the keys of the new parameter values are not the same as the labels.
         """
-        if self.labels is None:
+        if self.labels == []:
             raise AttributeError(
                 "In order to set parameter_values, the labels must be previously set."
             )
