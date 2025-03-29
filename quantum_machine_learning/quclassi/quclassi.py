@@ -140,22 +140,23 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             return self._structure
 
     @structure.setter
-    def structure(self, structure: str) -> None:
+    def structure(self, structure: str | None) -> None:
         """Set the new structure if it's valid, set the parameter values None and reset the registers.
 
-        :param str structure: a new structure
+        :param str structure | None: a new structure
         :raises ValueError: if a new structure is not constructed with acceptable letters
         """
-        valid = all(s in QuClassi.ACCEPTABLE_STRUCTURE for s in structure)
-        if not valid:
-            error_msg = f"""
-            A given structure must be constructed with only {QuClassi.ACCEPTABLE_STRUCTURE}.
-            However, it is '{structure}'.
-            """
-            raise ValueError(error_msg)
+        if structure is not None:
+            valid = all(s in QuClassi.ACCEPTABLE_STRUCTURE for s in structure)
+            if not valid:
+                error_msg = f"""
+                A given structure must be constructed with only {QuClassi.ACCEPTABLE_STRUCTURE}.
+                However, it is '{structure}'.
+                """
+                raise ValueError(error_msg)
 
         self._structure = structure
-        self.parameter_values = None
+        self._parameter_values = None
 
         self._reset_register()
 
@@ -197,12 +198,12 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :raises AttributeError: if the labels hasn't been set yet
         :raises AttributeError: if the keys of the new parameter values are not the same as the labels.
         """
-        if self.labels == []:
-            raise AttributeError(
-                "In order to set parameter_values, the labels must be previously set."
-            )
-
         if parameter_values is not None:
+            if self.labels == []:
+                raise AttributeError(
+                    "In order to set parameter_values, the labels must be previously set."
+                )
+
             if set(parameter_values.keys()) != set(self.labels):
                 raise AttributeError(
                     f"""
