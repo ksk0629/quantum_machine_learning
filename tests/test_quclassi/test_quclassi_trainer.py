@@ -1,9 +1,10 @@
 import glob
 import os
+import tempfile
 
-import numpy as np
-import qiskit
+import qiskit_aer
 import pytest
+import yaml
 
 from quantum_machine_learning.quclassi.quclassi import QuClassi
 from quantum_machine_learning.quclassi.quclassi_trainer import QuClassiTrainer
@@ -12,225 +13,247 @@ from quantum_machine_learning.quclassi.quclassi_trainer import QuClassiTrainer
 class TestQuClassiTrainer:
     @classmethod
     def setup_class(cls):
-        classical_data_size = 2
-        labels = ["Large", "Small"]
-        cls.positive_data = np.array([[0.9, 0.8], [0.8, 0.9]])
-        cls.negative_data = np.array([[0.1, 0.2], [0.2, 0.1]])
-        cls.train_data = np.concatenate((cls.positive_data, cls.negative_data))
-        cls.train_labels = np.array(["Large", "Large", "Small", "Small"])
+        pass
+
+    @pytest.mark.quclassi
+    def test_init(self):
+        """Normal test;
+        create an instance of QuClassiTrainer.
+
+        Check if
+        - its qulcassi is the same as the given quclassi.
+        - its epochs is the same as the given epochs.
+        - its learning_rate is the same as the given learning_rate.
+        - its batch_size is the same as the given batch_size.
+        - its backend is the same as the given backend.
+        - its shots is the same as the given shots.
+        - its seed is the same as the given seed.
+        - its optimisation_level is the same as the given optimisation_level.
+        - its losses is None.
+        - its accuracies is None.
+        - its parameters is None.
+        - the above things hold after substituting new values.
+        """
+        classical_data_size = 3
         structure = "s"
-        cls.model_dir_path = "./test/"
-        cls.quclassi = QuClassi(classical_data_size=classical_data_size, labels=labels)
-        cls.quclassi.build(structure)
-
-        cls.epochs = 2
-        cls.batch_size = 3
-        cls.trained_paramters = {"layer0_y[0]": 1, "layer0_z[0]": 1}
-        cls.initial_parameters = np.array([[1, 1], [0, 0]])
-
-    @pytest.mark.quclassi
-    def get_trainer(self):
-        return QuClassiTrainer(
-            quclassi=self.quclassi,
-            batch_size=self.batch_size,
-            epochs=self.epochs,
+        labels = ["a", "b"]
+        initial_parameters = {"a": [[1, 2, 3, 4]], "b": [[3, 4, 5, 6]]}
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size,
+            structure=structure,
+            labels=labels,
+            initial_parameters=initial_parameters,
         )
-
-    @pytest.mark.quclassi
-    def test_init_with_invalid_initial_parameters(self):
-        """Abnormal test;
-        Create the instance with an invalid initial_parameters.
-
-        Check if ValueError happens.
-        """
-        initial_parameters = np.array([1])
-        with pytest.raises(ValueError):
-            QuClassiTrainer(
-                quclassi=self.quclassi, initial_parameters=initial_parameters
-            )
-
-    @pytest.mark.quclassi
-    def test_init_with_valid_initial_parameters(self):
-        """Abnormal test;
-        Create the instance with a valid initial_parameters.
-
-        Check if
-        - the length of the member variable parameters_history of the return value is one
-        - the only element of the member variable parameters_history of the return value is the same as self.initial_parameters.
-        - the current_parameters of the return value is the same as self.initial_parameters.
-        """
+        epochs = 1
+        learning_rate = 0.1
+        batch_size = 2
+        shuffle = False
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        shots = 1
+        seed = 91
+        optimisation_level = 2
         quclassi_trainer = QuClassiTrainer(
-            quclassi=self.quclassi, initial_parameters=self.initial_parameters
+            quclassi=quclassi,
+            backend=backend,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            shots=shots,
+            seed=seed,
+            optimisation_level=optimisation_level,
         )
-        assert len(quclassi_trainer.parameters_history) == 1
-        assert np.allclose(
-            quclassi_trainer.parameters_history[0], self.initial_parameters
-        )
-        assert np.allclose(quclassi_trainer.current_parameters, self.initial_parameters)
+        assert quclassi_trainer.quclassi is quclassi
+        assert quclassi_trainer.epochs == epochs
+        assert quclassi_trainer.learning_rate == learning_rate
+        assert quclassi_trainer.batch_size == batch_size
+        assert quclassi_trainer.shuffle == shuffle
+        assert quclassi_trainer.backend == backend
+        assert quclassi_trainer.shots == shots
+        assert quclassi_trainer.seed == seed
+        assert quclassi_trainer.losses is None
+        assert quclassi_trainer.accuracies is None
+        assert quclassi_trainer.parameters is None
+
+        new_value = None
+        quclassi_trainer.quclassi = new_value
+        quclassi_trainer.epochs = new_value
+        quclassi_trainer.learning_rate = new_value
+        quclassi_trainer.backend = new_value
+        quclassi_trainer.batch_size = new_value
+        quclassi_trainer.shuffle = new_value
+        quclassi_trainer.shots = new_value
+        quclassi_trainer.seed = new_value
+        quclassi_trainer.optimisation_level = new_value
+        assert quclassi_trainer.quclassi is new_value
+        assert quclassi_trainer.epochs == new_value
+        assert quclassi_trainer.learning_rate == new_value
+        assert quclassi_trainer.batch_size == new_value
+        assert quclassi_trainer.shuffle == new_value
+        assert quclassi_trainer.backend == new_value
+        assert quclassi_trainer.shots == new_value
+        assert quclassi_trainer.seed == new_value
+        assert quclassi_trainer.optimisation_level == new_value
+        assert quclassi_trainer.losses is None
+        assert quclassi_trainer.accuracies is None
+        assert quclassi_trainer.parameters is None
 
     @pytest.mark.quclassi
-    def test_train_with_evaluation(self):
+    def test_train_without_saving(self):
         """Normal test;
-        Run train with eval=True.
+        run train method without saving.
 
         Check if
-        - the length of parameters_history is self.epochs + 1.
-        - the length of train_accuracies is self.epochs.
-        - the length of val_accuracies is self.epochs.
-        - the current_parameters is not the same as the first element of the parameter_histories.
+        - the first return value, supposedly loss, is dict.
+        - the keys of the first return value are the labels of the given QuClassi.
+        - the values of the first return value are floats.
         """
-        quclassi_trainer = self.get_trainer()
-        quclassi_trainer.train(
-            train_data=self.train_data,
-            train_labels=self.train_labels,
-            val_data=self.train_data,
-            val_labels=self.train_labels,
-            eval=True,
+        # Create data for training.
+        data_0 = [1, 0]  # |0>
+        data_1 = [0, 1]  # |1>
+        num_data = 1
+        data = []
+        data_labels = []
+        for _ in range(num_data):
+            data.append(data_0)
+            data_labels.append("0")
+            data.append(data_1)
+            data_labels.append("1")
+        # Create an instance of QuClassi for the created data.
+        structure = "s"
+        labels = ["0", "1"]
+        quclassi = QuClassi(
+            classical_data_size=len(data_0),
+            structure=structure,
+            labels=labels,
         )
-        assert len(quclassi_trainer.parameters_history) == self.epochs + 1
-        assert len(quclassi_trainer.train_accuracies) == self.epochs
-        assert len(quclassi_trainer.val_accuracies) == self.epochs
-        assert not np.allclose(
-            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
+        # Create an instance of QuClassiTrainer.
+        epochs = 2
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        quclassi_trainer = QuClassiTrainer(
+            quclassi=quclassi, backend=backend, epochs=epochs
         )
+        # Train the QuClassi.
+        loss, accuracy = quclassi_trainer.train(data=data, labels=data_labels)
+
+        assert isinstance(loss, dict)
+        assert set(loss.keys()) == set(quclassi.labels)
+        assert all(isinstance(value, float) for value in loss.values())
+        assert isinstance(accuracy, dict)
+        assert set(accuracy.keys()) == set(quclassi.labels)
+        assert all(isinstance(value, float) for value in accuracy.values())
 
     @pytest.mark.quclassi
-    def test_train_without_evaluation(self):
+    def test_train_with_saving(self):
         """Normal test;
-        Run train without eval=True.
+        run train method with saving.
 
         Check if
-        - the length of parameters_history is self.epochs + 1.
-        - the length of train_accuracies is 1.
-        - the length of val_accuracies is 1.
-        - the current_parameters is not the same as the first element of the parameter_histories.
+        - epochs-parameters yaml files are in the specified directory.
+        - each yaml file has a correct shape.
+        - the first return value, supposedly loss, is dict.
+        - the keys of the first return value are the labels of the given QuClassi.
+        - the values of the first return value are floats.
         """
-        quclassi_trainer = self.get_trainer()
-        quclassi_trainer.train(
-            train_data=self.train_data,
-            train_labels=self.train_labels,
-            val_data=self.train_data,
-            val_labels=self.train_labels,
-            eval=False,
+        # Create data for training.
+        data_0 = [1, 0]  # |0>
+        data_1 = [0, 1]  # |1>
+        num_data = 1
+        data = []
+        data_labels = []
+        for _ in range(num_data):
+            data.append(data_0)
+            data_labels.append("0")
+            data.append(data_1)
+            data_labels.append("1")
+        # Create an instance of QuClassi for the created data.
+        structure = "s"
+        labels = ["0", "1"]
+        quclassi = QuClassi(
+            classical_data_size=len(data_0),
+            structure=structure,
+            labels=labels,
         )
-        assert len(quclassi_trainer.parameters_history) == self.epochs + 1
-        assert len(quclassi_trainer.train_accuracies) == 1
-        assert len(quclassi_trainer.val_accuracies) == 1
-        assert not np.allclose(
-            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
+        # Create an instance of QuClassiTrainer.
+        epochs = 2
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        quclassi_trainer = QuClassiTrainer(
+            quclassi=quclassi, backend=backend, epochs=epochs
         )
+        # Train the QuClassi.
+        with tempfile.TemporaryDirectory() as tmp_dir_path:
+            loss, accuracy = quclassi_trainer.train(
+                data=data,
+                labels=data_labels,
+                save_per_epoch=True,
+                model_dir_path=tmp_dir_path,
+            )
+
+            target_file_name = os.path.join(tmp_dir_path, "./*.yaml")
+            target_file_paths = glob.glob(target_file_name)
+            assert len(target_file_paths) == epochs
+
+            for target_file_path in target_file_paths:
+                with open(
+                    target_file_path, "r", encoding=QuClassi.ENCODING
+                ) as yaml_file:
+                    parameters = yaml.unsafe_load(yaml_file)
+                assert set(parameters.keys()) == set(["initial_parameters"])
+                parameters = parameters["initial_parameters"]
+                assert set(parameters.keys()) == set(quclassi_trainer.quclassi.labels)
+                for values in parameters.values():
+                    assert len(values) == 2  # Because the structure is "s"
+
+            assert isinstance(loss, dict)
+            assert set(loss.keys()) == set(quclassi_trainer.quclassi.labels)
+            assert all(isinstance(value, float) for value in loss.values())
+            assert isinstance(accuracy, dict)
+            assert set(accuracy.keys()) == set(quclassi_trainer.quclassi.labels)
+            assert all(isinstance(value, float) for value in accuracy.values())
 
     @pytest.mark.quclassi
-    def test_train_one_epoch(self):
-        """Normal test;
-        Run train_one_epoch.
-
-        Check if the current_parameters is not the same as the first element of the parameter_histories.
-        """
-        quclassi_trainer = self.get_trainer()
-        quclassi_trainer.train_one_epoch(
-            train_data=self.positive_data, label="Large", epoch=1
-        )
-        assert not np.allclose(
-            quclassi_trainer.parameters_history[0], quclassi_trainer.current_parameters
-        )
-
-    @pytest.mark.quclassi
-    def test_run_sampler(self):
-        """Normal test;
-        Run run_sampler.
-
-        Check if
-        - the type of the return value is qiskit.primitives.primitive_job.PrimitiveJob.
-        - the return value has the function result() and its return value's length is the same as the length of self.train_data.
-        """
-        quclassi_trainer = self.get_trainer()
-        jobs = quclassi_trainer.run_sampler(
-            self.train_data, trained_parameters=self.trained_paramters
-        )
-        assert isinstance(jobs, qiskit.primitives.primitive_job.PrimitiveJob)
-        assert len(jobs.result()) == len(self.train_data)
-
-    @pytest.mark.quclassi
-    def test_get_fidelities(self):
-        """Normal test;
-        Run get_fidelities.
-
-        Check if
-        - the length of the return value is the same as the length of self.train_data.
-        - each element of the return value is between 0 and 1.
-        """
-        quclassi_trainer = self.get_trainer()
-        fidelities = quclassi_trainer.get_fidelities(
-            self.train_data, trained_parameters=self.trained_paramters
-        )
-        assert len(fidelities) == len(self.train_data)
-        for fidelity in fidelities:
-            assert 0 <= fidelity <= 1
-
-    @pytest.mark.quclassi
-    def test_save(self):
-        """Normal test;
-        Run save after running train.
-
-        Check if there are (self.epochs + 1) + 4 .pkl files under self.model_dir_path.
-        Note that, the "+4" comes from QuClassi.save function.
-        """
-        quclassi_trainer = self.get_trainer()
-        quclassi_trainer.train(
-            train_data=self.train_data,
-            train_labels=self.train_labels,
-            val_data=self.train_data,
-            val_labels=self.train_labels,
-            eval=False,
-        )
-
-        quclassi_trainer.save(self.model_dir_path)
-        pkl_files = glob.glob(os.path.join(self.model_dir_path, "*.pkl"))
-        assert len(pkl_files) == self.epochs + 1 + 4
-
-        all_files = glob.glob(os.path.join(self.model_dir_path, "*"))
-        for file in all_files:
-            os.remove(file)
-        os.rmdir(self.model_dir_path)
-
-    @pytest.mark.quclassi
-    @pytest.mark.parametrize(
-        "predicted_labels_and_true_labels", [[[1], [2, 3]], [[1, 2], [3]]]
-    )
-    def test_calculate_accuracy_with_invalid_args(
-        self, predicted_labels_and_true_labels
-    ):
+    def test_train_with_invalid_data(self):
         """Abnormal test;
-        Run calculate_accuracy with an invalid arguments.
+        run train method with unbalance data and labels,
+        which means that the lengths of the data and labels are not the same.
 
         Check if ValueError happens.
         """
-        (predicted_labels, true_labels) = predicted_labels_and_true_labels
+        classical_data_size = 3
+        structure = "s"
+        labels = ["a", "b"]
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size,
+            structure=structure,
+            labels=labels,
+        )
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        quclassi_trainer = QuClassiTrainer(quclassi=quclassi, backend=backend)
+
+        data = [[1, 2]]
         with pytest.raises(ValueError):
-            QuClassiTrainer.calculate_accuracy(
-                predicted_labels=predicted_labels, true_labels=true_labels
-            )
+            quclassi_trainer.train(data=data, labels=labels)
 
     @pytest.mark.quclassi
-    @pytest.mark.parametrize(
-        "predicted_labels_and_true_labels_and_accuracy",
-        [[[1], [1], 1], [[1, 2], [1, 3], 0.5], [[1, 2], [2, 1], 0]],
-    )
-    def test_calculate_accuracy_with_valid_args(
-        self, predicted_labels_and_true_labels_and_accuracy
-    ):
+    def test_train_without_giving_model_dir_while_saving(self):
         """Abnormal test;
-        Run calculate_accuracy with a valid arguments.
+        run train method with save_per_epoch is True and model_dir_path is None.
 
-        Check if the return value, which is an accuracy, is correct.
+        Check if ValueError happens.
         """
-        (predicted_labels, true_labels, true_accuracy) = (
-            predicted_labels_and_true_labels_and_accuracy
+        classical_data_size = 3
+        structure = "s"
+        labels = ["a", "b"]
+        quclassi = QuClassi(
+            classical_data_size=classical_data_size,
+            structure=structure,
+            labels=labels,
         )
-        predicted_labels = np.array(predicted_labels)
-        true_labels = np.array(true_labels)
-        accuracy = QuClassiTrainer.calculate_accuracy(
-            predicted_labels=predicted_labels, true_labels=true_labels
-        )
-        assert accuracy == true_accuracy
+        backend = qiskit_aer.AerSimulator(seed_simulator=901)
+        quclassi_trainer = QuClassiTrainer(quclassi=quclassi, backend=backend)
+
+        data = [[1, 2], [3, 4]]
+        with pytest.raises(ValueError):
+            quclassi_trainer.train(
+                data=data, labels=labels, save_per_epoch=True, model_dir_path=None
+            )
