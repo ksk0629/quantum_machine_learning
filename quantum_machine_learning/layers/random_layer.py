@@ -8,6 +8,7 @@ import qiskit.circuit
 
 from quantum_machine_learning.layers.base_layer import BaseLayer
 from quantum_machine_learning.gate.s_swap_gate import SSwapGate
+from quantum_machine_learning.utils.utils import Utils
 
 
 @dataclasses.dataclass
@@ -48,6 +49,7 @@ class RandomLayer(BaseLayer):
         available_gates: list[GateInfo] | None = None,
         threshold: float = 0.5,
         select_options: SelectOptions | None = None,
+        seed: int = 901,
         name: str | None = "RandomLayer",
     ):
         """Initialise this layer.
@@ -63,12 +65,14 @@ class RandomLayer(BaseLayer):
         self._available_gates: list[GateInfo] | None = None
         self._threshold: float | None = None
         self._select_options: SelectOptions | None = None
+        self._seed = None
 
         super().__init__(num_state_qubits=num_state_qubits, name=name)
 
         self.available_gates = available_gates
         self.threshold = threshold
         self.select_options = select_options
+        self.seed = seed
 
     @property
     def available_gates(self) -> list[GateInfo] | None:
@@ -125,6 +129,19 @@ class RandomLayer(BaseLayer):
         :param float | None threshold: a new threshold
         """
         self._threshold = threshold
+        self._reset_register()
+
+    @property
+    def seed(self) -> int | None:
+        """Return the random seed.
+
+        :return int | None: the random seed
+        """
+        return self._seed
+
+    @seed.setter
+    def seed(self, seed: int | None) -> None:
+        self._seed = seed
         self._reset_register()
 
     @property
@@ -247,6 +264,9 @@ class RandomLayer(BaseLayer):
     def _build(self) -> None:
         """Build the circuit."""
         super()._build()
+
+        # Fix the seed.
+        Utils.fix_seed(self.seed)
 
         # Set connection probabilities between qubits.
         self._set_connection_probabilieis()
