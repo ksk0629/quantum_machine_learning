@@ -1,6 +1,6 @@
 import dataclasses
 import os
-from typing import Final
+from typing import Callable, Final
 
 import numpy as np
 import qiskit
@@ -57,6 +57,9 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         classical_data_size: int,
         structure: str,
         labels: list[str],
+        transformer: Callable[[list[list[float]]], list[float]] | None = (
+            lambda data: (2 * np.arcsin(np.sqrt(data))).tolist()
+        ),
         initial_parameters: dict[str, list[float]] | None = None,
         name: str | None = "QuClassi",
     ):
@@ -65,6 +68,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int classical_data_size: the classical data size to be fed into QuClassi
         :param str structure: the strucutre of QuClassi
         :param list[str] labels: the labels to be classified
+        :param Callable[[list[list[float]]], list[float]] | None transformer: a method to be applied to a data to be fed to the QuClassi, defaults to (lambda data: (2 * np.arcsin(np.sqrt(data))).tolist())
         :param dict[str, list[float]] initial_parameters: the initial parameters, defaults to None
         :param str | None name: the name of the cirucit, defaults to "QuClassi"
         """
@@ -78,6 +82,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self._ansatz: qiskit.QuantumCircuit | None = None
         self._feature_map: qiskit.QuantumCircuit | None = None
         self._transpiled: dict[int, qiskit.QuantumCircuit] | None = None
+        self._transformer: Callable[[list[list[float]]], list[float]] = None
 
         super().__init__(name=name)  # For BlueprintCircuit
 
@@ -85,6 +90,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self.structure = structure
         self.labels = labels
         self.parameter_values = initial_parameters
+        self._transformer = transformer
 
     @property
     def classical_data_size(self) -> int:
@@ -578,6 +584,10 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int seed: a random seed, defaults to 901
         :return list[str]: the classified labels
         """
+        # Transform the data by self._transformer.
+        if self._transformer is not None:
+            data = self._transformer(data)
+
         # Classify each datum.
         predicted_labels = []
         for datum in data:

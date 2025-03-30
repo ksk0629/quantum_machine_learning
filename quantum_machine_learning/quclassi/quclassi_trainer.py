@@ -103,6 +103,10 @@ class QuClassiTrainer:
         self.accuracies = {label: [] for label in self.quclassi.labels}
         self.parameters = []
 
+        # Transform the data by self._transformer.
+        if self.quclassi._transformer is not None:
+            data = self.quclassi._transformer(data)
+
         # Separate the dataset by their labels.
         data_separated_by_label = dict()
         for label in self.quclassi.labels:
@@ -279,13 +283,12 @@ class QuClassiTrainer:
         :return float: the difference
         """
         # Shift the parameter values.
-        shifted_parameter_values = copy.deepcopy(parameter_values)
-        shifted_parameter_values[target_paramerter_index] += shift_value
+        parameter_values[target_paramerter_index] += shift_value
         shifted_trainable_parameters = {
             trainable_parameter: shifted_parameter_value
             for trainable_parameter, shifted_parameter_value in zip(
                 self.quclassi.trainable_parameters,
-                shifted_parameter_values,
+                parameter_values,
             )
         }
         # Get the fidelities.
@@ -297,6 +300,8 @@ class QuClassiTrainer:
         shifted_averaged_fidelity = np.average(shifted_fidelities)
         # Calculate the difference.
         difference = -CalculationUtils.safe_log_e(shifted_averaged_fidelity)
+
+        parameter_values[target_paramerter_index] -= shift_value
 
         return difference
 
