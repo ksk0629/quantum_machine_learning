@@ -45,6 +45,7 @@ class TestQuClassi:
           after substituting new parameter values.
         - the type of its trainable_parameters is qiskit.circuit.parametertable.ParameterView.
         - the type of its data_parameters is qiskit.circuit.parametertable.ParameterView.
+        - the type of its with_measurement is qiskit.QuantumCircuit after running _build method.
         """
         classical_data_size = 3
         structure = "s"
@@ -92,6 +93,9 @@ class TestQuClassi:
             quclassi.data_parameters, qiskit.circuit.parametertable.ParameterView
         )
 
+        quclassi._build()
+        assert isinstance(quclassi.with_measurement, qiskit.QuantumCircuit)
+
     @pytest.mark.quclassi
     def test_none(self):
         """Normal and abnormal tests;
@@ -102,6 +106,7 @@ class TestQuClassi:
         - its structure is the empty string.
         - its tarinable_parameters is None.
         - its data_parameters is None.
+        - its with_measurement is None.
         - AttributeError happens when _build() method is called
           because of the classical data size is None.
         - AttributeError happens when _build() method is called
@@ -119,6 +124,7 @@ class TestQuClassi:
 
         quclassi._ansatz = None
         assert quclassi.trainable_parameters is None
+        assert quclassi.with_measurement is None
         quclassi._feature_map = None
         assert quclassi.data_parameters is None
 
