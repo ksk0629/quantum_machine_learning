@@ -35,3 +35,9 @@ class CalculationUtils:
 
         num_correct = int((np.array(predicted_labels) == np.array(true_labels)).sum())
         return num_correct / len(predicted_labels)
+
+    @staticmethod
+    def safe_log_e(value: float) -> float:
+        if value == 0:
+            value = 1e-16
+        return float(np.log(value))

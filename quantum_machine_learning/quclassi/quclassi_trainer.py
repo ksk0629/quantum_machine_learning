@@ -255,10 +255,8 @@ class QuClassiTrainer:
         )
         # Calculate the average forward shifted fidelity.
         shifted_averaged_fidelity = np.average(shifted_fidelities)
-        if shifted_averaged_fidelity == 0:
-            shifted_averaged_fidelity = 1e-10
         # Calculate the difference.
-        difference = float(-np.log(shifted_averaged_fidelity))
+        difference = -CalculationUtils.safe_log_e(shifted_averaged_fidelity)
 
         return difference
 
