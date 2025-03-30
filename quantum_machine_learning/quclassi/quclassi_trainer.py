@@ -89,7 +89,8 @@ class QuClassiTrainer:
             raise ValueError(error_msg)
 
         if self.quclassi.parameter_values == dict():
-            self.quclassi._build()
+            if not self.quclassi._is_built:
+                self.quclassi._build()
             # If no parameter values are not, set them randomly.
             num_parameters_per_label = len(self.quclassi.trainable_parameters)
             self.quclassi.parameter_values = {
