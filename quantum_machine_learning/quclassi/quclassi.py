@@ -108,6 +108,12 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
     @property
     def using_classical_data_size(self) -> int:
+        """Return the data size that this QuClassi actually uses.
+        QuClassi assumes that the input classical data size is even,
+        so this return value is actual classical_data_size + 1 if it's odd.
+
+        :return int: data size that is evenised
+        """
         if self.classical_data_size % 2 == 0:  # Even number
             return self.classical_data_size
         else:  # Odd number
