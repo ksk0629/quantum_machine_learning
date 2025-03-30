@@ -285,7 +285,7 @@ class QuClassiTrainer:
             trainable_parameter: shifted_parameter_value
             for trainable_parameter, shifted_parameter_value in zip(
                 self.quclassi.trainable_parameters,
-                parameter_values,
+                shifted_parameter_values,
             )
         }
         # Get the fidelities.
