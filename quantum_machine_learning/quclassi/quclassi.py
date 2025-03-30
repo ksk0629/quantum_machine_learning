@@ -588,6 +588,12 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         if self._transformer is not None:
             data = self._transformer(data)
 
+        # Append 0 to each datum if their dimension is not the same as the using classical data size.
+        if len(data[0]) != self.using_classical_data_size:
+            expanded_data = np.zeros((len(data), self.using_classical_data_size))
+            expanded_data[:, :-1] = data
+            data = expanded_data.tolist()
+
         # Classify each datum.
         predicted_labels = []
         for datum in data:

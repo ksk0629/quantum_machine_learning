@@ -107,6 +107,14 @@ class QuClassiTrainer:
         if self.quclassi._transformer is not None:
             data = self.quclassi._transformer(data)
 
+        # Append 0 to each datum if their dimension is not the same as the using classical data size.
+        if len(data[0]) != self.quclassi.using_classical_data_size:
+            expanded_data = np.zeros(
+                (len(data), self.quclassi.using_classical_data_size)
+            )
+            expanded_data[:, :-1] = data
+            data = expanded_data.tolist()
+
         # Separate the dataset by their labels.
         data_separated_by_label = dict()
         for label in self.quclassi.labels:
