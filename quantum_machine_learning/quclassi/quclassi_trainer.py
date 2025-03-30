@@ -31,8 +31,20 @@ class QuClassiTrainer:
         shuffle: bool = True,
         shots: int = 8192,
         seed: int | None = 901,
-        optimisation_level: int = 3,
+        optimisation_level: int = 2,
     ):
+        """Initialise this trainer.
+
+        :param QuClassi quclassi: QuClassi to be trained
+        :param qiskit.providers.Backend backend: a backend
+        :param int epochs: the number of epochs, defaults to 25
+        :param float learning_rate: a learning rate, defaults to 0.01
+        :param int batch_size: a batch size, defaults to 1
+        :param bool shuffle: if the data will be shuffled, defaults to True
+        :param int shots: the number of shots, defaults to 8192
+        :param int | None seed: a random seed, defaults to 901
+        :param int optimisation_level: the level of the optimisation, defaults to 2
+        """
         self.quclassi = quclassi
         self.epochs = epochs
         self.learning_rate = learning_rate
@@ -58,6 +70,16 @@ class QuClassiTrainer:
         save_per_epoch: bool = False,
         model_dir_path: str | None = None,
     ) -> tuple[dict[str, float], dict[str, float]]:
+        """Train the QuClassi.
+
+        :param list[list[float]] data: data to train the QuClassi
+        :param list[str] labels: labels to train the QuClassi
+        :param bool save_per_epoch: if updated parameters should be saved per epoch, defaults to False
+        :param str | None model_dir_path: a path to a directory to save parameters, defaults to None
+        :raises ValueError: if the lengths of the data and labels are not the same
+        :raises ValueError: if save_per_epoch is True and model_dir_path is None
+        :return tuple[dict[str, float], dict[str, float]]: the last losses and accuracies
+        """
         if len(data) != len(labels):
             error_msg = f"The lengths of data and labels must be same. However, {len(data)} vs {len(labels)}."
             raise ValueError(error_msg)
@@ -143,6 +165,15 @@ class QuClassiTrainer:
         save: bool,
         model_dir_path: str | None = None,
     ) -> tuple[float, float]:
+        """Train the QuClassi only one epoch.
+
+        :param list[list[float]] data: data to train the QuClassi
+        :param str label: the label of the given data
+        :param int epoch: the current epoch number
+        :param bool save: if updated parameters should be saved
+        :param str | None model_dir_path: a path to a directory to save parameters, defaults to None
+        :return tuple[float, float]: the losses and accuracies
+        """
         # Shuffle the data if needed.
         if self.shuffle:
             np.random.shuffle(data)
@@ -238,6 +269,14 @@ class QuClassiTrainer:
         target_paramerter_index: int,
         shift_value: float,
     ) -> float:
+        """Get the difference computed by executing the QuClassi using shifted parameters.
+
+        :param list[list[float]] data: data to be fed to the QuClassi
+        :param list[float] parameter_values: parameter values to be used
+        :param int target_paramerter_index: an index of the parameter to be shifted
+        :param float shift_value: a shift value
+        :return float: the difference
+        """
         # Shift the parameter values.
         shifted_parameter_values = copy.deepcopy(parameter_values)
         shifted_parameter_values[target_paramerter_index] += shift_value
@@ -265,6 +304,12 @@ class QuClassiTrainer:
         data: list[list[float]],
         trainable_parameters: dict[str, float],
     ) -> list[float]:
+        """Get fidelities.
+
+        :param list[list[float]] data: data to calculate the fidelities
+        :param dict[str, float] trainable_parameters: parameters to be fed to the QuClassi
+        :return list[float]: the fidelities
+        """
         # Transplie the circuits.
         pass_manager = qiskit.transpiler.generate_preset_pass_manager(
             optimization_level=self.optimisation_level,
