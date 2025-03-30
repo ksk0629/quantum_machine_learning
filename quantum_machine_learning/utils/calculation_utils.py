@@ -9,6 +9,13 @@ class CalculationUtils:
         probabilities_list: list[dict[str, float]],
         true_labels: list[str],
     ) -> float:
+        """Calculate the cross entropy.
+
+        :param list[dict[str, float]] probabilities_list: a list of probabilities that are dictionaries whose keys are labels and values are their probabiliries
+        :param list[str] true_labels: the true labels
+        :raises ValueError: if the length of two of given arguments are not the same
+        :return float: the cross entropy value
+        """
         if len(probabilities_list) != len(true_labels):
             error_msg = f"The lengths of probabilities_list and true_labels must be same, but {len(probabilities_list)} vs {len(true_labels)}."
             raise ValueError(error_msg)
@@ -29,6 +36,13 @@ class CalculationUtils:
     def calculate_accuracy(
         predicted_labels: list[str], true_labels: list[str]
     ) -> float:
+        """Calculate the accuracy.
+
+        :param list[str] predicted_labels: predicted labels
+        :param list[str] true_labels: the true labels
+        :raises ValueError: if the lengths of two of the arguments are not the same
+        :return float: the accuracy
+        """
         if len(predicted_labels) != len(true_labels):
             error_mas = f"The lengths of the predicted and true labels must be the same, but {len(predicted_labels)} and {len(true_labels)}."
             raise ValueError(error_mas)
@@ -38,6 +52,12 @@ class CalculationUtils:
 
     @staticmethod
     def safe_log_e(value: float) -> float:
+        """Safely calculate the log_e.
+        If the given value is 0, then the value is automatically set as 1e-16.
+
+        :param float value: a value to be taken log_e
+        :return float: the value of log_e
+        """
         if value == 0:
             value = 1e-16
         return float(np.log(value))
