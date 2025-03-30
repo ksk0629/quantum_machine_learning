@@ -271,7 +271,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         backend: qiskit.providers.Backend,
         seed: int = 901,
     ) -> qiskit.QuantumCircuit:
-        """Get a transpiled QuClassi according to the optimisation level and backend.
+        """Get a transpiled QuClassi according to the given arguments.
         The transpiled circuit is stored to the member variable to return the same query quickly.
 
         :param int optimisation_level: an optimisation level
@@ -279,7 +279,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int seed: a random seed, defaults to 901
         :return qiskit.QuantumCircuit: the optimised QuClassi circuit
         """
-        key = (backend, optimisation_level)
+        key = (backend, optimisation_level, seed)
         if self._transpiled is not None and key in self._transpiled:
             # If the transpiled circuit has been already set, return it.
             return self._transpiled[key]
