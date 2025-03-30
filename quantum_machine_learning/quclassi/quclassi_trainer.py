@@ -312,12 +312,11 @@ class QuClassiTrainer:
         :return list[float]: the fidelities
         """
         # Transplie the circuits.
-        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
-            optimization_level=self.optimisation_level,
+        transpiled_circuit = self.quclassi._get_transpiled(
+            optimisation_level=self.optimisation_level,
             backend=self.backend,
-            seed_transpiler=self.seed,
+            seed=self.seed,
         )
-        transpiled_circuit = pass_manager.run(self.quclassi.with_measurement)
 
         # Create primitive unified blocks.
         primitive_unified_blocks = []

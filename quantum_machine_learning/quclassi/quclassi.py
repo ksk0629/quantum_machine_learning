@@ -77,6 +77,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self._train_qreg: qiskit.QuantumCircuit | None = None
         self._ansatz: qiskit.QuantumCircuit | None = None
         self._feature_map: qiskit.QuantumCircuit | None = None
+        self._transpiled: dict[int, qiskit.QuantumCircuit] | None = None
 
         super().__init__(name=name)  # For BlueprintCircuit
 
@@ -264,6 +265,39 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
 
         return circuit
 
+    def _get_transpiled(
+        self,
+        optimisation_level: int,
+        backend: qiskit.providers.Backend,
+        seed: int = 901,
+    ) -> qiskit.QuantumCircuit:
+        """Get a transpiled QuClassi according to the optimisation level and backend.
+        The transpiled circuit is stored to the member variable to return the same query quickly.
+
+        :param int optimisation_level: an optimisation level
+        :param qiskit.providers.Backend backend: a backend
+        :param int seed: a random seed, defaults to 901
+        :return qiskit.QuantumCircuit: the optimised QuClassi circuit
+        """
+        key = (backend, optimisation_level)
+        if self._transpiled is not None and key in self._transpiled:
+            # If the transpiled circuit has been already set, return it.
+            return self._transpiled[key]
+
+        if self._transpiled is None:
+            # If this is the first time transpiling the circuit, initialise self._transpiled.
+            self._transpiled = dict()
+
+        # Transpile the circuit and store it to the member variable.
+        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
+            optimization_level=optimisation_level,
+            backend=backend,
+            seed_transpiler=seed,
+        )
+        self._transpiled[key] = pass_manager.run(self.with_measurement)
+
+        return self._transpiled[key]
+
     def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
@@ -294,6 +328,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         self._ansatz = qiskit.QuantumCircuit(self._train_qreg, name="train")
         self._feature_map = qiskit.QuantumCircuit(self._data_qreg, name="data")
 
+        self._transpiled = dict()
         self._is_built = False
 
     def _build(self) -> None:
@@ -401,10 +436,9 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
             self._build()
 
         # Transplie the circuits.
-        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
-            optimization_level=optimisation_level, backend=backend, seed_transpiler=seed
+        transpiled_circuit = self._get_transpiled(
+            optimisation_level=optimisation_level, backend=backend, seed=seed
         )
-        transpiled_circuit = pass_manager.run(self.with_measurement)
 
         # Load the data to the parameters.
         data_parameters = {
