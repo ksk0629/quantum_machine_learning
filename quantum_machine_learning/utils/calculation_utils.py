@@ -8,7 +8,7 @@ class CalculationUtils:
     def calculate_cross_entropy(
         probabilities_list: list[dict[str, float]],
         true_labels: list[str],
-    ):
+    ) -> float:
         if len(probabilities_list) != len(true_labels):
             error_msg = f"The lengths of probabilities_list and true_labels must be same, but {len(probabilities_list)} vs {len(true_labels)}."
             raise ValueError(error_msg)
