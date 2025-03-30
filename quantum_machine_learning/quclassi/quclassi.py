@@ -450,7 +450,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         backend: qiskit.providers.Backend,
         shots: int = 8192,
         optimisation_level: int = 2,
-        seed: int = 901,
+        seed: int | None = 901,
     ) -> dict[str, float]:
         """Get the probabilities, calculated through the softmax function,
         of belonging the given datum to each label.
@@ -459,7 +459,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param qiskit.providers.Backend backend: a backend
         :param int shots: the number of shots, defaults to 8192
         :param int optimisation_level: the level of the optimisation, defaults to 2
-        :param int seed: a random seed, defaults to 901
+        :param int | None seed: a random seed, defaults to 901
         :return str: the predicted label
         """
         # Get the fidelities.
