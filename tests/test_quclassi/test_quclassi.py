@@ -29,6 +29,7 @@ class TestQuClassi:
         - its structure is the same as the given structure.
         - its labels are the same as the given labels.
         - its parameter values are the same as the given initial_parameters.
+        - the type of its with_measurement is qiskit.QuantumCircuit after running _build method.
         - its classical_data_size is the same as the given new classical_data_size
           after substituting a new classical_data_size.
         - its using_classical_data_size is the nearest larger even number of
@@ -45,12 +46,11 @@ class TestQuClassi:
           after substituting new parameter values.
         - the type of its trainable_parameters is qiskit.circuit.parametertable.ParameterView.
         - the type of its data_parameters is qiskit.circuit.parametertable.ParameterView.
-        - the type of its with_measurement is qiskit.QuantumCircuit after running _build method.
         """
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [[1, 2, 3, 4]], "b": [[3, 4, 5, 6]]}
+        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
         quclassi = QuClassi(
             classical_data_size=classical_data_size,
             structure=structure,
@@ -64,6 +64,8 @@ class TestQuClassi:
         assert quclassi.structure == structure
         assert quclassi.labels == labels
         assert quclassi.parameter_values == initial_parameters
+        quclassi._build()
+        assert isinstance(quclassi.with_measurement, qiskit.QuantumCircuit)
 
         new_classical_data_size = classical_data_size + 1
         quclassi.classical_data_size = new_classical_data_size
@@ -93,9 +95,6 @@ class TestQuClassi:
             quclassi.data_parameters, qiskit.circuit.parametertable.ParameterView
         )
 
-        quclassi._build()
-        assert isinstance(quclassi.with_measurement, qiskit.QuantumCircuit)
-
     @pytest.mark.quclassi
     def test_none(self):
         """Normal and abnormal tests;
@@ -124,9 +123,10 @@ class TestQuClassi:
 
         quclassi._ansatz = None
         assert quclassi.trainable_parameters is None
-        assert quclassi.with_measurement is None
         quclassi._feature_map = None
         assert quclassi.data_parameters is None
+        quclassi._ancilla_qreg = None
+        assert quclassi.with_measurement is None
 
         with pytest.raises(AttributeError):
             # AttributeError must happen because of the classical data size being None.
