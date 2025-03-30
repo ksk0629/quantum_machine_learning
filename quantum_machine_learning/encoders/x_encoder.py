@@ -11,7 +11,7 @@ class XEncoder(BaseEncoder):
     def __init__(
         self,
         data_dimension: int,
-        name: str = "x_encoder",
+        name: str = "XEncoder",
         transformer: Callable[[list[float]], list[float]] | None = None,
     ):
         """Initialise this encoder.

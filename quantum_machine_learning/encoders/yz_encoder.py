@@ -12,7 +12,7 @@ class YZEncoder(BaseEncoder):
     def __init__(
         self,
         data_dimension: int,
-        name: str = "yz_encoder",
+        name: str = "YZEncoder",
         transformer: Callable[[list[float]], list[float]] | None = None,
     ):
         """Initialise this encoder.
