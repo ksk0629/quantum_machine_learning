@@ -4,56 +4,151 @@ import pickle
 import numpy as np
 import qiskit
 from qiskit import qpy, primitives
+import qiskit.providers
 
 from quantum_machine_learning.encoders.x_encoder import XEncoder
 from quantum_machine_learning.layers.random_layer import RandomLayer
 from quantum_machine_learning.path_getter.quanv_nn_path_getter import QuanvNNPathGetter
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 from quantum_machine_learning.utils.circuit_utils import CircuitUtils
+from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 
 
 class MHQuanvLayer:
     """Quanvolutional layer class, suggested in https://arxiv.org/abs/1904.04767."""
 
-    def __init__(
-        self, kernel_size: tuple[int, int], num_filters: int, is_loaded: bool = False
-    ):
-        """Initialise the quanvolutional layer.
+    def __init__(self, kernel_size: tuple[int, int], num_filters: int, seed: int = 901):
+        self._kernel_size = None
+        self._num_filters = None
+        self._seed = None
+        self._filters = None
 
-        :param tuple[int, int] kernel_size: kernel size
-        :param int num_filters: number of filiters
-        :param bool is_loaded: if loaded mode
-        """
+        self._build()
+
         self.kernel_size = kernel_size
         self.num_filters = num_filters
+        self.seed = seed
 
-        circuit = qiskit.QuantumCircuit(self.num_qubits, name="QuanvFilter")
-        circuit.compose(
+    @property
+    def kernel_size(self) -> tuple[int, int]:
+        if self._kernel_size is None:
+            return (0, 0)
+        else:
+            return self._kernel_size
+
+    @kernel_size.setter
+    def kernel_size(self, kernel_size: tuple[int, int] | None) -> None:
+        self._kernel_size = kernel_size
+        self._build()
+
+    @property
+    def num_filters(self) -> int:
+        if self._num_filters is None:
+            return 0
+        else:
+            return self._num_filters
+
+    @num_filters.setter
+    def num_filters(self, num_filters: int | None) -> None:
+        self._num_filters = num_filters
+        self._build()
+
+    @property
+    def seed(self) -> int | None:
+        return self._seed
+
+    @seed.setter
+    def seed(self, seed: int | None) -> None:
+        self._seed = seed
+        self._build()
+
+    @property
+    def num_qubits(self) -> int:
+        return self.kernel_size[0] * self.kernel_size[1]
+
+    def _build(self) -> None:
+        # Create the base circuit.
+        base_circuit = qiskit.QuantumCircuit(self.num_qubits, name="QuanvFilter")
+        base_circuit.compose(
             XEncoder(data_dimension=self.num_qubits),
             range(self.num_qubits),
             inplace=True,
         )
-        circuit.barrier()
 
-        self.filters = []
-        if not is_loaded:
-            for _ in range(self.num_filters):
-                _c = circuit.compose(
-                    RandomLayer(num_state_qubits=self.num_qubits),
-                    range(self.num_qubits),
-                    inplace=False,
+        # Create filters.
+        self._filters = []
+        self.lookup_tables = []
+        for _ in range(self.num_filters):
+            filter = base_circuit.compose(
+                RandomLayer(num_state_qubits=self.num_qubits, seed=self.seed),
+                range(self.num_qubits),
+                inplace=False,
+            )
+            filter.measure_all()
+            self._filters.append(filter)
+
+    def __call__(
+        self,
+        data_2d: list[list[float]],
+        backend: qiskit.providers.Backend,
+        shots: int = 8192,
+    ) -> np.ndarray:
+        return self.process_data_2d(data_2d=data_2d, backend=backend, shots=shots)
+
+    def process_data_2d(
+        self,
+        data_2d: list[list[float]],
+        backend: qiskit.providers.Backend,
+        shots: int = 8192,
+    ) -> np.ndarray:
+        data_2d_np = np.array(data_2d)
+        if len(data_2d_np.shape) != 2:
+            error_msg = f"The shape of the given data_2d must be three as its batched two-dimensional data, however it is {data_2d_np.shape}."
+            raise ValueError(error_msg)
+
+        # Prepare the data to be fed to this Quanvolutional Layer.
+        windowed_data_2d = Preprocessor.window_batch_data(
+            batch_data=data_2d_np, window_size=self.kernel_size
+        )
+        batch_size = (
+            windowed_data_2d.shape[0] if len(windowed_data_2d.shape) == 4 else 1
+        )
+        num_channels = data_2d_np.shape[1]
+        windowed_flattened_data_2d = windowed_data_2d.reshape(
+            batch_size, num_channels, -1, self.num_qubits
+        ).tolist()
+
+        # Process the data.
+        processed_batch_data = []
+        new_height = data_2d_np.shape[2] - self.kernel_size[0] + 1 - 1 + 1
+        new_width = data_2d_np.shape[3] - self.kernel_size[1] + 1 - 1 + 1
+        for multi_channel_data_2d in windowed_flattened_data_2d:
+            processed_multi_channel_data = []
+            for _data_2d in multi_channel_data_2d:
+
+                vectorised_process_datum_2d = np.vectorize(
+                    # signature: (m, n) means the length of the shape is two.
+                    #            () means a scalar
+                    #            ->(p, q) means the length of the output shape is two
+                    self._process_datum_2d,
+                    signature="(l),(),()->(m, n)",
                 )
-                _c.measure_all()
-                self.filters.append(_c)
-            self.lookup_tables = []
+                processed_data_2d = vectorised_process_datum_2d(
+                    _data_2d, backend, shots
+                )
+                stacked_processed_data_2d = np.hstack(processed_data_2d)
 
-    @property
-    def num_qubits(self) -> int:
-        """Get the number of qubits of each filter.
-
-        :return int: number of qubits
-        """
-        return self.kernel_size[0] * self.kernel_size[1]
+                # Reshape the data as processed two-dimensional data.
+                stacked_processed_data_2d = stacked_processed_data_2d.reshape(
+                    self.quanv_layer.num_filters, new_height, new_width
+                )
+                processed_multi_channel_data.append(stacked_processed_data_2d)
+            # Treat the output data in different channels and processed by different filters in the same way.
+            # processed_multi_channel_data's shape
+            # = (num_channels, num_filters, new_height, new_width)
+            # -> (num_channels * num_filters, new_height, new_width)
+            processed_multi_channel_data = np.vstack(processed_multi_channel_data)
+            processed_batch_data.append(processed_multi_channel_data)
 
     def get_lookup_tables_path(
         self, model_dir_path: str, file_prefix: str | None = None
@@ -70,59 +165,6 @@ class MHQuanvLayer:
             else "lookup_tables.pkl"
         )
         return os.path.join(model_dir_path, filename)
-
-    def __call__(
-        self,
-        batch_data: np.ndarray,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 8096,
-    ) -> np.ndarray:
-        """Call self.process.
-
-        :param np.ndarray batch_data: batch data whose shape is [batch, data (whose length is the same as the number of qubits of each filter), depth(=channel)]
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
-        :param int shots: number of shots
-        :return np.ndarray: processed batch data
-        """
-        return self.process(batch_data=batch_data, sampler=sampler, shots=shots)
-
-    def process(
-        self,
-        batch_data: np.ndarray,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 8096,
-    ) -> np.ndarray:
-        """Process the given batch data through all filters.
-
-        :param np.ndarray batch_data: batch data whose shape is (batch, data (whose length is the same as the number of qubits of each filter))
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
-        :param int shots: number of shots
-        :return np.ndarray: processed batch data, first index implies the filter and the other implies the data in the given barch data
-        :raises ValueError: if length of shape of batch_data is not 2
-        :raises ValueError: if each data's shape is not the same as self.num_qubits
-        """
-        if len(batch_data.shape) != 2:
-            msg = f"The given batch_data shape must be three (batch, data), but {batch_data.shape}."
-            raise ValueError(msg)
-
-        is_data_shape_valid = all([len(data) != self.num_qubits for data in batch_data])
-        if is_data_shape_valid:
-            msg = f"The given batch_data must contain data having the shape as same as num.qubits {self.num_qubits}."
-            raise ValueError(msg)
-
-        process_one_data_np = np.vectorize(
-            # signature: (m, n) means the length of the shape is two.
-            #            () means a scalar
-            #            ->(p, q) means the length of the output shape is two
-            self.__process_one_data,
-            signature="(l),(),()->(m, n)",
-        )
-        processed_batch_data = process_one_data_np(batch_data, sampler, shots)
-        return np.hstack(processed_batch_data)
 
     def __process_one_data(
         self,
