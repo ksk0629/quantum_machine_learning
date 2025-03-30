@@ -12,8 +12,8 @@ from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 from quantum_machine_learning.utils.circuit_utils import CircuitUtils
 
 
-class QuanvLayer:
-    """Quanvolutional layer class."""
+class MHQuanvLayer:
+    """Quanvolutional layer class, suggested in https://arxiv.org/abs/1904.04767."""
 
     def __init__(
         self, kernel_size: tuple[int, int], num_filters: int, is_loaded: bool = False
