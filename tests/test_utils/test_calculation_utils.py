@@ -30,6 +30,26 @@ class TestCalculationUtils:
         assert cross_entropy == 0
 
     @pytest.mark.utils
+    def test_calculate_cross_entropy_with_invalid_date(self):
+        """Abnormal test;
+        run calculate_cross_entropy with arguments of which lengths are not the same.
+
+        Check if ValueError happens.
+        """
+        probabilities_list = [
+            {"A": 1, "B": 0, "C": 0},
+            {"A": 0, "B": 1, "C": 0},
+            {"A": 0, "B": 0, "C": 1},
+            {"A": 0, "B": 0, "C": 1},
+        ]
+        true_labels = ["A", "B", "C"]
+        with pytest.raises(ValueError):
+            CalculationUtils.calculate_cross_entropy(
+                probabilities_list=probabilities_list,
+                true_labels=true_labels,
+            )
+
+    @pytest.mark.utils
     def test_calculate_accuracy(self):
         """Normal test;
         run calculate_accuracy with arguments of which the accuracies are 0, 1/2 and 1.
@@ -56,6 +76,20 @@ class TestCalculationUtils:
             predicted_labels=predicted_labels, true_labels=true_labels
         )
         assert shold_be_one == 1
+
+    @pytest.mark.utils
+    def test_calculate_accuracy_with_invalid_data(self):
+        """Abnormal test;
+        run calculate_accuracy with arguments of which lengths are not the same.
+
+        Check if ValueError happens.
+        """
+        predicted_labels = ["A", "B", "C", "D"]
+        true_labels = ["B", "C", "A"]
+        with pytest.raises(ValueError):
+            CalculationUtils.calculate_accuracy(
+                predicted_labels=predicted_labels, true_labels=true_labels
+            )
 
     @pytest.mark.utils
     def test_safe_log_e(self):
