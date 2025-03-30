@@ -111,7 +111,7 @@ class TestQuClassiTrainer:
         # Create data for training.
         data_0 = [1, 0]  # |0>
         data_1 = [0, 1]  # |1>
-        num_data = 1
+        num_data = 4
         data = []
         data_labels = []
         for _ in range(num_data):
@@ -129,9 +129,10 @@ class TestQuClassiTrainer:
         )
         # Create an instance of QuClassiTrainer.
         epochs = 2
+        batch_size = 3
         backend = qiskit_aer.AerSimulator(seed_simulator=901)
         quclassi_trainer = QuClassiTrainer(
-            quclassi=quclassi, backend=backend, epochs=epochs
+            quclassi=quclassi, backend=backend, epochs=epochs, batch_size=batch_size
         )
         # Train the QuClassi.
         loss, accuracy = quclassi_trainer.train(data=data, labels=data_labels)
