@@ -1,16 +1,15 @@
+import copy
 import os
-import pickle
+from typing import Final
 
 import numpy as np
 import qiskit
-from qiskit import primitives
 from tqdm.auto import tqdm
+import yaml
 
 from quantum_machine_learning.quclassi.quclassi import QuClassi
-from quantum_machine_learning.path_getter.quclassi_path_getter import QuClassiPathGetter
-import quantum_machine_learning.utils
 from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
-from quantum_machine_learning.utils.circuit_utils import CircuitUtils
+from quantum_machine_learning.utils.utils import Utils
 
 
 class QuClassiTrainer:
@@ -18,326 +17,319 @@ class QuClassiTrainer:
     https://arxiv.org/pdf/2103.11307.
     """
 
+    # Define the filename of parameters.
+    PARAMETERS_PATH: Final[str] = "parameters.yaml"
+
     def __init__(
         self,
         quclassi: QuClassi,
+        backend: qiskit.providers.Backend,
         epochs: int = 25,
         learning_rate: float = 0.01,
         batch_size: int = 1,
         shuffle: bool = True,
-        initial_parameters: np.ndarray | None = None,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
-        shots: int = 8096,
+        shots: int = 8192,
+        seed: int | None = 901,
+        optimisation_level: int = 3,
     ):
-        """Initialise this trainer.
-
-        :param QuClassi quclassi: quclassi to be trained
-        :param int epochs: number of epochs, defaults to 25
-        :param float learning_rate: learning rate, defaults to 0.01
-        :param int batch_size: batch size, defaults to 1
-        :param bool shuffle: whether dataset is shuffled or not, defaults to True
-        :param np.ndarray | None initial_parameters: initial parameters, defaults to None
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
-        :param int shots: number of shots
-        :raises ValueError: if the lengths of quclassi.labels and initial_parameters do not match
-        """
-        if initial_parameters is not None and len(set(quclassi.labels)) != len(
-            initial_parameters
-        ):
-            msg = f"The labels the given quclassi has and the labels the given initial_weights has must be the same lengths, but {quclassi.labels} and {initial_parameters}"
-            raise ValueError(msg)
-
         self.quclassi = quclassi
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.shuffle = shuffle
-        self.parameters_history = []
-        if initial_parameters is not None:
-            self.current_parameters = initial_parameters
-        else:
-            self.current_parameters = (
-                np.random.rand(
-                    len(self.quclassi.trainable_parameters) * len(self.quclassi.labels)
-                )
-            ).reshape((len(quclassi.labels), -1))
-        self.parameters_history.append(self.current_parameters.copy())
-        self.sampler = sampler
+        self.backend = backend
         self.shots = shots
+        self.seed = seed
+        self.optimisation_level = optimisation_level
+
+        # Fix the np.random seed.
+        Utils.fix_seed(seed=seed)
 
         # Initialise the histories.
-        self.train_accuracies = []
-        self.val_accuracies = []
+        self.losses = None
+        self.accuracies = None
+        self.parameters = None
 
     def train(
         self,
-        train_data: np.ndarray,
-        train_labels: np.ndarray,
-        val_data: np.ndarray,
-        val_labels: np.ndarray,
-        eval: bool = False,
-    ):
-        """Train the quclassi.
+        data: list[list[float]],
+        labels: list[str],
+        save_per_epoch: bool = False,
+        model_dir_path: str | None = None,
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        if len(data) != len(labels):
+            error_msg = f"The lengths of data and labels must be same. However, {len(data)} vs {len(labels)}."
+            raise ValueError(error_msg)
 
-        :param np.ndarray train_data: whole train data
-        :param np.ndarray train_labels: corresponding train labels
-        :param np.ndarray val_data: whole validation data
-        :param np.ndarray val_labels: corresponding validation labels
-        :param bool eval: whether evaluation has to be done or not
-        """
-        # Separate the data.
-        train_data_separated_label = dict()
-        val_data_separated_label = dict()
+        if save_per_epoch and (model_dir_path is None):
+            error_msg = f"If the save_per_epoch is True, then model_dir_path must be given, but it is None."
+            raise ValueError(error_msg)
+
+        if self.quclassi.parameter_values == dict():
+            self.quclassi._build()
+            # If no parameter values are not, set them randomly.
+            num_parameters_per_label = len(self.quclassi.trainable_parameters)
+            self.quclassi.parameter_values = {
+                label: np.random.rand(num_parameters_per_label) * (2 * np.pi)
+                for label in self.quclassi.labels
+            }
+
+        # Initialise the histories.
+        self.losses = {label: [] for label in self.quclassi.labels}
+        self.accuracies = {label: [] for label in self.quclassi.labels}
+        self.parameters = []
+
+        # Separate the dataset by their labels.
+        data_separated_by_label = dict()
         for label in self.quclassi.labels:
-            target_train_indices = np.where(train_labels == label)
-            train_data_separated_label[label] = train_data[target_train_indices]
-            target_val_indices = np.where(val_labels == label)
-            val_data_separated_label[label] = val_data[target_val_indices]
+            # Separate the data for training by their labels.
+            target_indices = np.where(np.array(labels) == label)
+            data_separated_by_label[label] = np.array(data)[target_indices].tolist()
 
-        # Train self.quclassi.
+        # Train the QuClassi.
         with tqdm(range(1, self.epochs + 1)) as tepoch:
             for epoch in tepoch:
-                tepoch.set_description(f"Epoch {epoch} (train)")
+                # Set the description.
+                tepoch.set_description(f"Epoch {epoch}")
 
                 with tqdm(self.quclassi.labels, leave=False) as tlabels:
                     for label in tlabels:
+                        # Set the description.
                         tlabels.set_description(f"Label {label}")
-                        target_train_data = train_data_separated_label[label]
-                        self.train_one_epoch(
-                            train_data=target_train_data,
+
+                        # Train the QuClassi with the target data.
+                        target_data = data_separated_by_label[label]
+                        loss, accuracy = self._train_one_epoch(
+                            data=target_data,
                             label=label,
                             epoch=epoch,
+                            save=save_per_epoch,
+                            model_dir_path=model_dir_path,
                         )
-                    self.parameters_history.append(self.current_parameters.copy())
 
-                if eval:
-                    self.quclassi.trained_parameters = self.current_parameters
-                    # Get the accuracies.
-                    predicted_train_labels = [
-                        self.quclassi(data) for data in train_data
-                    ]
-                    self.train_accuracies.append(
-                        QuClassiTrainer.calculate_accuracy(
-                            predicted_labels=predicted_train_labels,
-                            true_labels=train_labels,
-                        )
-                    )
-                    predicted_val_labels = [self.quclassi(data) for data in val_data]
-                    self.val_accuracies.append(
-                        QuClassiTrainer.calculate_accuracy(
-                            predicted_labels=predicted_val_labels,
-                            true_labels=val_labels,
-                        )
+                        # Store the loss value and accuracies.
+                        self.losses[label].append(loss)
+                        self.accuracies[label].append(accuracy)
+
+                    # Store the current parameters.
+                    self.parameters.append(
+                        copy.deepcopy(self.quclassi.parameter_values)
                     )
 
-                    tepoch.set_postfix(
-                        {
-                            "Train Acc": self.train_accuracies[-1],
-                            "Val Acc": self.val_accuracies[-1],
-                        }
-                    )
+                    # Set the description.
+                    loss_description = {
+                        f"Loss_{label}": self.losses[label][-1]
+                        for label in self.quclassi.labels
+                    }
+                    accuracy_description = {
+                        f"Accuracy_{label}": self.accuracies[label][-1]
+                        for label in self.quclassi.labels
+                    }
+                    description = {**loss_description, **accuracy_description}
+                    tepoch.set_postfix(description)
 
-        if not eval:
-            # Get the accuracies.
-            self.quclassi.trained_parameters = self.current_parameters
-            predicted_train_labels = [self.quclassi(data) for data in train_data]
-            self.train_accuracies.append(
-                QuClassiTrainer.calculate_accuracy(
-                    predicted_labels=predicted_train_labels,
-                    true_labels=train_labels,
-                )
-            )
-            predicted_val_labels = [self.quclassi(data) for data in val_data]
-            self.val_accuracies.append(
-                QuClassiTrainer.calculate_accuracy(
-                    predicted_labels=predicted_val_labels,
-                    true_labels=val_labels,
-                )
-            )
-        print(f"Train Accuracy: {self.train_accuracies[-1]}")
-        print(f"Validation Accuracy: {self.val_accuracies[-1]}")
+        last_losses = {label: self.losses[label][-1] for label in self.quclassi.labels}
+        last_accuracies = {
+            label: self.accuracies[label][-1] for label in self.quclassi.labels
+        }
+        return last_losses, last_accuracies
 
-        # Set the trained parameters to self.quclassi.
-        self.quclassi.trained_parameters = self.current_parameters
-
-    def train_one_epoch(
+    def _train_one_epoch(
         self,
-        train_data: np.ndarray,
-        label: object,
+        data: list[list[float]],
+        label: str,
         epoch: int,
-    ):
-        """Train the quclassi only one epoch for one class.
-
-        :param np.ndarray train_data: train data belonging to the given label
-        :param object label: label to which the data belong
-        :param int epoch: current epoch
-        :param np.ndarray val_data: validation data belonging to the given label
-        """
+        save: bool,
+        model_dir_path: str | None = None,
+    ) -> tuple[float, float]:
         # Shuffle the data if needed.
         if self.shuffle:
-            np.random.shuffle(train_data)
+            np.random.shuffle(data)
 
-        # Adjust the size of the data if needed.
-        remainder = len(train_data) % self.batch_size
+        # Adjust the size of the data if needed accordinf to the batch size.
+        remainder = len(data) % self.batch_size
         if remainder != 0:
-            train_data = np.concatenate((train_data, train_data[:remainder]))
+            data = np.concatenate((data, data[:remainder])).tolist()
 
-        # Get the index of the target label, which corresponds to the target parameters.
-        target_label_index = self.quclassi.labels.index(label)
+        shift_value = np.pi / (2 * np.sqrt(epoch))
 
-        iterations = len(train_data) // self.batch_size
-        with tqdm(range(iterations), leave=False) as titerations:
-            for iteration in titerations:
-                titerations.set_description(f"Iteration {iteration}")
-                # Get target data for this iteration.
+        # Iterate the number of batches.
+        num_iterations = len(data) // self.batch_size
+        with tqdm(range(num_iterations), leave=False) as tnum_iterations:
+            for iteration in tnum_iterations:
+                tnum_iterations.set_description(f"Iteration {iteration}")
+                # Get the target data for this iteration.
                 start_index = iteration * self.batch_size
                 end_index = iteration * self.batch_size + self.batch_size
-                target_data = train_data[start_index:end_index]
+                target_data = data[start_index:end_index]
 
                 # Train each parameter.
-                for parameter_index in range(
-                    len(self.current_parameters[target_label_index])
-                ):
-                    # Get the forward difference.
-                    forward_shift = np.zeros(
-                        (self.current_parameters[target_label_index].shape)
-                    )
-                    forward_shift[parameter_index] += np.pi / (2 * np.sqrt(epoch))
-                    forward_difference_parameters = (
-                        self.current_parameters[target_label_index] + forward_shift
-                    )
-                    forward_difference_parameters = CircuitUtils.get_parameter_dict(
-                        parameter_names=self.quclassi.trainable_parameters,
-                        parameters=forward_difference_parameters,
-                    )
-                    forward_difference_fidelities = self.get_fidelities(
+                num_parameters = len(self.quclassi.parameter_values[label])
+                for parameter_index in range(num_parameters):
+                    # Get the forward shifted parameter values.
+                    forward_difference = self._get_difference(
                         data=target_data,
-                        trained_parameters=forward_difference_parameters,
+                        parameter_values=self.quclassi.parameter_values[label],
+                        target_paramerter_index=parameter_index,
+                        shift_value=shift_value,
                     )
-                    forward_averaged_fidelity = np.average(
-                        forward_difference_fidelities
-                    )
-                    if forward_averaged_fidelity == 0:
-                        forward_averaged_fidelity = 1e-10
-                    forward_difference_fidelity = -np.log(forward_averaged_fidelity)
 
-                    # Get the backward differene.
-                    backward_shift = np.zeros(
-                        (self.current_parameters[target_label_index].shape)
-                    )
-                    backward_shift[parameter_index] -= np.pi / (2 * np.sqrt(epoch))
-                    backward_difference_parameters = (
-                        self.current_parameters[target_label_index] + backward_shift
-                    )
-                    backward_difference_parameters = CircuitUtils.get_parameter_dict(
-                        parameter_names=self.quclassi.trainable_parameters,
-                        parameters=backward_difference_parameters,
-                    )
-                    backward_difference_fidelities = self.get_fidelities(
+                    # Get the backward shifted parameter values.
+                    backward_difference = self._get_difference(
                         data=target_data,
-                        trained_parameters=backward_difference_parameters,
+                        parameter_values=self.quclassi.parameter_values[label],
+                        target_paramerter_index=parameter_index,
+                        shift_value=-shift_value,
                     )
-                    backward_averaged_fidelity = np.average(
-                        backward_difference_fidelities
-                    )
-                    if backward_averaged_fidelity == 0:
-                        backward_averaged_fidelity = 1e-10
-                    backward_difference_fidelity = -np.log(backward_averaged_fidelity)
 
                     # Update the current parameters.
-                    diff = 0.5 * (
-                        forward_difference_fidelity - backward_difference_fidelity
-                    )
-                    self.current_parameters[target_label_index][parameter_index] -= (
+                    diff = 0.5 * (forward_difference - backward_difference)
+                    self.quclassi.parameter_values[label][parameter_index] -= (
                         diff * self.learning_rate
                     )
 
-    def run_sampler(
-        self,
-        data: np.ndarray,
-        trained_parameters: dict[str, float],
-    ) -> qiskit.primitives.primitive_job.PrimitiveJob:
-        """Run the given sampler.
+        if save and model_dir_path is not None:
+            # If save is True and the model directory path is given,
+            # save the current parameter values.
+            parameters = {"initial_parameters": self.quclassi._parameter_values}
+            # Save the parameters as the yaml file.
+            num_digit = len(str(self.epochs))
+            epoch_str = str(epoch).zfill(num_digit)
+            filename = f"{epoch_str}_{QuClassiTrainer.PARAMETERS_PATH}"
+            yaml_path = os.path.join(model_dir_path, filename)
+            with open(yaml_path, "w", encoding=QuClassi.ENCODING) as yaml_file:
+                yaml.dump(
+                    parameters,
+                    yaml_file,
+                    default_flow_style=False,
+                )
 
-        :param np.ndarray data: data to run the circuit.
-        :param dict[str, float] trained_parameters: parameters to run the circuit
-        :return qiskit.primitives.primitive_job.PrimitiveJob: result of running sampler
-        """
-        # Create the combination of the circuit and parameters to run the circuits.
-        pubs = []
-        for _td in data:
-            data_parameters = CircuitUtils.get_parameter_dict(
-                parameter_names=self.quclassi.data_parameters, parameters=_td
+        # Get the probabilities of each datum.
+        probabilities_list = [
+            self.quclassi._get_probabilities(
+                datum=datum,
+                backend=self.backend,
+                shots=self.shots,
+                optimisation_level=self.optimisation_level,
+                seed=self.seed,
             )
-            parameters = {**trained_parameters, **data_parameters}
-            pubs.append((self.quclassi.circuit, parameters))
+            for datum in data
+        ]
+        # Calculate the loss value.
+        loss = QuClassiTrainer.calculate_cross_entropy(
+            probabilities_list=probabilities_list, true_labels=[label] * len(data)
+        )
+        # Calculate the accuracy.
+        predicted_labels = [
+            max(probabilities, key=probabilities.get)
+            for probabilities in probabilities_list
+        ]
+        accuracy = QuClassiTrainer.calculate_accuracy(
+            predicted_labels=predicted_labels, true_labels=[label] * len(data)
+        )
+
+        return loss, accuracy
+
+    def _get_difference(
+        self,
+        data: list[list[float]],
+        parameter_values: list[float],
+        target_paramerter_index: int,
+        shift_value: float,
+    ) -> float:
+        # Shift the parameter values.
+        shifted_parameter_values = copy.deepcopy(parameter_values)
+        shifted_parameter_values[target_paramerter_index] += shift_value
+        shifted_trainable_parameters = {
+            trainable_parameter: shifted_parameter_value
+            for trainable_parameter, shifted_parameter_value in zip(
+                self.quclassi.trainable_parameters,
+                parameter_values,
+            )
+        }
+        # Get the fidelities.
+        shifted_fidelities = self._get_fidelities(
+            data=data,
+            trainable_parameters=shifted_trainable_parameters,
+        )
+        # Calculate the average forward shifted fidelity.
+        shifted_averaged_fidelity = np.average(shifted_fidelities)
+        if shifted_averaged_fidelity == 0:
+            shifted_averaged_fidelity = 1e-10
+        # Calculate the difference.
+        difference = float(-np.log(shifted_averaged_fidelity))
+
+        return difference
+
+    def _get_fidelities(
+        self,
+        data: list[list[float]],
+        trainable_parameters: dict[str, float],
+    ) -> list[float]:
+        # Transplie the circuits.
+        pass_manager = qiskit.transpiler.generate_preset_pass_manager(
+            optimization_level=self.optimisation_level,
+            backend=self.backend,
+            seed_transpiler=self.seed,
+        )
+        transpiled_circuit = pass_manager.run(self.quclassi.with_measurement)
+
+        # Create primitive unified blocks.
+        primitive_unified_blocks = []
+        for datum in data:
+            data_parameters = {
+                data_parameter: d
+                for data_parameter, d in zip(self.quclassi.data_parameters, datum)
+            }
+            primitive_unified_block = transpiled_circuit.assign_parameters(
+                {**trainable_parameters, **data_parameters}
+            )
+            primitive_unified_blocks.append(primitive_unified_block)
 
         # Run the sampler.
-        job = self.sampler.run(pubs, shots=self.shots)
-        return job
+        jobs = self.backend.run(primitive_unified_blocks, shots=self.shots)
 
-    def get_fidelities(
-        self,
-        data: np.ndarray,
-        trained_parameters: dict[str, float],
-    ) -> np.ndarray:
-        """Get the sequence of fidelities.
-
-        :param np.ndarray data: data to calculate fidelity
-        :param dict[str, float] trained_parameters: parameters to calculate fidelity
-        :return np.ndarray: sequence of fidelities
-        """
-        job = self.run_sampler(
-            data=data,
-            trained_parameters=trained_parameters,
-        )
         # Calculate the sequence of the fidelities.
         fidelities = []
-        results = job.result()
+        results = jobs.result().results
         for result in results:
+            digit_result = {
+                str(int(key, 16)): value for key, value in result.data.counts.items()
+            }  # The keys are initially expressed in hex.
             fidelities.append(
-                Postprocessor.calculate_fidelity_from_swap_test(
-                    result.data.c.get_counts()
-                )
+                Postprocessor.calculate_fidelity_from_swap_test(digit_result)
             )
+
         return fidelities
 
     @staticmethod
+    def calculate_cross_entropy(
+        probabilities_list: list[dict[str, float]],
+        true_labels: list[str],
+    ):
+        if len(probabilities_list) != len(true_labels):
+            error_msg = f"The lengths of probabilities_list and true_labels must be same, but {len(probabilities_list)} vs {len(true_labels)}."
+            raise ValueError(error_msg)
+
+        cross_entropy = 0
+        for true_label, probabilities in zip(true_labels, probabilities_list):
+            predicted_label = max(probabilities, key=probabilities.get)
+            if true_label == predicted_label:
+                cross_entropy += -np.log(probabilities[predicted_label])
+            else:
+                cross_entropy += -np.log(1 - probabilities[predicted_label])
+
+        cross_entropy /= len(true_labels)
+
+        return cross_entropy
+
+    @staticmethod
     def calculate_accuracy(
-        predicted_labels: np.ndarray, true_labels: np.ndarray
+        predicted_labels: list[str], true_labels: list[str]
     ) -> float:
-        """Calculate accuracy.
-
-        :param np.ndarray predicted_labels: predicted labels
-        :param np.ndarray true_labels: true labels
-        :raises ValueError: if predicted_labels and true_labels have the different lengths
-        :return float: accuracy
-        """
         if len(predicted_labels) != len(true_labels):
-            msg = f"Given predicted_labels and true_labels must be the same lengths, but {len(predicted_labels)} and {len(true_labels)}."
-            raise ValueError(msg)
+            error_mas = f"The lengths of the predicted and true labels must be the same, but {len(predicted_labels)} and {len(true_labels)}."
+            raise ValueError(error_mas)
 
-        num_correct = (predicted_labels == true_labels).sum()
+        num_correct = int((np.array(predicted_labels) == np.array(true_labels)).sum())
         return num_correct / len(predicted_labels)
-
-    def save(self, model_dir_path: str):
-        """Save the circuit and parameters to the directory specified by the given model_dir_path.
-
-        :param str model_dir_path: path to the output directory.
-        """
-        # Save the model.
-        self.quclassi.save(model_dir_path=model_dir_path)
-
-        # Save the trained_parameters for each epoch.
-        path_getter = QuClassiPathGetter(dir_path=model_dir_path)
-        name, extension = os.path.splitext(
-            os.path.basename(path_getter.trained_parameters)
-        )
-        for index, parameters in enumerate(self.parameters_history):
-            parameters_path = os.path.join(
-                model_dir_path, f"{name}_{index:0>{len(str(self.epochs))}}{extension}"
-            )
-            with open(parameters_path, "wb") as pkl_file:
-                pickle.dump(parameters, pkl_file)
