@@ -88,7 +88,7 @@ class YZEncoder(BaseEncoder):
         super()._build()
 
         # Make the quantum circuit.
-        circuit = qiskit.QuantumCircuit(*self.qregs)
+        circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add the encoding part: the rotation Y and Z.
         for index in range(self.num_encoding_qubits):  # type: ignore

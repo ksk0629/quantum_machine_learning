@@ -350,7 +350,7 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         # <<< Train qubits creation <<<
 
         # >>> Whole circuit creation >>>
-        circuit = qiskit.QuantumCircuit(*self.qregs)
+        circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
         circuit.compose(self._ansatz.to_gate(), self._train_qreg, inplace=True)
         circuit.compose(self._feature_map.to_gate(), self._data_qreg, inplace=True)
 

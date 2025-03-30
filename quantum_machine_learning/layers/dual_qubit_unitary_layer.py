@@ -124,7 +124,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         super()._build()
 
         # Make the quantum circuit.
-        circuit = qiskit.QuantumCircuit(*self.qregs)
+        circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add the encoding part: the rotation Y and Z.
         if self.qubit_applied_pairs is None:

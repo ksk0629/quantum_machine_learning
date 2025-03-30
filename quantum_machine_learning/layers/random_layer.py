@@ -276,7 +276,7 @@ class RandomLayer(BaseLayer):
         random.shuffle(self._selected_gates)
 
         # Make the quantum circuit.
-        circuit = qiskit.QuantumCircuit(*self.qregs)
+        circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Apply the gates to the circuit.
         for selected_gate in self._selected_gates:  # type: ignore
