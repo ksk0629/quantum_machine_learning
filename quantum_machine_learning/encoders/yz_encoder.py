@@ -9,54 +9,27 @@ from quantum_machine_learning.encoders.base_encoder import BaseEncoder
 class YZEncoder(BaseEncoder):
     """YZEncoder class, which is used in https://arxiv.org/pdf/2103.11307."""
 
-    def __init__(
-        self,
-        data_dimension: int,
-        name: str = "YZEncoder",
-        transformer: Callable[[list[float]], list[float]] | None = None,
-    ):
+    def __init__(self, data_dimension: int, name: str = "YZEncoder"):
         """Initialise this encoder.
 
         :param int data_dimension: the dimension of data
         :param str | None name: the name of this encoder, defaults to None
-        :param Callable[[list[float]], list[float]] | None transformer: the data transformer, defaults to None
         """
         self._y_parameters: qiskit.circuit.ParameterVector | None = None
         self._z_parameters: qiskit.circuit.ParameterVector | None = None
 
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+        super().__init__(data_dimension=data_dimension, name=name)
 
     @property
-    def num_encoding_qubits(self) -> int | None:
+    def num_encoding_qubits(self) -> int:
         """Return the number of qubits to be encoded.
 
-        :return int | None: the number of encoding qubits
+        :return int: the number of encoding qubits
         """
-        if self.data_dimension is None:
-            return None
-
         if self.data_dimension % 2 == 0:  # Even number
             return int(self.data_dimension // 2)
         else:  # Odd number
             return int((self.data_dimension + 1) // 2)
-
-    @property
-    def y_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the Y-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr | None: the Y-rotation parameter vector
-        """
-        return self._y_parameters
-
-    @property
-    def z_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the Z-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr | None: the Z-rotation parameter vector
-        """
-        return self._z_parameters
 
     def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
@@ -64,8 +37,7 @@ class YZEncoder(BaseEncoder):
         :param bool raise_on_failure: if raise an error or not, defaults to True
         :return bool: if the configuration is valid
         """
-        valid = True
-
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
         return valid
 
     def _reset_register(self) -> None:
@@ -81,7 +53,7 @@ class YZEncoder(BaseEncoder):
         self._z_parameters = qiskit.circuit.ParameterVector(
             "z", length=self.num_encoding_qubits
         )
-        self._parameters = [self.y_parameters, self.z_parameters]
+        self._parameters = [self._y_parameters, self._z_parameters]
 
     def _build(self) -> None:
         """Build the circuit."""
@@ -92,7 +64,7 @@ class YZEncoder(BaseEncoder):
 
         # Add the encoding part: the rotation Y and Z.
         for index in range(self.num_encoding_qubits):  # type: ignore
-            circuit.ry(self.y_parameters[index], index)  # type: ignore
-            circuit.rz(self.z_parameters[index], index)  # type: ignore
+            circuit.ry(self._y_parameters[index], index)  # type: ignore
+            circuit.rz(self._z_parameters[index], index)  # type: ignore
 
         self.append(circuit.to_gate(), self.qubits)
