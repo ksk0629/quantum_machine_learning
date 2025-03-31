@@ -39,17 +39,18 @@ class TestXEncoder:
         1. its name is the same as the given name.
         2. its data_dimension is the same as the given data_dimension.
         """
-        random.seed(10)  # For reproducibility
+        random.seed(901)  # For reproducibility
 
         chars = string.ascii_letters + string.digits
-        name = "".join(random.choice(chars) for _ in range(64))
-
         data_dimension = 2
-        tester = BaseEncoderNormalTester(name=name, data_dimension=data_dimension)
-        # 1. its name is the same as the given name.
-        assert tester.name == name
-        # 2. its data_dimension is the same as the given data_dimension.
-        assert tester.data_dimension == data_dimension
+        num_trials = 100
+        for _ in range(num_trials):
+            name = "".join(random.choice(chars) for _ in range(64))
+            tester = BaseEncoderNormalTester(name=name, data_dimension=data_dimension)
+            # 1. its name is the same as the given name.
+            assert tester.name == name
+            # 2. its data_dimension is the same as the given data_dimension.
+            assert tester.data_dimension == data_dimension
 
     @pytest.mark.encoder
     def test_data_dimension(self):
