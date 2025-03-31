@@ -8,11 +8,7 @@ from quantum_machine_learning.encoders.base_encoder import BaseEncoder
 class XEncoder(BaseEncoder):
     """XEncoder class"""
 
-    def __init__(
-        self,
-        data_dimension: int,
-        name: str = "XEncoder",
-    ):
+    def __init__(self, data_dimension: int, name: str = "XEncoder"):
         """Initialise this encoder.
 
         :param int data_dimension: the dimension of data
