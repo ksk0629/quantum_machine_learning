@@ -13,9 +13,9 @@ class BaseParametrisedLayer(BaseLayer, ABC):
         *regs: qiskit.QuantumRegister,
         num_state_qubits: int,
         parameter_prefix: str | None = None,
-        name: str | None = None
+        name: str | None = None,
     ):
-        """Initialise the BaseLayer.
+        """Initialise the BaseParametrisedLayer.
 
         :param int num_state_qubits: the number of state qubits
         :param str | None parameter_prefix: a prefix of the parameter names, defaults to None
@@ -25,17 +25,9 @@ class BaseParametrisedLayer(BaseLayer, ABC):
         self._parameter_prefix: str | None = None
 
         super().__init__(*regs, num_state_qubits=num_state_qubits, name=name)
-        self.parameter_prefix = parameter_prefix  # type: ignore
+        self.parameter_prefix = parameter_prefix
 
-    @property
-    def num_state_qubits(self) -> int | None:
-        """Return the number of the state qubits
-
-        :return int | None: the number of the state qubits
-        """
-        return self._num_state_qubits
-
-    @num_state_qubits.setter
+    @BaseLayer.num_state_qubits.setter  # Override the settter in BaseLayer
     def num_state_qubits(self, num_state_qubits: int) -> None:
         """Set the new number of the state qubits and reset the register and parameters.
 
@@ -58,7 +50,7 @@ class BaseParametrisedLayer(BaseLayer, ABC):
             return self._parameter_prefix
 
     @parameter_prefix.setter
-    def parameter_prefix(self, parameter_prefix: str | None) -> None:
+    def parameter_prefix(self, parameter_prefix: str) -> None:
         """Set a new prefix of the parameter names and reset the parameters and register.
 
         :param str | None parameter_prefix: a new prefix oh the parameter names
@@ -88,6 +80,25 @@ class BaseParametrisedLayer(BaseLayer, ABC):
                 [len(parameter_vector) for parameter_vector in self._parameters]
             )
             return num_parameters
+
+    def _check_configuration(self, raise_on_failure: bool = True) -> bool:
+        """Check if the current configuration is valid.
+
+        :param bool raise_on_failure: if raise an error or not, defaults to True
+        :raises AttributeError: if its num_parameters is 0.
+        :return bool: if the configuration is valid
+        """
+        valid = super()._check_configuration(
+            raise_on_failure=raise_on_failure
+        )  # From BaseLayer
+
+        if self.num_parameters == 0:
+            valid = False
+            if raise_on_failure:
+                error_msg = f"The num_parameters must be positive integer, but {self.num_parameters}."
+                raise AttributeError(error_msg)
+
+        return valid
 
     @abstractmethod
     def _reset_parameters(self) -> None:
