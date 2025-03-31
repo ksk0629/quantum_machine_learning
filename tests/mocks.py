@@ -9,105 +9,90 @@ class BaseEncoderNormalTester(BaseEncoder):
     """Mock class of a child class of BaseEncoder for normal test
     This is just for testing, so the docstrings will be omitted."""
 
-    def __init__(self, data_dimension, name=None, transformer=None):
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+    def __init__(self, data_dimension, name=None):
+        self._num_reset_register = 0
+        self._num_reset_parameters = 0
+
+        super().__init__(data_dimension=data_dimension, name=name)
 
     @property
     def num_encoding_qubits(self):
         return 1
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        valid = super()._check_configuration()
+        return valid
 
     def _build(self):
         super()._build()
-        circuit = qiskit.QuantumCircuit(1)
-        self.append(circuit.to_gate(), self.qubits)
 
     def _reset_register(self):
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
+        self._num_reset_register += 1
 
     def _reset_parameters(self):
-        self._parameters = [qiskit.circuit.ParameterVector("test_parameter", length=1)]
+        self._num_reset_parameters += 1
 
 
 class BaseEncoderTesterWithoutNumEncodingQubits(BaseEncoder):
     """Mock class of a child class of BaseEncoder for abnormal test
     This is just for testing, so the docstrings will be omitted."""
 
-    def __init__(self, data_dimension, name=None, transformer=None):
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+    def __init__(self, data_dimension, name=None):
+        super().__init__(data_dimension=data_dimension, name=name)
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        pass
 
     def _build(self):
-        super()._build()
-        circuit = qiskit.QuantumCircuit(1)
-        self.append(circuit.to_gate(), self.qubits)
+        pass
 
     def _reset_register(self):
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
+        pass
 
     def _reset_parameters(self):
-        self._parameters = [qiskit.circuit.ParameterVector("test_parameter", length=1)]
+        pass
 
 
 class BaseEncoderTesterWithoutResetRegister(BaseEncoder):
     """Mock class of a child class of BaseEncoder for normal test
     This is just for testing, so the docstrings will be omitted."""
 
-    def __init__(self, data_dimension: int, name=None, transformer=None):
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+    def __init__(self, data_dimension: int, name=None):
+        super().__init__(data_dimension=data_dimension, name=name)
 
     @property
     def num_encoding_qubits(self):
-        return 1
+        pass
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        pass
 
     def _build(self):
-        super()._build()
-        circuit = qiskit.QuantumCircuit(1)
-        self.append(circuit.to_gate(), self.qubits)
+        pass
 
     def _reset_parameters(self):
-        self._parameters = [qiskit.circuit.ParameterVector("test_parameter", length=1)]
+        pass
 
 
 class BaseEncoderTesterWithoutResetParameters(BaseEncoder):
     """Mock class of a child class of BaseEncoder for normal test
     This is just for testing, so the docstrings will be omitted."""
 
-    def __init__(self, data_dimension, name=None, transformer=None):
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+    def __init__(self, data_dimension, name=None):
+        super().__init__(data_dimension=data_dimension, name=name)
 
     @property
     def num_encoding_qubits(self):
-        return 1
+        pass
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        pass
 
     def _build(self):
-        super()._build()
-        circuit = qiskit.QuantumCircuit(1)
-        self.append(circuit.to_gate(), self.qubits)
+        pass
 
     def _reset_register(self):
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
+        pass
 
 
 # === BaseLayer ===
