@@ -30,6 +30,17 @@ class TestBaseParametrisedLayer:
         5. its _num_reset_parameters is 2.
            (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=num_state_qubits)
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        assert tester.num_state_qubits == num_state_qubits
+        # 2. its parameter_prefix is "".
+        assert tester.parameter_prefix == ""
+        # 3. its _parameters is None.
+        assert tester._parameters is None
+        # 4. its _num_reset_register is 2.
+        assert tester._num_reset_register == 2
+        # 5. its _num_reset_parameters is 2.
+        assert tester._num_reset_parameters == 2
 
     @pytest.mark.layer
     def test_init_with_name(self):
@@ -42,10 +53,26 @@ class TestBaseParametrisedLayer:
         3. its parameter_prefix is "".
         4. its parameters is None.
         """
-        # 1. its name is the same as the given name.
-        # 2. its num_state_qubits is the same as the given num_state_qubits.
-        # 3. its parameter_prefix is "".
-        # 4. its parameters is None.
+        random.seed(901)  # For reproducibility
+
+        chars = string.ascii_letters + string.digits
+        num_state_qubits = 2
+
+        num_trials = 100
+        for _ in range(num_trials):
+            name = "".join(random.choice(chars) for _ in range(64))
+
+            tester = BaseParametrisedLayerNormalTester(
+                num_state_qubits=num_state_qubits, name=name
+            )
+            # 1. its name is the same as the given name.
+            assert tester.name == name
+            # 2. its num_state_qubits is the same as the given num_state_qubits.
+            assert tester.num_state_qubits == num_state_qubits
+            # 3. its parameter_prefix is "".
+            assert tester.parameter_prefix == ""
+            # 4. its parameters is None.
+            assert tester._parameters is None
 
     @pytest.mark.layer
     def test_init_with_parameter_prefix(self):
@@ -57,9 +84,24 @@ class TestBaseParametrisedLayer:
         2. its num_state_qubits is the same as the given num_state_qubits.
         4. its parameters is None.
         """
-        # 1. its parameter_prefix is the same as the given parameter_prefix.
-        # 2. its num_state_qubits is the same as the given num_state_qubits.
-        # 4. its parameters is None.
+        random.seed(901)  # For reproducibility
+
+        chars = string.ascii_letters + string.digits
+        num_state_qubits = 2
+
+        num_trials = 100
+        for _ in range(num_trials):
+            parameter_prefix = "".join(random.choice(chars) for _ in range(64))
+
+            tester = BaseParametrisedLayerNormalTester(
+                num_state_qubits=num_state_qubits, parameter_prefix=parameter_prefix
+            )
+            # 1. its parameter_prefix is the same as the given parameter_prefix.
+            assert tester.parameter_prefix == parameter_prefix
+            # 2. its num_state_qubits is the same as the given num_state_qubits.
+            assert tester.num_state_qubits == num_state_qubits
+            # 4. its parameters is None.
+            assert tester._parameters is None
 
     @pytest.mark.layer
     @pytest.mark.parametrize("num_state_qubits", [1, 2, 5, 6])
@@ -77,17 +119,25 @@ class TestBaseParametrisedLayer:
         5. its _num_reset_register is 3.
         6. its _num_reset_parameters is 3.
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=num_state_qubits)
         # 1. its num_state_qubits is the same as the given num_state_qubits.
+        assert tester.num_state_qubits == num_state_qubits
         # 2. its _num_reset_register is 2.
-        #    (This means that _reset_register method ran when num_state_qubits and parameter_prefix were set.)
+        assert tester._num_reset_register == 2
         # 3. its _num_reset_parameters is 2.
-        #    (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
+        assert tester._num_reset_parameters == 2
         # 4. its num_state_qubits is the same as the new num_state_qubits after setting a new value in num_state_qubits.
+        new_num_state_qubits = num_state_qubits + 3
+        tester.num_state_qubits = new_num_state_qubits
+        assert tester.num_state_qubits == new_num_state_qubits
         # 5. its _num_reset_register is 3.
+        assert tester._num_reset_register == 3
         # 6. its _num_reset_parameters is 3.
+        assert tester._num_reset_parameters == 3
 
     @pytest.mark.layer
-    def test_parameter_prefix(self):
+    @pytest.mark.parametrize("parameter_prefix", ["hey", " this", " is ", "test "])
+    def test_parameter_prefix(self, parameter_prefix):
         """Normal test;
         call the setter and getter of parameter_prefix.
 
@@ -104,17 +154,30 @@ class TestBaseParametrisedLayer:
         8. its _num_reset_register is 4.
         9. its _num_reset_parameters is 4.
         """
+        tester = BaseParametrisedLayerNormalTester(
+            num_state_qubits=2, parameter_prefix=parameter_prefix
+        )
         # 1. its parameter_prefix is the same as the given parameter_prefix.
+        assert tester.parameter_prefix == parameter_prefix
         # 2. its _num_reset_register is 2.
-        #    (This means that _reset_register method ran when num_state_qubits and parameter_prefix were set.)
+        assert tester._num_reset_register == 2
         # 3. its _num_reset_parameters is 2.
-        #    (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
+        assert tester._num_reset_parameters == 2
         # 4. its parameter_prefix is "" after settting None in it.
+        tester.parameter_prefix = None
+        assert tester.parameter_prefix == ""
         # 5. its _num_reset_register is 3.
+        assert tester._num_reset_register == 3
         # 6. its _num_reset_parameters is 3.
+        assert tester._num_reset_parameters == 3
         # 7. its parameter_prefix is the same as the new parameter_prefix after setting a new value in it.
+        new_parameter_prefix = parameter_prefix + "OK!"
+        tester.parameter_prefix = new_parameter_prefix
+        assert tester.parameter_prefix == new_parameter_prefix
         # 8. its _num_reset_register is 4.
+        assert tester._num_reset_register == 4
         # 9. its _num_reset_parameters is 4.
+        assert tester._num_reset_parameters == 4
 
     @pytest.mark.layer
     def test_parameters(self):
