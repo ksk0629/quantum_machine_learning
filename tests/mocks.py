@@ -105,19 +105,18 @@ class BaseLayerNormalTester(BaseLayer):
     """
 
     def __init__(self, num_state_qubits, name=None):
+        self._num_reset_registers = 0
         super().__init__(num_state_qubits=num_state_qubits, name=name)
 
     def _reset_register(self):
-        qreg = qiskit.QuantumRegister(1)
-        self.qregs = [qreg]
+        self._num_reset_registers += 1
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
 
     def _build(self):
         super()._build()
-        circuit = qiskit.QuantumCircuit(*self.qregs)
-        self.append(circuit.to_gate(), self.qubits)
+        pass
 
 
 class BaseLayerTesterWithoutResetRegister(BaseLayer):
@@ -129,12 +128,10 @@ class BaseLayerTesterWithoutResetRegister(BaseLayer):
         super().__init__(num_state_qubits=num_state_qubits, name=name)
 
     def _check_configuration(self, raise_on_failure=True):
-        return True
+        pass
 
     def _build(self):
-        super()._build()
-        circuit = qiskit.QuantumCircuit(*self.qregs)
-        self.append(circuit.to_gate(), self.qubits)
+        pass
 
 
 # === BaseParametrisedLayer ===
