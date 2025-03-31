@@ -1,5 +1,4 @@
 import pytest
-import qiskit
 
 from quantum_machine_learning.encoders.x_encoder import XEncoder
 
