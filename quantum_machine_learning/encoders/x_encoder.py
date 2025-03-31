@@ -12,23 +12,19 @@ class XEncoder(BaseEncoder):
         self,
         data_dimension: int,
         name: str = "XEncoder",
-        transformer: Callable[[list[float]], list[float]] | None = None,
     ):
         """Initialise this encoder.
 
         :param int data_dimension: the dimension of data
         :param str name: the name of the circuit
-        :param Callable[[list[float]], list[float]] | None transformer: the data transformer, defaults to None
         """
-        super().__init__(
-            data_dimension=data_dimension, name=name, transformer=transformer
-        )
+        super().__init__(data_dimension=data_dimension, name=name)
 
     @property
-    def num_encoding_qubits(self) -> int | None:
+    def num_encoding_qubits(self) -> int:
         """Return the number of qubits to be encoded.
 
-        :return int | None: the number of encoding qubits
+        :return int: the number of encoding qubits
         """
         return self.data_dimension
 
@@ -38,8 +34,7 @@ class XEncoder(BaseEncoder):
         :param bool raise_on_failure: if raise an error or not, defaults to True
         :return bool: if the configuration is valid
         """
-        valid = True
-
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
         return valid
 
     def _reset_register(self) -> None:
