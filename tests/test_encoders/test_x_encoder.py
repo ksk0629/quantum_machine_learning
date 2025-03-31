@@ -10,46 +10,77 @@ class TestXEncoder:
         pass
 
     @pytest.mark.encoder
-    @pytest.mark.parametrize("data_dimension", [2, 3])
-    def test_init(self, data_dimension):
+    @pytest.mark.parametrize("data_dimension", [1, 2, 5, 6])
+    def test_init_with_defaults(self, data_dimension):
         """Normal test;
-        Create an XEcnoder instance and chenge the data dimension.
+        create an instance of XEncoder with defaults.
 
         Check if
-        - its num_encoding_qubits is the same as the given data_dimension.
-        - its num_parameters is the same as the given data_dimension.
-        - the type of its parameters is list.
-        - the length of its parameters is 1.
-        - the type of the first element of its parameters is qiskit.circuit.ParameterVector.
-        - the length of the first element of its parameters is the same as the given data_dimension.
-        - the type of its data is qiskit.circuit.quantumcircuitdata.QuantumCircuitData.
-        - the length of its data is 1.
-        - the type of the first element of its data is qiskit.circuit.CircuitInstruction.
-        - the above things are preserved with the new_data_dimension after substituting new_data_dimension.
+        1. its data_dimension is the same as the given data_dimension.
+        2. its name is "XEncoder"
+        3. its num_encoding_qubits is the same as the given data_dimension.
         """
         x_encoder = XEncoder(data_dimension=data_dimension)
+        # 1. its data_dimension is the same as the given data_dimension.
+        assert x_encoder.data_dimension == data_dimension
+        # 2. its name is "XEncoder"
+        assert x_encoder.name == "XEncoder"
+        # 3. its num_encoding_qubits is the same as the given data_dimension.
         assert x_encoder.num_encoding_qubits == data_dimension
-        assert x_encoder.num_parameters == data_dimension
-        assert isinstance(x_encoder.parameters, list)
-        assert len(x_encoder.parameters) == 1
-        assert isinstance(x_encoder.parameters[0], qiskit.circuit.ParameterVector)
-        assert len(x_encoder.parameters[0]) == data_dimension
-        assert isinstance(
-            x_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
-        )
-        assert len(x_encoder.data) == 1
-        assert isinstance(x_encoder.data[0], qiskit.circuit.CircuitInstruction)
 
+    @pytest.mark.encoder
+    @pytest.mark.parametrize("data_dimension", [1, 2, 5, 6])
+    def test_build(self, data_dimension):
+        """Normal test;
+        run _build method.
+
+        Check if
+        1. its num_qubits is the same as the given data_dimension.
+        2. its num_parameters is the same as the given data_dimension.
+        3. itself, after performing decompose() method, contains only RX gates such that
+            3.1 the number of the gates is the same as data_dimension.
+            3.2 they are parametrised.
+            3.3 each gate is applied to each qubit.
+        4. the above things correctly hold after setting a new data_dimension.
+        """
+        x_encoder = XEncoder(data_dimension=data_dimension)
+        applied_qubits = set()  # for 3.3
+        # 1. its num_qubits is the same as the given data_dimension.
+        assert x_encoder.num_qubits == data_dimension
+        # 2. its num_parameters is the same as the given data_dimension.
+        assert x_encoder.num_parameters == data_dimension
+        # 3. itself, after performing decompose() method, contains only RX gates such that
+        decomposed_x_encoder = x_encoder.decompose()
+        gates = decomposed_x_encoder.data
+        assert all(gate.operation.name == "rx" for gate in gates)
+        #     3.1 the number of the gates is the same as data_dimension.
+        assert len(gates) == data_dimension
+        for gate in gates:
+            #     3.2 they are parametrised.
+            assert len(gate.operation.params) == 1  # == 1: since it's a RX gate
+
+            applied_qubits.add(gate.qubits[0]._index)  # [0]: since it's a RX gate
+        #     3.3 each gate is applied to each qubit.
+        assert applied_qubits == set(range(data_dimension))
+
+        # 4. the above things correctly hold after setting a new data_dimension.
         new_data_dimension = data_dimension + 1
         x_encoder.data_dimension = new_data_dimension
-        assert x_encoder.num_encoding_qubits == new_data_dimension
+        applied_qubits = set()  # for 4-3.3
+        # 4-1. its num_qubits is the same as the given data_dimension.
+        assert x_encoder.num_qubits == new_data_dimension
+        # 4-2. its num_parameters is the same as the given data_dimension.
         assert x_encoder.num_parameters == new_data_dimension
-        assert isinstance(x_encoder.parameters, list)
-        assert len(x_encoder.parameters) == 1
-        assert isinstance(x_encoder.parameters[0], qiskit.circuit.ParameterVector)
-        assert len(x_encoder.parameters[0]) == new_data_dimension
-        assert isinstance(
-            x_encoder.data, qiskit.circuit.quantumcircuitdata.QuantumCircuitData
-        )
-        assert len(x_encoder.data) == 1
-        assert isinstance(x_encoder.data[0], qiskit.circuit.CircuitInstruction)
+        # 4-3. itself, after performing decompose() method, contains only RX gates such that
+        decomposed_x_encoder = x_encoder.decompose()
+        gates = decomposed_x_encoder.data
+        assert all(gate.operation.name == "rx" for gate in gates)
+        #     4-3.1 the number of the gates is the same as data_dimension.
+        assert len(gates) == new_data_dimension
+        for gate in gates:
+            #     4-3.2 they are parametrised.
+            assert len(gate.operation.params) == 1  # == 1: since it's a RX gate
+
+            applied_qubits.add(gate.qubits[0]._index)  # [0]: since it's a RX gate
+        #     4-3.3 each gate is applied to each qubit.
+        assert applied_qubits == set(range(new_data_dimension))
