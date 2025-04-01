@@ -73,11 +73,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         :return bool: if the configuration is valid
         """
         valid = super()._check_configuration(raise_on_failure=raise_on_failure)
-        if self.num_state_qubits == 1:
-            valid = False
-            if raise_on_failure:
-                error_msg = f"num_state_qubits must be larger than 1, but now {self.num_state_qubits}."
-                raise AttributeError(error_msg)
+
         return valid
 
     def _reset_register(self) -> None:
