@@ -95,8 +95,8 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
         if self.qubit_applied_pairs == []:
-            self._yy_parameters = None
-            self._zz_parameters = None
+            self._yy_parameters = []
+            self._zz_parameters = []
         else:
             self._yy_parameters = qiskit.circuit.ParameterVector(
                 parameter_name("yy"), length=len(self.qubit_applied_pairs)
