@@ -186,10 +186,15 @@ class TestBaseParametrisedLayer:
 
         Check if
         1. its parameters is None.
-        2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVecotr.
+        2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVector.
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
         # 1. its parameters is None.
-        # 2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVecotr.
+        assert tester.parameters is None
+        # 2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVector.
+        parameters = [qiskit.circuit.ParameterVector("x", length=2)]
+        tester._parameters = parameters
+        assert tester.parameters == parameters
 
     @pytest.mark.layer
     def test_num_parameters(self):
@@ -200,8 +205,24 @@ class TestBaseParametrisedLayer:
         1. its num_parameters is 0.
         2. its num_parameters is a total number of elements in each list after setting a new _parameters.
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
         # 1. its num_parameters is 0.
-        # 2. its num_parameters is a total number of elements in each list after setting a new _parameters.
+        assert tester.num_parameters == 0
+
+        num_trials = 100
+        random.seed(901)
+        for index in range(num_trials):
+            num_parameter_vectors = random.randint(1, 100)
+            num_parameters = [
+                random.randint(1, 100) for _ in range(num_parameter_vectors)
+            ]
+            parameters = [
+                qiskit.circuit.ParameterVector(f"name_{index}", length=length)
+                for length in num_parameters
+            ]
+            # 2. its num_parameters is a total number of elements in each list after setting a new _parameters.
+            tester._parameters = parameters
+            assert tester.num_parameters == sum(num_parameters)
 
     @pytest.mark.layer
     def test_valid_check_configuration(self):
@@ -211,6 +232,11 @@ class TestBaseParametrisedLayer:
         Check if
         1. no error arises.
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
+        # 1. no error arises.
+        parameters = [qiskit.circuit.ParameterVector("x", length=2)]
+        tester._parameters = parameters
+        tester._build()
 
     @pytest.mark.layer
     def test_invalid_check_configuration(self):
@@ -220,7 +246,10 @@ class TestBaseParametrisedLayer:
         Check if
         1. AttributeError arises.
         """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
         # 1. AttributeError arises.
+        with pytest.raises(AttributeError):
+            tester._build()
 
     @pytest.mark.layer
     def test_without_reset_parameters(self):
