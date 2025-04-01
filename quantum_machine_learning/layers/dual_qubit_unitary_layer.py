@@ -1,3 +1,4 @@
+import itertools
 import math
 
 import qiskit
@@ -38,36 +39,28 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         self.qubit_applied_pairs = qubit_applied_pairs
 
     @property
-    def yy_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the YY-rotation of this circuit.
+    def qubit_applied_pairs(self) -> list[tuple[int, int]]:
+        """Return pairs of two qubits to be applied.
 
-        :return qiskit.circuit.ParameterVecotr | None: the YY-rotation parameter vector
+        :return list[tuple[int, int]]: pairs of two qubits to be applied
         """
-        return self._yy_parameters
-
-    @property
-    def zz_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the ZZ-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr | None: the ZZ-rotation parameter vector
-        """
-        return self._zz_parameters
-
-    @property
-    def qubit_applied_pairs(self) -> list[tuple[int, int]] | None:
-        """Return pairs of two-qubit to be applied.
-
-        :return list[tuple[int, int]] | None: pairs of two-qubit to be applied
-        """
-        return self._qubit_applied_pairs
+        if self._qubit_applied_pairs is None:
+            if self.num_state_qubits == 0 or self.num_state_qubits == 1:
+                # If no qubits or only one qubit is there, a list of the pairs of two qubits should be empty.
+                return []
+            else:
+                # If there are multiple qubits, return all the combinations.
+                qubits = range(self.num_state_qubits)
+                all_combinations = list(itertools.combinations(qubits, 2))
+                return all_combinations
+        else:
+            return self._qubit_applied_pairs
 
     @qubit_applied_pairs.setter
-    def qubit_applied_pairs(
-        self, qubit_applied_pairs: list[tuple[int, int]] | None
-    ) -> None:
+    def qubit_applied_pairs(self, qubit_applied_pairs: list[tuple[int, int]]) -> None:
         """Set the pairs of two-qubit to be applied and reset the register and parameters.
 
-        :param list[tuple[int, int]] | None qubit_applied_pairs: a new pairs of two-qubit to be applied
+        :param list[tuple[int, int]] qubit_applied_pairs: a new pairs of two-qubit to be applied
         """
         self._qubit_applied_pairs = qubit_applied_pairs
         self._reset_parameters()
@@ -79,7 +72,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         :param bool raise_on_failure: if raise an error or not, defaults to True
         :return bool: if the configuration is valid
         """
-        valid = True
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
         if self.num_state_qubits == 1:
             valid = False
             if raise_on_failure:
@@ -101,23 +94,14 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
             prefix = ""
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
-        if self.qubit_applied_pairs is None:
-            length = math.comb(self.num_state_qubits, 2)  # type:ignore
-            self._yy_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("yy"), length=length
-            )
-            self._zz_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("zz"), length=length
-            )
-        else:
-            self._yy_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("yy"), length=len(self.qubit_applied_pairs)
-            )
-            self._zz_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("zz"), length=len(self.qubit_applied_pairs)
-            )
+        self._yy_parameters = qiskit.circuit.ParameterVector(
+            parameter_name("yy"), length=len(self.qubit_applied_pairs)
+        )
+        self._zz_parameters = qiskit.circuit.ParameterVector(
+            parameter_name("zz"), length=len(self.qubit_applied_pairs)
+        )
 
-        self._parameters = [self.yy_parameters, self.zz_parameters]
+        self._parameters = [self._yy_parameters, self._zz_parameters]
 
     def _build(self) -> None:
         """Build the circuit."""
@@ -127,16 +111,8 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
         circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add the encoding part: the rotation Y and Z.
-        if self.qubit_applied_pairs is None:
-            index = 0
-            for i in range(self.num_state_qubits):  # type: ignore
-                for j in range(i + 1, self.num_state_qubits):  # type: ignore
-                    circuit.ryy(self.yy_parameters[index], i, j)  # type: ignore
-                    circuit.rzz(self.zz_parameters[index], i, j)  # type: ignore
-                    index += 1
-        else:
-            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
-                circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)  # type: ignore
-                circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)  # type: ignore
+        for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
+            circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)
+            circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)
 
         self.append(circuit.to_gate(), self.qubits)
