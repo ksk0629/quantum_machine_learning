@@ -116,7 +116,7 @@ class DualQubitUnitaryLayer(BaseParametrisedLayer):
 
         # Add the encoding part: the rotation Y and Z.
         for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
-            circuit.ryy(self.yy_parameters[index], qubit_1, qubit_2)
-            circuit.rzz(self.zz_parameters[index], qubit_1, qubit_2)
+            circuit.ryy(self._yy_parameters[index], qubit_1, qubit_2)
+            circuit.rzz(self._zz_parameters[index], qubit_1, qubit_2)
 
         self.append(circuit.to_gate(), self.qubits)
