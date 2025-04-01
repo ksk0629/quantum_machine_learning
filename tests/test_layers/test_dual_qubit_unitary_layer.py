@@ -1,3 +1,5 @@
+import random
+import string
 import math
 
 import pytest
@@ -14,131 +16,188 @@ class TestDualQubitUnitaryLayer:
         pass
 
     @pytest.mark.layer
-    @pytest.mark.parametrize("num_state_qubits", [2, 3])
-    def test_normal(self, num_state_qubits):
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_init_with_defaults(self, num_state_qubits):
         """Normal test;
-        Create an instance of DualQubitUnitaryLayer class.
+        create an instance of DualQubitUnitaryLayer with the default values.
 
         Check if
-        - the type of its yy_parameters is qiskit.circuit.ParameterVector.
-        - the length of its yy_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - the type of its zz_parameters is qiskit.circuit.ParameterVector.
-        - the length of its zz_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - its num_parameters is the double as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - the type of its parameters is list.
-        - the first element of its parameters is the same as its yy_parameters.
-        - the second element of its parameters is the same as its zz_parameters.
-        - the type of itself is qiskit.QuantumCircuit.
-        - the above things are still correct with a new num_state_qubits
-          after substituting the new num_state_qubits.
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. its parameter_prefix is the empty string.
+        4. its name is "DualQubitUnitaryLayer".
+        5. the length of its _parameters is 2.
+        6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
         """
-        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
-        parameter_length = math.comb(num_state_qubits, 2)
-        assert isinstance(layer.yy_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.yy_parameters) == parameter_length
-        assert isinstance(layer.zz_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.zz_parameters) == parameter_length
-        assert layer.num_parameters == 2 * parameter_length
-        assert isinstance(layer.parameters, list)
-        assert layer.parameters[0] == layer.yy_parameters
-        assert layer.parameters[1] == layer.zz_parameters
-        assert isinstance(layer, qiskit.QuantumCircuit)
-
-        layer._build()  # For the coverage
-
-        new_num_state_qubits = num_state_qubits + 1
-        new_parameter_length = math.comb(new_num_state_qubits, 2)
-        layer.num_state_qubits = new_num_state_qubits
-        assert isinstance(layer.yy_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.yy_parameters) == new_parameter_length
-        assert isinstance(layer.zz_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.zz_parameters) == new_parameter_length
-        assert layer.num_parameters == 2 * new_parameter_length
-        assert isinstance(layer.parameters, list)
-        assert layer.parameters[0] == layer.yy_parameters
-        assert layer.parameters[1] == layer.zz_parameters
-        assert isinstance(layer, qiskit.QuantumCircuit)
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        # 2. its qubit_applied_pairs is all the combinations of two qubits.
+        # 3. its parameter_prefix is the empty string.
+        # 4. its name is "DualQubitUnitaryLayer".
+        # 5. the length of its _parameters is 2.
+        # 6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
 
     @pytest.mark.layer
-    def test_with_one_num_state_qubits(self):
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_init_with_qubit_applied_pairs(self, num_state_qubits):
         """Normal test;
-        Create an instance of DualQubitUnitaryLayer class with 1 state qubit.
+        create an instance of DualQubitUnitaryLayer by giving qubit_applied_pairs.
 
         Check if
-        - AttributeError happens when to_gate() runs.
-        - AttributeError happens when to_gate() runs after substituting a new odd number of state qubits.
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is the same as the given qubit_applied_paris.
+        3. its parameter_prefix is the empty string.
+        4. its name is "DualQubitUnitaryLayer".
+        5. the length of its _parameters is 2.
+        6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
         """
-        num_state_qubits = 1
-        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
-        with pytest.raises(AttributeError):
-            layer.to_gate()
-
-        num_state_qubits = 2
-        layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
-        layer.num_state_qubits = 1
-        with pytest.raises(AttributeError):
-            layer.to_gate()
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        # 2. its qubit_applied_pairs is the same as the given qubit_applied_paris.
+        # 3. its parameter_prefix is the empty string.
+        # 4. its name is "DualQubitUnitaryLayer".
+        # 5. the length of its _parameters is 2.
+        # 6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
 
     @pytest.mark.layer
-    def test_with_qubit_applied_pairs(self):
+    def test_init_with_name(self, num_state_qubits):
         """Normal test;
-        Create an instance of DualQubitUnitaryLayer class with qubit_applied_pairs.
+        create an instance of DualQubitUnitaryLayer by giving name.
 
         Check if
-        - the length of its decomposed data is the same as the length of the given qubit_applied_pairs.
-        - the length of its yy_parameters is the same as the length of the given qubit_applied_pairs.
-        - the length of its zz_parameters is the same as the length of the given qubit_applied_pairs.
-        - each qubits in its decomposed data is the same as the each element of the given qubit_applied_pairs.
-        - the above things are still correct after substituting a new qubit_applied_pairs.
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. its parameter_prefix is the empty string.
+        4. its name is the same as the given name.
+        5. the length of its _parameters is 2.
+        6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
         """
-        num_state_qubits = 5
-        qubit_applied_pairs = [(0, 2), (0, 4)]
-        layer = DualQubitUnitaryLayer(
-            num_state_qubits=num_state_qubits, qubit_applied_pairs=qubit_applied_pairs
-        )
-        assert len(layer.yy_parameters) == len(qubit_applied_pairs)
-        assert len(layer.zz_parameters) == len(qubit_applied_pairs)
-        for pair_index in range(len(qubit_applied_pairs)):
-            index = pair_index * 2
-            data = layer.decompose().data[index]
-            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
-
-            data = layer.decompose().data[index + 1]
-            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
-
-        new_qubit_applied_pairs = [(1, 2)]
-        layer.qubit_applied_pairs = new_qubit_applied_pairs
-        assert len(layer.yy_parameters) == len(new_qubit_applied_pairs)
-        assert len(layer.zz_parameters) == len(new_qubit_applied_pairs)
-        for pair_index in range(len(new_qubit_applied_pairs)):
-            index = pair_index * 2
-            data = layer.decompose().data[index]
-            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
-
-            data = layer.decompose().data[index + 1]
-            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        # 2. its qubit_applied_pairs is all the combinations of two qubits.
+        # 3. its parameter_prefix is the empty string.
+        # 4. its name is the same as the given name.
+        # 5. the length of its _parameters is 2.
+        # 6. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 7. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
 
     @pytest.mark.layer
-    def test_with_parameter_prefix(self):
+    def test_qubit_applied_pairs(self):
         """Normal test;
-        create an instance of DualQubitUnitaryLayer with specified parameter_prefix.
+        call the setter and getter of qubit_applied_pairs.
 
         Check if
-        - its parameter_prefix is the same as the given parameter_prefix.
-        - its parameter_prefix is the same as the new given parameter_prefix
-          after substituting a new parameter_prefix.
+        1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
+        2. the length of its _parameters is 2.
+        3. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        4. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        6. the length of its _parameters is 2.
+        7. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        8. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        10. the length of its _parameters is 2.
+        11. both elements of its _parameters are None.
+        12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        13. the length of its _parameters is 2.
+        14. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        15. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
         """
-        num_state_qubits = 2
-        parameter_prefix = "prefix!"
-        layer = DualQubitUnitaryLayer(
-            num_state_qubits=num_state_qubits, parameter_prefix=parameter_prefix
-        )
-        assert layer.parameter_prefix == parameter_prefix
+        # 1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
+        # 2. the length of its _parameters is 2.
+        # 3. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 4. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        # 5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        # 6. the length of its _parameters is 2.
+        # 7. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 8. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        # 9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        # 10. the length of its _parameters is 2.
+        # 11. both elements of its _parameters are None.
+        # 12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        # 13. the length of its _parameters is 2.
+        # 14. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 15. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
 
-        new_parameter_prefix = "new parameter_prefix!"
-        layer.parameter_prefix = new_parameter_prefix
-        assert layer.parameter_prefix == new_parameter_prefix
+    @pytest.mark.layer
+    def test_valid_check_configuration(self):
+        """Normal test;
+        run _build() to see if _check_configuration works with more than one num_state_qubits.
+
+        Check if
+        1. no error arises.
+        """
+        # 1. no error arises.
+
+    @pytest.mark.layer
+    def test_valid_check_configuration(self):
+        """Normal test;
+        run _build() to see if _check_configuration works with one num_state_qubits.
+
+        Check if
+        1. AttributeError arises.
+        """
+        # 1. AttributeError arises.
+
+    @pytest.mark.layer
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_build(self, num_state_qubits):
+        """Normal test;
+        run _build().
+
+        Check if
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. the length of its _parameters is 2.
+        4. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        5. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        6. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+            6.1 the number of the gates is the same as qubit_applied_pairs.
+            3.2 they are parametrised.
+            3.3 each gate is applied to two qubits.
+        7. its num_state_qubits is the same as the new num_state_qubits after setting it.
+        8. its qubit_applied_pairs is all the combinations of two qubits.
+        9. the length of its _parameters is 2.
+        10. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        11. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        12. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+            12.1 the number of the gates is the same as qubit_applied_pairs.
+            12.2 they are parametrised.
+            12.3 each gate is applied to two qubits.
+        13. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting it.
+        14. the length of its _parameters is 2.
+        15. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        16. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        17. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+            17.1 the number of the gates is the same as qubit_applied_pairs.
+            17.2 they are parametrised.
+            17.3 each gate is applied to two qubits.
+        """
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        # 2. its qubit_applied_pairs is all the combinations of two qubits.
+        # 3. the length of its _parameters is 2.
+        # 4. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 5. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        # 6. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+        #     6.1 the number of the gates is the same as qubit_applied_pairs.
+        #     3.2 they are parametrised.
+        #     3.3 each gate is applied to two qubits.
+        # 7. its num_state_qubits is the same as the new num_state_qubits after setting it.
+        # 8. its qubit_applied_pairs is all the combinations of two qubits.
+        # 9. the length of its _parameters is 2.
+        # 10. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 11. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        # 12. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+        #     12.1 the number of the gates is the same as qubit_applied_pairs.
+        #     12.2 they are parametrised.
+        #     12.3 each gate is applied to two qubits.
+        # 13. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting it.
+        # 14. the length of its _parameters is 2.
+        # 15. the types of both elements of its _parameters are qiskit.circuit.ParameterVector.
+        # 16. the lengths of both elements of its _parameters are the same as one of its qubit_applied_pairs.
+        # 17. itself, after performing decompose() method, contains only RYY and RZZ gates such that
+        #     17.1 the number of the gates is the same as qubit_applied_pairs.
+        #     17.2 they are parametrised.
+        #     17.3 each gate is applied to two qubits.
