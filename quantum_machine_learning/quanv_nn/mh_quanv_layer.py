@@ -3,7 +3,7 @@ import pickle
 
 import numpy as np
 import qiskit
-from qiskit import qpy, primitives
+from qiskit import qpy
 import qiskit.providers
 
 from quantum_machine_learning.encoders.x_encoder import XEncoder
@@ -169,15 +169,13 @@ class MHQuanvLayer:
     def __process_one_data(
         self,
         data: np.ndarray,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
+        backend: qiskit.providers.BackendV2,
         shots: int = 8096,
     ) -> np.ndarray:
         """Process one data, which is one-dimensional array.
 
         :param np.ndarray data: one data
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param qiskit.providers.BackendV2 backend: a backend
         :param int shots: number of shots
         :return np.ndarray: processed data through each filter, first index implies filter
         """
@@ -195,7 +193,7 @@ class MHQuanvLayer:
             pubs.append((filter, parameters))
 
         # Run the sampler.
-        job = sampler.run(pubs, shots=shots)
+        job = backend.run(pubs, shots=shots)
         # Count the number of ones from each result.
         results = job.result()
         results = [result.data.meas.get_counts() for result in results]
@@ -209,15 +207,13 @@ class MHQuanvLayer:
     def build_lookup_tables(
         self,
         patterns: np.ndarray,
-        sampler: (
-            primitives.BaseSamplerV1 | primitives.BaseSamplerV2
-        ) = primitives.StatevectorSampler(seed=901),
+        backend: qiskit.providers.BackendV2,
         shots: int = 8096,
     ):
         """Build each look-up table to the given patterns.
 
         :param np.ndarray patterns: input patterns to make look-up tables
-        :param qiskit.primitives.BaseSamplerV1  |  qiskit.primitives.BaseSamplerV2 sampler: sampler primitives, defaults to qiskit.primitives.StatevectorSampler
+        :param qiskit.providers.BackendV2 backend: a backend
         :param int shots: number of shots
         """
         # Initialise the tables.
@@ -225,7 +221,7 @@ class MHQuanvLayer:
 
         # Process all patterns.
         output_patterns = self.process(
-            batch_data=patterns, sampler=sampler, shots=shots
+            batch_data=patterns, backend=backend, shots=shots
         )
 
         # Store the outputs.
