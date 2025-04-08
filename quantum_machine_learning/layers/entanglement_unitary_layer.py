@@ -118,16 +118,8 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add the encoding part: the rotation controlled Y and Z rotations.
-        if self.qubit_applied_pairs is None:
-            index = 0
-            for i in range(self.num_state_qubits):  # type: ignore
-                for j in range(i + 1, self.num_state_qubits):  # type: ignore
-                    circuit.cry(self._cy_parameters[index], i, j)  # type: ignore
-                    circuit.crz(self._cz_parameters[index], i, j)  # type: ignore
-                    index += 1
-        else:
-            for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
-                circuit.cry(self._cy_parameters[index], qubit_1, qubit_2)  # type: ignore
-                circuit.crz(self._cz_parameters[index], qubit_1, qubit_2)  # type: ignore
+        for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
+            circuit.cry(self._cy_parameters[index], qubit_1, qubit_2)  # type: ignore
+            circuit.crz(self._cz_parameters[index], qubit_1, qubit_2)  # type: ignore
 
         self.append(circuit.to_gate(), self.qubits)
