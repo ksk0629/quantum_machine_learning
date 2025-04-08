@@ -26,6 +26,8 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         :param str parameter_prefix | None: a prefix of the parameter names, defaults to None
         :param str | None name: the name of this encoder, defaults to "EntanglementUnitary"
         """
+        self._cy_parameters: qiskit.circuit.ParameterVector | None = None
+        self._cz_parameters: qiskit.circuit.ParameterVector | None = None
         self._qubit_applied_pairs: list[tuple[int, int]] | None = None
 
         super().__init__(
@@ -95,14 +97,9 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
             prefix = ""
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
-        if self.qubit_applied_pairs is None:
-            length = math.comb(self.num_state_qubits, 2)  # type: ignore
-            self._cy_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("cy"), length=length
-            )
-            self._cz_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("cz"), length=length
-            )
+        if self.qubit_applied_pairs == []:
+            self._cy_parameters = []
+            self._cz_parameters = []
         else:
             self._cy_parameters = qiskit.circuit.ParameterVector(
                 parameter_name("cy"), length=len(self.qubit_applied_pairs)
@@ -125,12 +122,12 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
             index = 0
             for i in range(self.num_state_qubits):  # type: ignore
                 for j in range(i + 1, self.num_state_qubits):  # type: ignore
-                    circuit.cry(self.cy_parameters[index], i, j)  # type: ignore
-                    circuit.crz(self.cz_parameters[index], i, j)  # type: ignore
+                    circuit.cry(self._cy_parameters[index], i, j)  # type: ignore
+                    circuit.crz(self._cz_parameters[index], i, j)  # type: ignore
                     index += 1
         else:
             for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
-                circuit.cry(self.cy_parameters[index], qubit_1, qubit_2)  # type: ignore
-                circuit.crz(self.cz_parameters[index], qubit_1, qubit_2)  # type: ignore
+                circuit.cry(self._cy_parameters[index], qubit_1, qubit_2)  # type: ignore
+                circuit.crz(self._cz_parameters[index], qubit_1, qubit_2)  # type: ignore
 
         self.append(circuit.to_gate(), self.qubits)
