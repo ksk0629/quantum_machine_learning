@@ -25,8 +25,6 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         :param str parameter_prefix | None: a prefix of the parameter names, defaults to None
         :param str | None name: the name of this encoder, defaults to "EntanglementUnitary"
         """
-        self._cy_parameters: qiskit.circuit.ParameterVector | None = None
-        self._cz_parameters: qiskit.circuit.ParameterVector | None = None
         self._qubit_applied_pairs: list[tuple[int, int]] | None = None
 
         super().__init__(
@@ -37,22 +35,6 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
 
         self.num_state_qubits = num_state_qubits
         self.qubit_applied_pairs = qubit_applied_pairs
-
-    @property
-    def cy_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the controlled Y-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr | None: the controlled Y-rotation parameter vector
-        """
-        return self._cy_parameters
-
-    @property
-    def cz_parameters(self) -> qiskit.circuit.ParameterVector | None:
-        """Return the parameter vector for the controlled Z-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr | None: the controlled Z-rotation parameter vector
-        """
-        return self._cz_parameters
 
     @property
     def qubit_applied_pairs(self) -> list[tuple[int, int]] | None:
@@ -118,7 +100,7 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
                 parameter_name("cz"), length=len(self.qubit_applied_pairs)
             )
 
-        self._parameters = [self.cy_parameters, self.cz_parameters]
+        self._parameters = [self._cy_parameters, self._cz_parameters]
 
     def _build(self) -> None:
         """Build the circuit."""
