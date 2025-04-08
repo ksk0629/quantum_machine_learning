@@ -1,5 +1,4 @@
 import pytest
-import qiskit
 
 from quantum_machine_learning.layers.single_qubit_unitary_layer import (
     SingleQubitUnitaryLayer,
