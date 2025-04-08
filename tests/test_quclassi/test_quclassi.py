@@ -50,7 +50,7 @@ class TestQuClassi:
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
+        initial_parameters = {"a": [0.1, 0.2, 0.3, 0.4], "b": [0.3, 0.4, 0.5, 0.6]}
         quclassi = QuClassi(
             classical_data_size=classical_data_size,
             structure=structure,
@@ -249,7 +249,7 @@ class TestQuClassi:
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
+        initial_parameters = {"a": [0.1, 0.2, 0.3, 0.4], "b": [0.3, 0.4, 0.5, 0.6]}
         quclassi = QuClassi(
             classical_data_size=classical_data_size,
             structure=structure,
@@ -257,7 +257,7 @@ class TestQuClassi:
             initial_parameters=initial_parameters,
         )
 
-        data = [[1, 2, 3, 0], [4, 5, 6, 0], [7, 8, 9, 0]]
+        data = [[0.1, 0.2, 0.3, 0], [0.4, 0.5, 0.6, 0], [0.7, 0.8, 0.9, 0]]
         backend = qiskit_aer.AerSimulator(seed_simulator=901)
         shots = 8192
 
@@ -284,7 +284,7 @@ class TestQuClassi:
             labels=labels,
         )
 
-        data = [[1, 2, 3, 0], [4, 5, 6, 0], [7, 8, 9, 0]]
+        data = [[0.1, 0.2, 0.3, 0], [0.4, 0.5, 0.6, 0], [0.7, 0.8, 0.9, 0]]
         backend = qiskit_aer.AerSimulator(seed_simulator=901)
         shots = 8192
         with pytest.raises(AttributeError):
@@ -309,7 +309,7 @@ class TestQuClassi:
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
+        initial_parameters = {"a": [0.1, 0.2, 0.3, 0.4], "b": [0.3, 0.4, 0.5, 0.6]}
         quclassi = QuClassi(
             classical_data_size=classical_data_size,
             structure=structure,
@@ -359,7 +359,7 @@ class TestQuClassi:
         classical_data_size = 3
         structure = "s"
         labels = ["a", "b"]
-        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
+        initial_parameters = {"a": [0.1, 0.2, 0.3, 0.4], "b": [0.3, 0.4, 0.5, 0.6]}
         name = "Name"
         yaml_data = {
             "classical_data_size": classical_data_size,
