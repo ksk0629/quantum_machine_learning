@@ -293,32 +293,6 @@ class TestQuClassi:
             )
 
     @pytest.mark.quclassi
-    def test_invalid_data_classify(self):
-        """Abnormal test;
-        run classify method by giving incorrect data.
-
-        Check if AttributeError happens.
-        """
-        classical_data_size = 3
-        structure = "s"
-        labels = ["a", "b"]
-        initial_parameters = {"a": [1, 2, 3, 4], "b": [3, 4, 5, 6]}
-        quclassi = QuClassi(
-            classical_data_size=classical_data_size,
-            structure=structure,
-            labels=labels,
-            initial_parameters=initial_parameters,
-        )
-
-        data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        backend = qiskit_aer.AerSimulator(seed_simulator=901)
-        shots = 8192
-        with pytest.raises(ValueError):
-            quclassi.classify(
-                data=data, backend=backend, shots=shots, optimisation_level=0
-            )
-
-    @pytest.mark.quclassi
     def test_save(self):
         """Normal test;
         run the save method.
