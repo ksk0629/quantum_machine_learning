@@ -4,15 +4,9 @@ import qiskit
 class SSwapGate(qiskit.circuit.Gate):
     """Square root swap gate class."""
 
-    def __init__(
-        self,
-        label: str | None = None,
-        *,
-        duration: int | float | None = None,
-        unit: str = "dt"
-    ):
+    def __init__(self, label: str | None = None):
         """Create the square root of swap gate."""
-        super().__init__("√SWAP", 2, [], label=label, duration=duration, unit=unit)
+        super().__init__("√SWAP", 2, [], label=label)
 
     def _define(self) -> None:
         """Calculate a subcircuit that implements this unitary."""
