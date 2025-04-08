@@ -21,6 +21,7 @@ class TestSingleQubitUnitaryLayer:
         1. its num_state_qubits is the same as the given num_state_qubits.
         2. its name is "SingleQubitUnitary".
         3. its qubits_applied is [0, 1, ..., num_state_qubits].
+        4. the parameter_prefix is the same as the new parameter_prefix after setting it.
         """
         layer = SingleQubitUnitaryLayer(num_state_qubits=num_state_qubits)
         # 1. its num_state_qubits is the same as the given num_state_qubits.
@@ -29,6 +30,10 @@ class TestSingleQubitUnitaryLayer:
         assert layer.name == "SingleQubitUnitary"
         # 3. its qubits_applied is [0, 1, ..., num_state_qubits].
         assert layer.qubits_applied == list(range(num_state_qubits))
+        # 4. the parameter_prefix is the same as the new parameter_prefix after setting it.
+        parameter_prefix = "HEY"
+        layer.parameter_prefix = parameter_prefix
+        assert layer.parameter_prefix == parameter_prefix
 
     @pytest.mark.layer
     def test_qubits_applied(self):
