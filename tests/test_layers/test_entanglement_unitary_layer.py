@@ -1,4 +1,6 @@
-import math
+import itertools
+import random
+import string
 
 import pytest
 import qiskit
@@ -14,131 +16,333 @@ class TestEntanglementUnitaryLayer:
         pass
 
     @pytest.mark.layer
-    @pytest.mark.parametrize("num_state_qubits", [2, 3])
-    def test_normal(self, num_state_qubits):
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_init_with_defaults(self, num_state_qubits):
         """Normal test;
-        Create an instance of EntanglementUnitaryLayer class.
+        create an instance of EntanglementUnitaryLayer with the default values.
 
         Check if
-        - the type of its cy_parameters is qiskit.circuit.ParameterVector.
-        - the length of its cy_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - the type of its cz_parameters is qiskit.circuit.ParameterVector.
-        - the length of its cz_parameters is the same as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - its num_parameters is the double as the number of combinations of choosing two qubits in num_state_qubits qubits.
-        - the type of its parameters is list.
-        - the first element of its parameters is the same as its cy_parameters.
-        - the second element of its parameters is the same as its cz_parameters.
-        - the type of itself is qiskit.QuantumCircuit.
-        - the above things are still correct with a new num_state_qubits
-          after substituting the new num_state_qubits.
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. its parameter_prefix is the empty string.
+        4. its name is "EntanglementUnitary".
+        5. the length of its parameters is 2.
+        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        8. the parameter_prefix is the same as the new parameter_prefix after setting it.
         """
         layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
-        parameter_length = math.comb(num_state_qubits, 2)
-        assert isinstance(layer.cy_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.cy_parameters) == parameter_length
-        assert isinstance(layer.cz_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.cz_parameters) == parameter_length
-        assert layer.num_parameters == 2 * parameter_length
-        assert isinstance(layer.parameters, list)
-        assert layer.parameters[0] == layer.cy_parameters
-        assert layer.parameters[1] == layer.cz_parameters
-        assert isinstance(layer, qiskit.QuantumCircuit)
-
-        layer._build()  # For the coverage
-
-        new_num_state_qubits = num_state_qubits + 1
-        new_parameter_length = math.comb(new_num_state_qubits, 2)
-        layer.num_state_qubits = new_num_state_qubits
-        assert isinstance(layer.cy_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.cy_parameters) == new_parameter_length
-        assert isinstance(layer.cz_parameters, qiskit.circuit.ParameterVector)
-        assert len(layer.cz_parameters) == new_parameter_length
-        assert layer.num_parameters == 2 * new_parameter_length
-        assert isinstance(layer.parameters, list)
-        assert layer.parameters[0] == layer.cy_parameters
-        assert layer.parameters[1] == layer.cz_parameters
-        assert isinstance(layer, qiskit.QuantumCircuit)
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        assert layer.num_state_qubits == num_state_qubits
+        # 2. its qubit_applied_pairs is all the combinations of two qubits.
+        qubits = list(range(layer.num_state_qubits))
+        all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+        assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
+        assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
+        # 3. its parameter_prefix is the empty string.
+        assert layer.parameter_prefix == ""
+        # 4. its name is "EntanglementUnitary".
+        assert layer.name == "EntanglementUnitary"
+        # 5. the length of its parameters is 2.
+        assert len(layer.parameters) == 2
+        # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+        # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
+        # 8. the parameter_prefix is the same as the new parameter_prefix after setting it.
+        parameter_prefix = "HEY"
+        layer.parameter_prefix = parameter_prefix
+        assert layer.parameter_prefix == parameter_prefix
 
     @pytest.mark.layer
-    def test_with_one_num_state_qubits(self):
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_init_with_qubit_applied_pairs(self, num_state_qubits):
         """Normal test;
-        Create an instance of EntanglementUnitaryLayer class with an odd number of state qubits.
+        create an instance of EntanglementUnitaryLayer by giving qubit_applied_pairs.
 
         Check if
-        - AttributeError happens when to_gate() runs.
-        - AttributeError happens when to_gate() runs after substituting a new odd number of state qubits.
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is the same as the given qubit_applied_paris.
+        3. its parameter_prefix is the empty string.
+        4. its name is "EntanglementUnitary".
+        5. the length of its parameters is 2.
+        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
         """
-        num_state_qubits = 1
-        layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
-        with pytest.raises(AttributeError):
-            layer.to_gate()
+        random.seed(901)
 
+        qubits = list(range(num_state_qubits))
+        all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+
+        num_trials = (
+            100
+            if len(all_combinations_of_two_qubits) > 100
+            else len(all_combinations_of_two_qubits)
+        )
+        for _ in range(num_trials):
+            k = random.randint(1, num_state_qubits - 1)
+            qubit_applied_pairs = random.choices(all_combinations_of_two_qubits, k=k)
+            layer = EntanglementUnitaryLayer(
+                num_state_qubits=num_state_qubits,
+                qubit_applied_pairs=qubit_applied_pairs,
+            )
+            # 1. its num_state_qubits is the same as the given num_state_qubits.
+            assert layer.num_state_qubits == num_state_qubits
+            # 2. its qubit_applied_pairs is the same as the given qubit_applied_paris.
+            assert layer.qubit_applied_pairs == qubit_applied_pairs
+            # 3. its parameter_prefix is the empty string.
+            assert layer.parameter_prefix == ""
+            # 4. its name is "EntanglementUnitary".
+            assert layer.name == "EntanglementUnitary"
+            # 5. the length of its parameters is 2.
+            assert len(layer.parameters)
+            # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+            assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+            assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+            # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+            assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+            assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
+
+    @pytest.mark.layer
+    def test_init_with_name(self):
+        """Normal test;
+        create an instance of EntanglementUnitaryLayer by giving name.
+
+        Check if
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. its parameter_prefix is the empty string.
+        4. its name is the same as the given name.
+        5. the length of its parameters is 2.
+        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        """
+        random.seed(901)  # For reproducibility
+
+        chars = string.ascii_letters + string.digits
         num_state_qubits = 2
-        layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
-        layer.num_state_qubits = 1
-        with pytest.raises(AttributeError):
-            layer.to_gate()
+
+        num_trials = 100
+        for _ in range(num_trials):
+            name = "".join(random.choice(chars) for _ in range(64))
+            layer = EntanglementUnitaryLayer(
+                num_state_qubits=num_state_qubits, name=name
+            )
+            # 1. its num_state_qubits is the same as the given num_state_qubits.
+            assert layer.num_state_qubits == num_state_qubits
+            # 2. its qubit_applied_pairs is all the combinations of two qubits.
+            qubits = list(range(layer.num_state_qubits))
+            all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+            assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
+            assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
+            # 3. its parameter_prefix is the empty string.
+            assert layer.parameter_prefix == ""
+            # 4. its name is the same as the given name.
+            assert layer.name == name
+            # 5. the length of its parameters is 2.
+            assert len(layer.parameters) == 2
+            # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+            assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+            assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+            # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+            assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+            assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
 
     @pytest.mark.layer
-    def test_with_qubit_applied_pairs(self):
+    def test_qubit_applied_pairs(self):
         """Normal test;
-        Create an instance of EntanglementUnitaryLayer class with qubit_applied_pairs.
+        call the setter and getter of qubit_applied_pairs.
 
         Check if
-        - the length of its decomposed data is the same as the length of the given qubit_applied_pairs.
-        - the length of its cy_parameters is the same as the length of the given qubit_applied_pairs.
-        - the length of its cz_parameters is the same as the length of the given qubit_applied_pairs.
-        - each qubits in its decomposed data is the same as the each element of the given qubit_applied_pairs.
-        - the above things are still correct after substitutin a new qubit_applied_pairs.
+        1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
+        2. the length of its parameters is 2.
+        3. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        4. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        6. the length of its parameters is 2.
+        7. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        8. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        10. the length of its parameters is 2.
+        # 11. both elements of its parameters are the empty list.
+        12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        13. the length of its parameters is 2.
+        14. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        15. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
         """
-        num_state_qubits = 5
-        qubit_applied_pairs = [(0, 2), (0, 4)]
+        num_state_qubits = 7
+        qubit_applied_pairs = [(0, 1), (0, 6), (1, 3)]
         layer = EntanglementUnitaryLayer(
             num_state_qubits=num_state_qubits, qubit_applied_pairs=qubit_applied_pairs
         )
-        assert len(layer.cy_parameters) == len(qubit_applied_pairs)
-        assert len(layer.cz_parameters) == len(qubit_applied_pairs)
-        for pair_index in range(len(qubit_applied_pairs)):
-            index = pair_index * 2
-            data = layer.decompose().data[index]
-            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
-
-            data = layer.decompose().data[index + 1]
-            assert data.qubits[0]._index == qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == qubit_applied_pairs[pair_index][1]
-
-        new_qubit_applied_pairs = [(1, 2)]
+        # 1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
+        assert layer.qubit_applied_pairs == qubit_applied_pairs
+        # 2. the length of its parameters is 2.
+        assert len(layer.parameters) == 2
+        # 3. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+        # 4. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
+        # 5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        layer.qubit_applied_pairs = None
+        qubits = list(range(layer.num_state_qubits))
+        all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+        assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
+        assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
+        # 6. the length of its parameters is 2.
+        assert len(layer.parameters) == 2
+        # 7. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+        # 8. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
+        # 9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        layer.num_state_qubits = 1
+        assert layer.qubit_applied_pairs == []
+        # 10. the length of its parameters is 2.
+        assert len(layer.parameters) == 2
+        # 11. both elements of its parameters are the empty list.
+        assert layer.parameters[0] == []
+        assert layer.parameters[1] == []
+        # 12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        new_qubit_applied_pairs = [(0, 1), (1, 2), (3, 4), (5, 6)]
         layer.qubit_applied_pairs = new_qubit_applied_pairs
-        assert len(layer.cy_parameters) == len(new_qubit_applied_pairs)
-        assert len(layer.cz_parameters) == len(new_qubit_applied_pairs)
-        for pair_index in range(len(new_qubit_applied_pairs)):
-            index = pair_index * 2
-            data = layer.decompose().data[index]
-            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
-
-            data = layer.decompose().data[index + 1]
-            assert data.qubits[0]._index == new_qubit_applied_pairs[pair_index][0]
-            assert data.qubits[1]._index == new_qubit_applied_pairs[pair_index][1]
+        assert layer.qubit_applied_pairs == new_qubit_applied_pairs
+        # 13. the length of its parameters is 2.
+        assert len(layer.parameters) == 2
+        # 14. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
+        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
+        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
+        # 15. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
+        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
 
     @pytest.mark.layer
-    def test_with_parameter_prefix(self):
+    def test_valid_check_configuration(self):
         """Normal test;
-        create an instance of EntanglementUnitaryLayer with specified parameter_prefix.
+        run _build() to see if _check_configuration works with more than one num_state_qubits.
 
         Check if
-        - its parameter_prefix is the same as the given parameter_prefix.
-        - its parameter_prefix is the same as the new given parameter_prefix
-          after substituting a new parameter_prefix.
+        1. no error arises.
         """
         num_state_qubits = 2
-        parameter_prefix = "prefix!"
-        layer = EntanglementUnitaryLayer(
-            num_state_qubits=num_state_qubits, parameter_prefix=parameter_prefix
-        )
-        assert layer.parameter_prefix == parameter_prefix
+        layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
+        # 1. no error arises.
+        layer._build()
 
-        new_parameter_prefix = "new parameter_prefix!"
-        layer.parameter_prefix = new_parameter_prefix
-        assert layer.parameter_prefix == new_parameter_prefix
+    @pytest.mark.layer
+    def test_invalid_check_configuration(self):
+        """Abormal test;
+        run _build() to see if _check_configuration works with one num_state_qubits.
+
+        Check if
+        1. AttributeError arises.
+        """
+        num_state_qubits = 1
+        layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
+        # 1. AttributeError arises.
+        with pytest.raises(AttributeError):
+            layer._build()
+
+    @pytest.mark.layer
+    @pytest.mark.parametrize("num_state_qubits", [2, 3, 6, 7])
+    def test_build(self, num_state_qubits):
+        """Normal test;
+        run _build().
+
+        Check if
+        1. its num_state_qubits is the same as the given num_state_qubits.
+        2. its qubit_applied_pairs is all the combinations of two qubits.
+        3. itself, after performing decompose() method, contains only CRY and CRZ gates such that
+            3.1 the number of the gates is twice the size of its qubit_applied_pairs.
+            3.2 they are parametrised.
+            3.3 each gate is applied to two qubits.
+        4. its num_state_qubits is the same as the new num_state_qubits after setting it.
+        5. its qubit_applied_pairs is all the combinations of two qubits.
+        6. itself, after performing decompose() method, contains only CRY and CRZ gates such that
+            6.1 the number of the gates is twice the size of its qubit_applied_pairs
+            6.2 they are parametrised.
+            6.3 each gate is applied to two qubits.
+        7. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting it.
+        8. itself, after performing decompose() method, contains only CRY and CRZ gates such that
+            8.1 the number of the gates is twice the size of its qubit_applied_pairs
+            8.2 they are parametrised.
+            8.3 each gate is applied to two qubits.
+        """
+        layer = EntanglementUnitaryLayer(num_state_qubits=num_state_qubits)
+        # 1. its num_state_qubits is the same as the given num_state_qubits.
+        assert layer.num_state_qubits == num_state_qubits
+        # 2. its qubit_applied_pairs is all the combinations of two qubits.
+        qubits = list(range(layer.num_state_qubits))
+        all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+        assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
+        assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
+        # 3. itself, after performing decompose() method, contains only CY and CZ gates such that
+        decomposed_x_layer = layer.decompose()
+        gates = decomposed_x_layer.data
+        assert all(
+            gate.operation.name == "cry" or gate.operation.name == "crz"
+            for gate in gates
+        )
+        #     3.1 the number of the gates is twice the size of its qubit_applied_pairs.
+        assert len(gates) == 2 * len(layer.qubit_applied_pairs)
+
+        for gate in gates:
+            #     3.2 they are parametrised.
+            assert (
+                len(gate.operation.params) == 1
+            )  # == 1: since it's either an CRY or an CRZ gate
+            #     3.3 each gate is applied to two qubits.
+            assert gate.operation.num_qubits == 2
+        # 4. its num_state_qubits is the same as the new num_state_qubits after setting it.
+        new_num_state_qubits = num_state_qubits + 1
+        layer.num_state_qubits = new_num_state_qubits
+        assert layer.num_state_qubits == new_num_state_qubits
+        # 5. its qubit_applied_pairs is all the combinations of two qubits.
+        qubits = list(range(layer.num_state_qubits))
+        all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
+        assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
+        assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
+        # 6. itself, after performing decompose() method, contains only CRY and CRZ gates such that
+        decomposed_x_layer = layer.decompose()
+        gates = decomposed_x_layer.data
+        assert all(
+            gate.operation.name == "cry" or gate.operation.name == "crz"
+            for gate in gates
+        )
+        #     6.1 the number of the gates is twice the size of its qubit_applied_pairs
+        assert len(gates) == 2 * len(layer.qubit_applied_pairs)
+
+        for gate in gates:
+            #     6.2 they are parametrised.
+            assert (
+                len(gate.operation.params) == 1
+            )  # == 1: since it's either an CRY or an CRZ gate
+            #     6.3 each gate is applied to two qubits.
+            assert gate.operation.num_qubits == 2
+        # 7. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting it.
+        new_qubit_applied_pairs = [(0, 1)]
+        layer.qubit_applied_pairs = new_qubit_applied_pairs
+        assert layer.qubit_applied_pairs == new_qubit_applied_pairs
+        # 8. itself, after performing decompose() method, contains only CRY and CRZ gates such that
+        decomposed_x_layer = layer.decompose()
+        gates = decomposed_x_layer.data
+        assert all(
+            gate.operation.name == "cry" or gate.operation.name == "crz"
+            for gate in gates
+        )
+        #     17.1 the number of the gates is twice the size of its qubit_applied_pairs
+        assert len(gates) == 2 * len(layer.qubit_applied_pairs)
+
+        for gate in gates:
+            #     17.2 they are parametrised.
+            assert (
+                len(gate.operation.params) == 1
+            )  # == 1: since it's either an CRY or an CRZ gate
+            #     17.3 each gate is applied to two qubits.
+            assert gate.operation.num_qubits == 2
