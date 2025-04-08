@@ -422,20 +422,12 @@ class QuClassi(qiskit.circuit.library.BlueprintCircuit):
         :param int optimisation_level: the level of the optimisation, defaults to 2
         :param int seed: a random seed, defaults to 901
         :raises AttributeError: if the parameter values haven't been set
-        :raises ValueError: if the shape of the given datum is not the same as the using classical data size
         :return dict[str, float]: the fidelities for each label
         """
         # Raise the error if the parameter values haven't been set.
         if self.parameter_values == {}:
             error_msg = "No parameter values are found. Set the parameter values first."
             raise AttributeError(error_msg)
-        # Raise the error if the data shape does not meet the using_classical_data_size.
-        if len(datum) != self.using_classical_data_size:
-            error_msg = f"""
-            The size of given datum must be {self.using_classical_data_size}.
-            However, it is {len(datum)}.
-            """
-            raise ValueError(error_msg)
 
         # Build the circuit if not yet.
         if not self._is_built:
