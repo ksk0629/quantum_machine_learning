@@ -36,28 +36,15 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
         self.qubits_applied = qubits_applied
 
     @property
-    def y_parameters(self) -> qiskit.circuit.ParameterVector:
-        """Return the parameter vector for the Y-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr: the Y-rotation parameter vector
-        """
-        return self._y_parameters
-
-    @property
-    def z_parameters(self) -> qiskit.circuit.ParameterVector:
-        """Return the parameter vector for the Z-rotation of this circuit.
-
-        :return qiskit.circuit.ParameterVecotr: the Z-rotation parameter vector
-        """
-        return self._z_parameters
-
-    @property
-    def qubits_applied(self) -> list[tuple[int, int]] | None:
+    def qubits_applied(self) -> list[int]:
         """Return the qubits to be applied.
 
-        :return list[tuple[int, int]] | None: pairs of two-qubit to be applied
+        :return list[int]: qubits to be applied the gates
         """
-        return self._qubits_applied
+        if self._qubits_applied is None:
+            return list(range(self.num_state_qubits))
+        else:
+            return self._qubits_applied
 
     @qubits_applied.setter
     def qubits_applied(self, qubits_applied: list[int] | None):
@@ -75,8 +62,7 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
         :param bool raise_on_failure: if raise an error or not, defaults to True
         :return bool: if the configuration is valid
         """
-        valid = True
-
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
         return valid
 
     def _reset_register(self) -> None:
@@ -93,13 +79,9 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
             prefix = ""
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
-        if self.qubits_applied is None:
-            self._y_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("y"), length=self.num_state_qubits
-            )
-            self._z_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("z"), length=self.num_state_qubits
-            )
+        if self.qubits_applied == []:
+            self._y_parameters = []
+            self._z_parameters = []
         else:
             length = len(self.qubits_applied)
             self._y_parameters = qiskit.circuit.ParameterVector(
@@ -108,7 +90,7 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
             self._z_parameters = qiskit.circuit.ParameterVector(
                 parameter_name("z"), length=length
             )
-        self._parameters = [self.y_parameters, self.z_parameters]
+        self._parameters = [self._y_parameters, self._z_parameters]
 
     def _build(self) -> None:
         """Build the circuit."""
@@ -118,13 +100,8 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
         circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add the encoding part: the rotation Y and Z.
-        if self.qubits_applied is None:
-            for index in range(self.num_state_qubits):
-                circuit.ry(self.y_parameters[index], index)
-                circuit.rz(self.z_parameters[index], index)
-        else:
-            for index, qubit in enumerate(self.qubits_applied):
-                circuit.ry(self.y_parameters[index], qubit)
-                circuit.rz(self.z_parameters[index], qubit)
+        for index, qubit in enumerate(self.qubits_applied):
+            circuit.ry(self._y_parameters[index], qubit)
+            circuit.rz(self._z_parameters[index], qubit)
 
         self.append(circuit.to_gate(), self.qubits)
