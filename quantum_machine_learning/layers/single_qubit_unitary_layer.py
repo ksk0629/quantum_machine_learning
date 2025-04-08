@@ -79,17 +79,13 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
             prefix = ""
         parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
-        if self.qubits_applied == []:
-            self._y_parameters = []
-            self._z_parameters = []
-        else:
-            length = len(self.qubits_applied)
-            self._y_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("y"), length=length
-            )
-            self._z_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("z"), length=length
-            )
+        length = len(self.qubits_applied)
+        self._y_parameters = qiskit.circuit.ParameterVector(
+            parameter_name("y"), length=length
+        )
+        self._z_parameters = qiskit.circuit.ParameterVector(
+            parameter_name("z"), length=length
+        )
         self._parameters = [self._y_parameters, self._z_parameters]
 
     def _build(self) -> None:
