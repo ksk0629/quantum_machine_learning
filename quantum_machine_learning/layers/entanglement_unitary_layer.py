@@ -1,3 +1,4 @@
+import itertools
 import math
 
 import qiskit
@@ -37,12 +38,22 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         self.qubit_applied_pairs = qubit_applied_pairs
 
     @property
-    def qubit_applied_pairs(self) -> list[tuple[int, int]] | None:
+    def qubit_applied_pairs(self) -> list[tuple[int, int]]:
         """Return pairs of two-qubit to be applied.
 
-        :return list[tuple[int, int]] | None: pairs of two-qubit to be applied
+        :return list[tuple[int, int]]: pairs of two-qubit to be applied
         """
-        return self._qubit_applied_pairs
+        if self._qubit_applied_pairs is None:
+            if self.num_state_qubits == 0 or self.num_state_qubits == 1:
+                # If no qubits or only one qubit is there, a list of the pairs of two qubits should be empty.
+                return []
+            else:
+                # If there are multiple qubits, return all the combinations.
+                qubits = range(self.num_state_qubits)
+                all_combinations = list(itertools.combinations(qubits, 2))
+                return all_combinations
+        else:
+            return self._qubit_applied_pairs
 
     @qubit_applied_pairs.setter
     def qubit_applied_pairs(
