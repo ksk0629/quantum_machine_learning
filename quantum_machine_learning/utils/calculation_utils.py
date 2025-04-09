@@ -88,4 +88,4 @@ class CalculationUtils:
         output_width = np.floor(
             (width + 2 * padding - dilation * (kernel_size[1] - 1) - 1) / stride + 1
         )
-        return (output_height, output_width)
+        return (int(output_height), int(output_width))
