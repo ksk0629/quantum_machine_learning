@@ -62,9 +62,10 @@ class MHQuanvLayer:
         self._lookup_table: dict[tuple[int, ...], list[list[float]]] | None = None
         self._is_built: bool | None = False
 
-        self.kernel_size = kernel_size
-        self.num_filters = num_filters
-        self.seed = seed
+        # Don't use setters to avoid building this layer unintentionally.
+        self._kernel_size = kernel_size
+        self._num_filters = num_filters
+        self._seed = seed
         self._lookup_mode = lookup_mode
 
         if build:
