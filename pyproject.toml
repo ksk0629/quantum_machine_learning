@@ -46,14 +46,13 @@ build-backend = "poetry.core.masonry.api"
 markers = [
     "encoder: marks tests for Encoder family classes",
     "layer: marks tests for Layer family classes",
-    "quclassi: marks tests for QuClassi related classes",
     "preprocessor: marks tests for Preprocessor class",
     "postprocessor: marks tests for Postprocessor class",
     "path_getter: marks tests for PathGetter family classes",
     "gate: marks tests for Gate family classes",
     "utils: marks tests for Utils family classes"
 ]
-pythonpath = "./quantum_machine_learning"
+pythonpath = "./quantum_machine_learning_utils"
 testpaths = ["tests",]
 
 [tool.mypy]
@@ -73,5 +72,5 @@ exclude_lines = [
 ]
 omit = [
     "./tests/mocks.py",  # Skip the mock class file.
-    "./quantum_machine_learning/dataset_gallery/dataset_gallery.py", # Skip the class for just dataset.
+    "./quantum_machine_learning_utils/dataset_gallery/dataset_gallery.py", # Skip the class for just dataset.
 ]
