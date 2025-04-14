@@ -1,9 +1,7 @@
-from typing import Callable
-
 import qiskit
 import qiskit.circuit
 
-from quantum_machine_learning.encoders.base_encoder import BaseEncoder
+from quantum_machine_learning_utils.encoders.base_encoder import BaseEncoder
 
 
 class YZEncoder(BaseEncoder):

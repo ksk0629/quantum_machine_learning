@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from quantum_machine_learning.utils.utils import Utils
+from quantum_machine_learning_utils.utils.utils import Utils
 
 
 class TestUtils:

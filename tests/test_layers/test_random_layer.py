@@ -5,7 +5,7 @@ import string
 import pytest
 import qiskit
 
-from quantum_machine_learning.layers.random_layer import (
+from quantum_machine_learning_utils.layers.random_layer import (
     GateInfo,
     SelectOptions,
     RandomLayer,

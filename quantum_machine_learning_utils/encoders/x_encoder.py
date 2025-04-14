@@ -1,8 +1,6 @@
-from typing import Callable
-
 import qiskit
 
-from quantum_machine_learning.encoders.base_encoder import BaseEncoder
+from quantum_machine_learning_utils.encoders.base_encoder import BaseEncoder
 
 
 class XEncoder(BaseEncoder):

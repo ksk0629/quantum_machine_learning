@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from quantum_machine_learning.utils.calculation_utils import CalculationUtils
+from quantum_machine_learning_utils.utils.calculation_utils import CalculationUtils
 
 
 class TestCalculationUtils:

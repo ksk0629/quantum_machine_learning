@@ -1,6 +1,6 @@
 import pytest
 
-from quantum_machine_learning.encoders.yz_encoder import YZEncoder
+from quantum_machine_learning_utils.encoders.yz_encoder import YZEncoder
 
 
 class TestYZEncoder:

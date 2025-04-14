@@ -1,10 +1,9 @@
 import itertools
-import math
 
 import qiskit
 import qiskit.circuit
 
-from quantum_machine_learning.layers.base_parametrised_layer import (
+from quantum_machine_learning_utils.layers.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 
