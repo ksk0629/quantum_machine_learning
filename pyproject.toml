@@ -47,8 +47,6 @@ build-backend = "poetry.core.masonry.api"
 markers = [
     "encoder: marks tests for Encoder family classes",
     "layer: marks tests for Layer family classes",
-    "preprocessor: marks tests for Preprocessor class",
-    "postprocessor: marks tests for Postprocessor class",
     "path_getter: marks tests for PathGetter family classes",
     "gate: marks tests for Gate family classes",
     "utils: marks tests for Utils family classes"
