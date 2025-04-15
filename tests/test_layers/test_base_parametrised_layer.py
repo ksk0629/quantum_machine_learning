@@ -225,6 +225,27 @@ class TestBaseParametrisedLayer:
             assert tester.num_parameters == sum(num_parameters)
 
     @pytest.mark.layer
+    def test_get_parameter_name(self):
+        """Normal test;
+        Run _get_parameter_name.
+
+        Check if
+        1. the return value is with prefix if a prefix was given.
+        2. the return value is just the given parameter_name if a prefix wasn't given.
+        """
+        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
+        parameter_name = "name"
+        # 1. the return value is with prefix if a prefix was given.
+        assert (
+            tester._get_parameter_name(parameter_name=parameter_name) == parameter_name
+        )
+        # 2. the return value is just the given parameter_name if a prefix wasn't given.
+        prefix = "prefix"
+        tester.parameter_prefix = prefix
+        correct_name = f"{prefix}_{parameter_name}"
+        assert tester._get_parameter_name(parameter_name=parameter_name) == correct_name
+
+    @pytest.mark.layer
     def test_valid_check_configuration(self):
         """Normal test;
         run _build() method to see if _check_configuration works when parameters were set.

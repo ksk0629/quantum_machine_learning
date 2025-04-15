@@ -81,6 +81,19 @@ class BaseParametrisedLayer(BaseLayer, ABC):
             )
             return num_parameters
 
+    def _get_parameter_name(self, parameter_name: str) -> str:
+        """Get the parameter name from its parametr_prefix and name.
+
+        :param str parameter name: a parameter name
+        :return str: the parameter name
+        """
+        if self.parameter_prefix != "":
+            prefix = f"{self.parameter_prefix}_"
+        else:
+            prefix = ""
+
+        return f"{prefix}{parameter_name}"
+
     def _check_configuration(self, raise_on_failure: bool = True) -> bool:
         """Check if the current configuration is valid.
 
