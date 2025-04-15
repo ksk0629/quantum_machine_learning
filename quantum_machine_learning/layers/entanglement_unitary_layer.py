@@ -89,22 +89,16 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
 
     def _reset_parameters(self) -> None:
         """Reset the parameter vector."""
-        # Make the parameter name according to the prefix.
-        if self.parameter_prefix != "":
-            prefix = f"{self.parameter_prefix}_"
-        else:
-            prefix = ""
-        parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
         if self.qubit_applied_pairs == []:
             self._cy_parameters = []
             self._cz_parameters = []
         else:
             self._cy_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("cy"), length=len(self.qubit_applied_pairs)
+                self._get_parameter_name("cy"), length=len(self.qubit_applied_pairs)
             )
             self._cz_parameters = qiskit.circuit.ParameterVector(
-                parameter_name("cz"), length=len(self.qubit_applied_pairs)
+                self._get_parameter_name("cz"), length=len(self.qubit_applied_pairs)
             )
 
         self._parameters = [self._cy_parameters, self._cz_parameters]

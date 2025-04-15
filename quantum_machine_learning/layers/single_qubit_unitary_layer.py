@@ -72,19 +72,13 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
 
     def _reset_parameters(self) -> None:
         """Reset the parameter vector."""
-        # Make the parameter name according to the prefix.
-        if self.parameter_prefix != "":
-            prefix = f"{self.parameter_prefix}_"
-        else:
-            prefix = ""
-        parameter_name = lambda name: f"{prefix}{name}"
         # Set the parameters.
         length = len(self.qubits_applied)
         self._y_parameters = qiskit.circuit.ParameterVector(
-            parameter_name("y"), length=length
+            self._get_parameter_name("y"), length=length
         )
         self._z_parameters = qiskit.circuit.ParameterVector(
-            parameter_name("z"), length=length
+            self._get_parameter_name("z"), length=length
         )
         self._parameters = [self._y_parameters, self._z_parameters]
 

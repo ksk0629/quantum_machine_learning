@@ -77,18 +77,13 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
 
     def _reset_parameters(self) -> None:
         """Reset the parameter vector."""
-        # Make the parameter name according to the prefix.
-        if self.parameter_prefix != "":
-            prefix = f"{self.parameter_prefix}_"
-        else:
-            prefix = ""
-        parameter_name = lambda name: f"{prefix}{name}"
-
         # Set the parameters.
         length = self.num_state_qubits * (
             3 * self.num_reputations
         )  # [RZ*RY*RZ] * reputations
-        parameters = qiskit.circuit.ParameterVector(parameter_name("w"), length=length)
+        parameters = qiskit.circuit.ParameterVector(
+            self._get_parameter_name("w"), length=length
+        )
         self._parameters = [parameters]
 
     def _build(self) -> None:
