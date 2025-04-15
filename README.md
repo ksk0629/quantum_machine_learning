@@ -1,5 +1,5 @@
 # INTRODUCTION
-This is a util package for quantum machine learnings. Note that this package itself does not contain any models.
+This is a util package for quantum machine learnings.
 
 # HOW TO INSTALL
 ## FOR USERS
