@@ -44,10 +44,10 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
             return self._num_reputations
 
     @num_reputations.setter
-    def num_reputations(self, num_reputations: int) -> None:
+    def num_reputations(self, num_reputations: int | None) -> None:
         """Set a new number of reputations and reset parameters and registers.
 
-        :param int num_reputations: a new number of reputations
+        :param int | None num_reputations: a new number of reputations
         """
         self._num_reputations = num_reputations
         self._reset_parameters()
@@ -91,7 +91,7 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
         parameter_name = lambda name: f"{prefix}{name}"
 
         # Set the parameters.
-        length = len(self.num_state_qubits) * (
+        length = self.num_state_qubits * (
             3 * self.num_reputations
         )  # [RZ*RY*RZ] * reputations
         parameters = qiskit.circuit.ParameterVector(parameter_name("w"), length=length)
