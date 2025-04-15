@@ -71,5 +71,5 @@ exclude_lines = [
 ]
 omit = [
     "./tests/mocks.py",  # Skip the mock class file.
-    "./quantum_machine_learning_utils/dataset_gallery/dataset_gallery.py", # Skip the class for just dataset.
+    "./quantum_machine_learning/dataset_gallery/dataset_gallery.py", # Skip the class for just dataset.
 ]
