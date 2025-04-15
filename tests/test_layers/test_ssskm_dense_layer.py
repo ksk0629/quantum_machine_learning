@@ -92,16 +92,3 @@ class TestSSSKMDenseLayer:
         # 1. AttributeError arises.
         with pytest.raises(AttributeError):
             layer._build()
-
-    @pytest.mark.layer
-    def test_check_configuration_invlaid_num_reputations(self):
-        """Abnormal test:
-        Run _build() with _num_reputations being None.
-
-        Check if
-        1. AttributeError arises.
-        """
-        layer = SSSKMDenseLayer(num_state_qubits=2, num_reputations=None)
-        # 1. AttributeError arises.
-        with pytest.raises(AttributeError):
-            layer._build()

@@ -57,17 +57,11 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
         """Check if the current configuration is valid.
 
         :param bool raise_on_failure: if raise an error or not, defaults to True
-        :raises AttributeError: if the number of reputations is non-positive
         :raises AttributeError: if the number of state qubits is not greater than 1
         :return bool: if the configuration is valid
         """
         valid = super()._check_configuration(raise_on_failure=raise_on_failure)
 
-        if self.num_reputations == 0:
-            valid = False
-            if raise_on_failure:
-                error_msg = f"The number of reputations must be positive, but {self.num_reputations}."
-                raise AttributeError(error_msg)
         if self.num_state_qubits == 1:
             valid = False
             if raise_on_failure:
