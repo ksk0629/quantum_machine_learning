@@ -2,7 +2,7 @@ import qiskit
 
 
 # === BaseEncoder ===
-from quantum_machine_learning_utils.encoders.base_encoder import BaseEncoder
+from quantum_machine_learning.encoders.base_encoder import BaseEncoder
 
 
 class BaseEncoderNormalTester(BaseEncoder):
@@ -96,7 +96,7 @@ class BaseEncoderTesterWithoutResetParameters(BaseEncoder):
 
 
 # === BaseLayer ===
-from quantum_machine_learning_utils.layers.base_layer import BaseLayer
+from quantum_machine_learning.layers.base_layer import BaseLayer
 
 
 class BaseLayerNormalTester(BaseLayer):
@@ -135,7 +135,7 @@ class BaseLayerTesterWithoutResetRegister(BaseLayer):
 
 
 # === BaseParametrisedLayer ===
-from quantum_machine_learning_utils.layers.base_parametrised_layer import (
+from quantum_machine_learning.layers.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 

@@ -1,6 +1,6 @@
 import pytest
 
-from quantum_machine_learning_utils.postprocessor.postprocessor import Postprocessor
+from quantum_machine_learning.postprocessor.postprocessor import Postprocessor
 
 
 class TestPostprocessor:

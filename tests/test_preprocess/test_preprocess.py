@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from quantum_machine_learning_utils.preprocessor.preprocessor import Preprocessor
+from quantum_machine_learning.preprocessor.preprocessor import Preprocessor
 
 
 class TestPreprocessor:

@@ -5,7 +5,7 @@ import string
 import pytest
 import qiskit
 
-from quantum_machine_learning_utils.layers.dual_qubit_unitary_layer import (
+from quantum_machine_learning.layers.dual_qubit_unitary_layer import (
     DualQubitUnitaryLayer,
 )
 
