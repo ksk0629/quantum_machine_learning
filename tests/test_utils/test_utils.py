@@ -17,11 +17,13 @@ class TestUtils:
         """Normal test;
         Run fix_seed and generate random integers through each module and do the same thing.
 
-        Check if the generated integers are the same.
+        Check if
+        1. the generated integers are the same.
         """
         low = 0
         high = 100000
 
+        # 1. the generated integers are the same.
         Utils.fix_seed(self.seed)
         x_random = random.randint(low, high)
         x_np = np.random.randint(low, high)
