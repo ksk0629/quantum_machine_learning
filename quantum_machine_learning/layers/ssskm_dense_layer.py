@@ -45,12 +45,11 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
 
     @num_reputations.setter
     def num_reputations(self, num_reputations: int | None) -> None:
-        """Set a new number of reputations and reset parameters and registers.
+        """Set a new number of reputations and reset the registers.
 
         :param int | None num_reputations: a new number of reputations
         """
         self._num_reputations = num_reputations
-        self._reset_parameters()
         self._reset_register()
 
     def _check_configuration(self, raise_on_failure=True) -> bool:
@@ -75,17 +74,6 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
         qreg = qiskit.QuantumRegister(self.num_state_qubits)
         self.qregs = [qreg]
 
-    def _reset_parameters(self) -> None:
-        """Reset the parameter vector."""
-        # Set the parameters.
-        length = self.num_state_qubits * (
-            3 * self.num_reputations
-        )  # [RZ*RY*RZ] * reputations
-        parameters = qiskit.circuit.ParameterVector(
-            self._get_parameter_name("w"), length=length
-        )
-        self._parameters = [parameters]
-
     def _build(self) -> None:
         """Build the circuit."""
         super()._build()
@@ -94,16 +82,27 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
         circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
         # Add RZ, RY and RZ gates to each qubit.
+        parameter_index = 0
         for qubit in range(self.num_state_qubits):
 
             for reputation_index in range(self.num_reputations):  # Loop for reputation
-                for parameter_basic_index in range(3):  # RY * RZ * RY
-                    parameter_index = parameter_basic_index + (3 * reputation_index)
-                    parameter = self.parameters[0][parameter_index]
+                parameter = qiskit.circuit.Parameter(
+                    self._get_parameter_name(f"w[{parameter_index}]")
+                )
+                circuit.rz(parameter, qubit)
+                parameter_index += 1
 
-                    circuit.rz(parameter, qubit)
-                    circuit.ry(parameter, qubit)
-                    circuit.rz(parameter, qubit)
+                parameter = qiskit.circuit.Parameter(
+                    self._get_parameter_name(f"w[{parameter_index}]")
+                )
+                circuit.ry(parameter, qubit)
+                parameter_index += 1
+
+                parameter = qiskit.circuit.Parameter(
+                    self._get_parameter_name(f"w[{parameter_index}]")
+                )
+                circuit.rz(parameter, qubit)
+                parameter_index += 1
 
         # Add CNOT gates to entangle qubits.
         for qubit in range(self.num_state_qubits):

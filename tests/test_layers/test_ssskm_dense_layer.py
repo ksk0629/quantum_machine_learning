@@ -39,13 +39,13 @@ class TestSSSKMDenseLayer:
         1. its num_reputations is the same as the given num_reputations.
         2. its _is_build is False.
         3. its _is_build is True after running _build().
-        4. its parameters[0] has 3 * num_state_qubits * num_reputations elements.
+        4. the length of its parameters is 3 * its num_reputations * its num_state_qubits.
         5. its num_reutations is 0 after setting None.
         6. its _is_build is False.
         7. its num_reputations is the same as the new one after setting a new one.
         8. its _is_build is False.
         9. its _is_build is True after running _build().
-        10. its parameters[0] has 3 * num_state_qubits * num_reputations elements.
+        10. the length of its parameters is 3 * its num_reputations * its num_state_qubits.
         """
         num_state_qubits = 4
         num_reputations = 3
@@ -59,9 +59,9 @@ class TestSSSKMDenseLayer:
         # 3. its _is_build is True after running _build().
         layer._build()
         assert layer._is_built
-        # 4. its parameters[0] has 3 * num_state_qubits * num_reputations elements.
+        # 4. the length of its parameters is 3 * its num_reputations * its num_state_qubits.
         correct_num_parameters = 3 * num_state_qubits * num_reputations
-        assert len(layer.parameters[0]) == correct_num_parameters
+        assert len(layer.parameters) == correct_num_parameters
         # 5. its num_reutations is 0 after setting None.
         layer.num_reputations = None
         assert layer.num_reputations == 0
@@ -76,9 +76,9 @@ class TestSSSKMDenseLayer:
         # 9. its _is_build is True after running _build().
         layer._build()
         assert layer._is_built
-        # 10. its parameters[0] has 3 * num_state_qubits * num_reputations elements.
+        # 10. the length of its parameters is 3 * its num_reputations * its num_state_qubits.
         new_correct_num_parameters = 3 * num_state_qubits * new_num_reputations
-        assert len(layer.parameters[0]) == new_correct_num_parameters
+        assert len(layer.parameters) == new_correct_num_parameters
 
     @pytest.mark.layer
     def test_check_configuration_invlaid_num_state_qubits(self):
