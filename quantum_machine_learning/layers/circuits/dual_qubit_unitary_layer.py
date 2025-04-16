@@ -1,29 +1,28 @@
 import itertools
 
 import qiskit
-import qiskit.circuit
 
-from quantum_machine_learning.layers.base_parametrised_layer import (
+from quantum_machine_learning.layers.circuits.base.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 
 
-class EntanglementUnitaryLayer(BaseParametrisedLayer):
-    """EntanglementUnitaryLayer class, suggested in https://arxiv.org/pdf/2103.11307"""
+class DualQubitUnitaryLayer(BaseParametrisedLayer):
+    """DualQubitUnitaryLayer class, suggested in https://arxiv.org/pdf/2103.11307"""
 
     def __init__(
         self,
         num_state_qubits: int,
         qubit_applied_pairs: list[tuple[int, int]] | None = None,
         parameter_prefix: str | None = None,
-        name: str | None = "EntanglementUnitary",
+        name: str | None = "DualQubitUnitary",
     ):
         """initialise the layer.
 
         :param int num_state_qubits: the number of state qubits
         :param list[tuple[int, int]] | None qubit_applied_pairs: pairs of two-qubit to be applied, defaults to None
-        :param str parameter_prefix | None: a prefix of the parameter names, defaults to None
-        :param str | None name: the name of this encoder, defaults to "EntanglementUnitary"
+        :param str | None parameter_prefix: a prefix of the parameter names, defaults to None
+        :param str | None name: the name of this encoder, defaults to "DualQubitUnitary"
         """
         self._qubit_applied_pairs: list[tuple[int, int]] | None = None
 
@@ -38,9 +37,9 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
 
     @property
     def qubit_applied_pairs(self) -> list[tuple[int, int]]:
-        """Return pairs of two-qubit to be applied.
+        """Return pairs of two qubits to be applied.
 
-        :return list[tuple[int, int]]: pairs of two-qubit to be applied
+        :return list[tuple[int, int]]: pairs of two qubits to be applied
         """
         if self._qubit_applied_pairs is None:
             if self.num_state_qubits == 0 or self.num_state_qubits == 1:
@@ -55,12 +54,10 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
             return self._qubit_applied_pairs
 
     @qubit_applied_pairs.setter
-    def qubit_applied_pairs(
-        self, qubit_applied_pairs: list[tuple[int, int]] | None
-    ) -> None:
+    def qubit_applied_pairs(self, qubit_applied_pairs: list[tuple[int, int]]) -> None:
         """Set the pairs of two-qubit to be applied and reset the register.
 
-        :param list[tuple[int, int]] | None qubit_applied_pairs: a new pairs of two-qubit to be applied
+        :param list[tuple[int, int]] qubit_applied_pairs: a new pairs of two-qubit to be applied
         """
         self._qubit_applied_pairs = qubit_applied_pairs
         self._reset_register()
@@ -72,12 +69,14 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         :raises AttributeError: if the number of state qubits is not greater than 1
         :return bool: if the configuration is valid
         """
-        valid = True
+        valid = super()._check_configuration(raise_on_failure=raise_on_failure)
+
         if self.num_state_qubits <= 1:
             valid = False
             if raise_on_failure:
-                error_msg = f"num_state_qubits must be greater than 1, but now {self.num_state_qubits}."
+                error_msg = f"The number of state qubits must be greater than 1, but {self.num_state_qubits}."
                 raise AttributeError(error_msg)
+
         return valid
 
     def _reset_register(self) -> None:
@@ -92,15 +91,20 @@ class EntanglementUnitaryLayer(BaseParametrisedLayer):
         # Make the quantum circuit.
         circuit = qiskit.QuantumCircuit(*self.qregs, name=self.name)
 
-        # Add the encoding part: the rotation controlled Y and Z rotations.
-        for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):  # type: ignore
-            cry_parameter = qiskit.circuit.Parameter(
-                self._get_parameter_name(f"cry[{index}]")
+        # Add the encoding part: the rotation Y and Z.
+        for index, (qubit_1, qubit_2) in enumerate(self.qubit_applied_pairs):
+            print(qubit_1)
+            print(qubit_2)
+            # Get parameters.
+            yy_parameter = qiskit.circuit.Parameter(
+                self._get_parameter_name(f"yy[{index}]")
             )
-            crz_parameter = qiskit.circuit.Parameter(
-                self._get_parameter_name(f"crz[{index}]")
+            zz_parameter = qiskit.circuit.Parameter(
+                self._get_parameter_name(f"zz[{index}]")
             )
-            circuit.cry(cry_parameter, qubit_1, qubit_2)
-            circuit.crz(crz_parameter, qubit_1, qubit_2)
+            circuit.ryy(yy_parameter, qubit_1, qubit_2)
+            circuit.rzz(zz_parameter, qubit_1, qubit_2)
+            print(circuit)
+            print("=====")
 
         self.append(circuit.to_gate(), self.qubits)
