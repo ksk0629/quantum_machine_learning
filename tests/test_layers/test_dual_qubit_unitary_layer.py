@@ -26,10 +26,7 @@ class TestDualQubitUnitaryLayer:
         2. its qubit_applied_pairs is all the combinations of two qubits.
         3. its parameter_prefix is the empty string.
         4. its name is "DualQubitUnitary".
-        5. the length of its parameters is 2.
-        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        8. the parameter_prefix is the same as the new parameter_prefix after setting it.
+        5. the parameter_prefix is the same as the new parameter_prefix after setting it.
         """
         layer = DualQubitUnitaryLayer(num_state_qubits=num_state_qubits)
         # 1. its num_state_qubits is the same as the given num_state_qubits.
@@ -43,15 +40,7 @@ class TestDualQubitUnitaryLayer:
         assert layer.parameter_prefix == ""
         # 4. its name is "DualQubitUnitary".
         assert layer.name == "DualQubitUnitary"
-        # 5. the length of its parameters is 2.
-        assert len(layer.parameters) == 2
-        # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-        # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
-        # 8. the parameter_prefix is the same as the new parameter_prefix after setting it.
+        # 5. the parameter_prefix is the same as the new parameter_prefix after setting it.
         parameter_prefix = "HEY"
         layer.parameter_prefix = parameter_prefix
         assert layer.parameter_prefix == parameter_prefix
@@ -67,9 +56,6 @@ class TestDualQubitUnitaryLayer:
         2. its qubit_applied_pairs is the same as the given qubit_applied_paris.
         3. its parameter_prefix is the empty string.
         4. its name is "DualQubitUnitary".
-        5. the length of its parameters is 2.
-        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
         """
         random.seed(901)
 
@@ -96,14 +82,6 @@ class TestDualQubitUnitaryLayer:
             assert layer.parameter_prefix == ""
             # 4. its name is "DualQubitUnitary".
             assert layer.name == "DualQubitUnitary"
-            # 5. the length of its parameters is 2.
-            assert len(layer.parameters)
-            # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-            assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-            assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-            # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-            assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-            assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
 
     @pytest.mark.layer
     def test_init_with_name(self):
@@ -115,9 +93,6 @@ class TestDualQubitUnitaryLayer:
         2. its qubit_applied_pairs is all the combinations of two qubits.
         3. its parameter_prefix is the empty string.
         4. its name is the same as the given name.
-        5. the length of its parameters is 2.
-        6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
         """
         random.seed(901)  # For reproducibility
 
@@ -139,14 +114,6 @@ class TestDualQubitUnitaryLayer:
             assert layer.parameter_prefix == ""
             # 4. its name is the same as the given name.
             assert layer.name == name
-            # 5. the length of its parameters is 2.
-            assert len(layer.parameters) == 2
-            # 6. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-            assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-            assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-            # 7. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-            assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-            assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
 
     @pytest.mark.layer
     def test_qubit_applied_pairs(self):
@@ -155,20 +122,11 @@ class TestDualQubitUnitaryLayer:
 
         Check if
         1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
-        2. the length of its parameters is 2.
-        3. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        4. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
-        6. the length of its parameters is 2.
-        7. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        8. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
-        10. the length of its parameters is 2.
-        # 11. both elements of its parameters are the empty list.
-        12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
-        13. the length of its parameters is 2.
-        14. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        15. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
+        2. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        3. the length of its parameters is double in the size of qubit_applied_pairs.
+        4. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        5. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        6. the length of its parameters is double in the size of qubit_applied_pairs.
         """
         num_state_qubits = 7
         qubit_applied_pairs = [(0, 1), (0, 6), (1, 3)]
@@ -177,48 +135,24 @@ class TestDualQubitUnitaryLayer:
         )
         # 1. its qubit_applied_pairs is the same as the given qubit_applied_pairs.
         assert layer.qubit_applied_pairs == qubit_applied_pairs
-        # 2. the length of its parameters is 2.
-        assert len(layer.parameters) == 2
-        # 3. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-        # 4. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
-        # 5. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
+        # 2. its qubit_applied_pairs is all the combinations of two qubits after setting None in qubit_applied_paris.
         layer.qubit_applied_pairs = None
         qubits = list(range(layer.num_state_qubits))
         all_combinations_of_two_qubits = list(itertools.combinations(qubits, 2))
         assert len(layer.qubit_applied_pairs) == len(all_combinations_of_two_qubits)
         assert set(layer.qubit_applied_pairs) == set(all_combinations_of_two_qubits)
-        # 6. the length of its parameters is 2.
-        assert len(layer.parameters) == 2
-        # 7. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-        # 8. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
-        # 9. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
+        # 3. the length of its parameters is double in the size of qubit_applied_pairs.
+        assert len(layer.parameters) == 2 * len(layer.qubit_applied_pairs)
+        # 4. its qubit_applied_pairs is the empty list after setting 1 in num_state_qubits.
         layer.num_state_qubits = 1
         assert layer.qubit_applied_pairs == []
-        # 10. the length of its parameters is 2.
-        assert len(layer.parameters) == 2
-        # 11. both elements of its parameters are the empty list.
-        assert layer.parameters[0] == []
-        assert layer.parameters[1] == []
-        # 12. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        # 5. its qubit_applied_pairs is the same as the new qubit_applied_pairs after setting a new qubit_applied_pairs.
+        layer.num_state_qubits = 7
         new_qubit_applied_pairs = [(0, 1), (1, 2), (3, 4), (5, 6)]
         layer.qubit_applied_pairs = new_qubit_applied_pairs
         assert layer.qubit_applied_pairs == new_qubit_applied_pairs
-        # 13. the length of its parameters is 2.
-        assert len(layer.parameters) == 2
-        # 14. the types of both elements of its parameters are qiskit.circuit.ParameterVector.
-        assert isinstance(layer.parameters[0], qiskit.circuit.ParameterVector)
-        assert isinstance(layer.parameters[1], qiskit.circuit.ParameterVector)
-        # 15. the lengths of both elements of its parameters are the same as one of its qubit_applied_pairs.
-        assert len(layer.parameters[0]) == len(layer.qubit_applied_pairs)
-        assert len(layer.parameters[1]) == len(layer.qubit_applied_pairs)
+        # 6. the length of its parameters is double in the size of qubit_applied_pairs.
+        assert len(layer.parameters) == 2 * len(layer.qubit_applied_pairs)
 
     @pytest.mark.layer
     def test_valid_check_configuration(self):
