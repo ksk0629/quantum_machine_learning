@@ -1,6 +1,6 @@
 import pytest
 
-from quantum_machine_learning.layers.circuits.ansatz.ssskm_dense_layer import (
+from quantum_machine_learning.layers.circuits.ansatzes.ssskm_dense_layer import (
     SSSKMDenseLayer,
 )
 

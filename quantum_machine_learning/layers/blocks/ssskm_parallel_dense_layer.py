@@ -4,11 +4,11 @@ import numpy as np
 import qiskit
 from qiskit.primitives import BackendEstimatorV2
 
-from quantum_machine_learning.layers.circuits.base.base_parametrised_layer import (
+from quantum_machine_learning.layers.circuits.bases.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 from quantum_machine_learning.layers.circuits.feature_maps.y_angle import YAngle
-from quantum_machine_learning.layers.circuits.ansatz.ssskm_dense_layer import (
+from quantum_machine_learning.layers.circuits.ansatzes.ssskm_dense_layer import (
     SSSKMDenseLayer,
 )
 

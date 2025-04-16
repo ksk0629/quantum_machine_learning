@@ -7,7 +7,7 @@ import numpy as np
 import qiskit
 import qiskit.circuit
 
-from quantum_machine_learning.layers.circuits.base.base_layer import BaseLayer
+from quantum_machine_learning.layers.circuits.bases.base_layer import BaseLayer
 from quantum_machine_learning.gate.s_swap_gate import SSwapGate
 from quantum_machine_learning.utils.utils import Utils
 

@@ -2,7 +2,7 @@ import itertools
 
 import qiskit
 
-from quantum_machine_learning.layers.circuits.base.base_parametrised_layer import (
+from quantum_machine_learning.layers.circuits.bases.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import qiskit
 
-from quantum_machine_learning.layers.circuits.base.base_layer import BaseLayer
+from quantum_machine_learning.layers.circuits.bases.base_layer import BaseLayer
 
 
 class BaseParametrisedLayer(BaseLayer, ABC):

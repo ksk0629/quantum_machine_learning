@@ -1,102 +1,8 @@
 import qiskit
 
 
-# === BaseEncoder ===
-from quantum_machine_learning.encoders.base_encoder import BaseEncoder
-
-
-class BaseEncoderNormalTester(BaseEncoder):
-    """Mock class of a child class of BaseEncoder for normal test
-    This is just for testing, so the docstrings will be omitted."""
-
-    def __init__(self, data_dimension, name=None):
-        self._num_reset_register = 0
-        self._num_reset_parameters = 0
-
-        super().__init__(data_dimension=data_dimension, name=name)
-
-    @property
-    def num_encoding_qubits(self):
-        return 1
-
-    def _check_configuration(self, raise_on_failure=True):
-        valid = super()._check_configuration()
-        return valid
-
-    def _build(self):
-        super()._build()
-
-    def _reset_register(self):
-        self._num_reset_register += 1
-
-    def _reset_parameters(self):
-        self._num_reset_parameters += 1
-
-
-class BaseEncoderTesterWithoutNumEncodingQubits(BaseEncoder):
-    """Mock class of a child class of BaseEncoder for abnormal test
-    This is just for testing, so the docstrings will be omitted."""
-
-    def __init__(self, data_dimension, name=None):
-        super().__init__(data_dimension=data_dimension, name=name)
-
-    def _check_configuration(self, raise_on_failure=True):
-        pass
-
-    def _build(self):
-        pass
-
-    def _reset_register(self):
-        pass
-
-    def _reset_parameters(self):
-        pass
-
-
-class BaseEncoderTesterWithoutResetRegister(BaseEncoder):
-    """Mock class of a child class of BaseEncoder for normal test
-    This is just for testing, so the docstrings will be omitted."""
-
-    def __init__(self, data_dimension: int, name=None):
-        super().__init__(data_dimension=data_dimension, name=name)
-
-    @property
-    def num_encoding_qubits(self):
-        pass
-
-    def _check_configuration(self, raise_on_failure=True):
-        pass
-
-    def _build(self):
-        pass
-
-    def _reset_parameters(self):
-        pass
-
-
-class BaseEncoderTesterWithoutResetParameters(BaseEncoder):
-    """Mock class of a child class of BaseEncoder for normal test
-    This is just for testing, so the docstrings will be omitted."""
-
-    def __init__(self, data_dimension, name=None):
-        super().__init__(data_dimension=data_dimension, name=name)
-
-    @property
-    def num_encoding_qubits(self):
-        pass
-
-    def _check_configuration(self, raise_on_failure=True):
-        pass
-
-    def _build(self):
-        pass
-
-    def _reset_register(self):
-        pass
-
-
 # === BaseLayer ===
-from quantum_machine_learning.layers.circuits.base.base_layer import BaseLayer
+from quantum_machine_learning.layers.circuits.bases.base_layer import BaseLayer
 
 
 class BaseLayerNormalTester(BaseLayer):
@@ -135,7 +41,7 @@ class BaseLayerTesterWithoutResetRegister(BaseLayer):
 
 
 # === BaseParametrisedLayer ===
-from quantum_machine_learning.layers.circuits.base.base_parametrised_layer import (
+from quantum_machine_learning.layers.circuits.bases.base_parametrised_layer import (
     BaseParametrisedLayer,
 )
 
