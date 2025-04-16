@@ -1,6 +1,6 @@
 import pytest
 
-from quantum_machine_learning.layers.circuits.single_qubit_unitary_layer import (
+from quantum_machine_learning.layers.circuits.ansatz.single_qubit_unitary_layer import (
     SingleQubitUnitaryLayer,
 )
 
