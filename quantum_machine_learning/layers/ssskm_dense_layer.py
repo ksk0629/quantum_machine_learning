@@ -84,8 +84,7 @@ class SSSKMDenseLayer(BaseParametrisedLayer):
         # Add RZ, RY and RZ gates to each qubit.
         parameter_index = 0
         for qubit in range(self.num_state_qubits):
-
-            for reputation_index in range(self.num_reputations):  # Loop for reputation
+            for _ in range(self.num_reputations):  # Loop for reputation
                 parameter = qiskit.circuit.Parameter(
                     self._get_parameter_name(f"w[{parameter_index}]")
                 )
