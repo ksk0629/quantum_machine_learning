@@ -4,10 +4,7 @@ import string
 import pytest
 import qiskit
 
-from tests.mocks import (
-    BaseParametrisedLayerNormalTester,
-    BaseParametrisedLayerTesterWithoutResetParameters,
-)
+from tests.mocks import BaseParametrisedLayerNormalTester
 
 
 class TestBaseParametrisedLayer:
@@ -24,23 +21,16 @@ class TestBaseParametrisedLayer:
         Check if
         1. its num_state_qubits is the same as the given num_state_qubits.
         2. its parameter_prefix is "".
-        3. its _parameters is None.
-        4. its _num_reset_register is 2.
+        3. its _num_reset_register is 2.
            (This means that _reset_register method ran when num_state_qubits and parameter_prefix were set.)
-        5. its _num_reset_parameters is 2.
-           (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
         """
         tester = BaseParametrisedLayerNormalTester(num_state_qubits=num_state_qubits)
         # 1. its num_state_qubits is the same as the given num_state_qubits.
         assert tester.num_state_qubits == num_state_qubits
         # 2. its parameter_prefix is "".
         assert tester.parameter_prefix == ""
-        # 3. its _parameters is None.
-        assert tester._parameters is None
-        # 4. its _num_reset_register is 2.
+        # 3. its _num_reset_register is 2.
         assert tester._num_reset_register == 2
-        # 5. its _num_reset_parameters is 2.
-        assert tester._num_reset_parameters == 2
 
     @pytest.mark.layer
     def test_init_with_name(self):
@@ -51,7 +41,6 @@ class TestBaseParametrisedLayer:
         1. its name is the same as the given name.
         2. its num_state_qubits is the same as the given num_state_qubits.
         3. its parameter_prefix is "".
-        4. its parameters is None.
         """
         random.seed(901)  # For reproducibility
 
@@ -71,8 +60,6 @@ class TestBaseParametrisedLayer:
             assert tester.num_state_qubits == num_state_qubits
             # 3. its parameter_prefix is "".
             assert tester.parameter_prefix == ""
-            # 4. its parameters is None.
-            assert tester._parameters is None
 
     @pytest.mark.layer
     def test_init_with_parameter_prefix(self):
@@ -82,7 +69,6 @@ class TestBaseParametrisedLayer:
         Check if
         1. its parameter_prefix is the same as the given parameter_prefix.
         2. its num_state_qubits is the same as the given num_state_qubits.
-        4. its parameters is None.
         """
         random.seed(901)  # For reproducibility
 
@@ -100,8 +86,6 @@ class TestBaseParametrisedLayer:
             assert tester.parameter_prefix == parameter_prefix
             # 2. its num_state_qubits is the same as the given num_state_qubits.
             assert tester.num_state_qubits == num_state_qubits
-            # 4. its parameters is None.
-            assert tester._parameters is None
 
     @pytest.mark.layer
     @pytest.mark.parametrize("num_state_qubits", [1, 2, 5, 6])
@@ -113,27 +97,20 @@ class TestBaseParametrisedLayer:
         1. its num_state_qubits is the same as the given num_state_qubits.
         2. its _num_reset_register is 2.
            (This means that _reset_register method ran when num_state_qubits and parameter_prefix were set.)
-        3. its _num_reset_parameters is 2.
-           (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
-        4. its num_state_qubits is the same as the new num_state_qubits after setting a new value in num_state_qubits.
-        5. its _num_reset_register is 3.
-        6. its _num_reset_parameters is 3.
+        3. its num_state_qubits is the same as the new num_state_qubits after setting a new value in num_state_qubits.
+        4. its _num_reset_register is 3.
         """
         tester = BaseParametrisedLayerNormalTester(num_state_qubits=num_state_qubits)
         # 1. its num_state_qubits is the same as the given num_state_qubits.
         assert tester.num_state_qubits == num_state_qubits
         # 2. its _num_reset_register is 2.
         assert tester._num_reset_register == 2
-        # 3. its _num_reset_parameters is 2.
-        assert tester._num_reset_parameters == 2
-        # 4. its num_state_qubits is the same as the new num_state_qubits after setting a new value in num_state_qubits.
+        # 3. its num_state_qubits is the same as the new num_state_qubits after setting a new value in num_state_qubits.
         new_num_state_qubits = num_state_qubits + 3
         tester.num_state_qubits = new_num_state_qubits
         assert tester.num_state_qubits == new_num_state_qubits
-        # 5. its _num_reset_register is 3.
+        # 4. its _num_reset_register is 3.
         assert tester._num_reset_register == 3
-        # 6. its _num_reset_parameters is 3.
-        assert tester._num_reset_parameters == 3
 
     @pytest.mark.layer
     @pytest.mark.parametrize("parameter_prefix", ["hey", " this", " is ", "test "])
@@ -145,14 +122,10 @@ class TestBaseParametrisedLayer:
         1. its parameter_prefix is the same as the given parameter_prefix.
         2. its _num_reset_register is 2.
            (This means that _reset_register method ran when num_state_qubits and parameter_prefix were set.)
-        3. its _num_reset_parameters is 2.
-           (This means that _reset_parameters method ran when num_state_qubits and parameter_prefix were set.)
-        4. its parameter_prefix is "" after settting None in it.
-        5. its _num_reset_register is 3.
-        6. its _num_reset_parameters is 3.
-        7. its parameter_prefix is the same as the new parameter_prefix after setting a new value in it.
-        8. its _num_reset_register is 4.
-        9. its _num_reset_parameters is 4.
+        3. its parameter_prefix is "" after settting None in it.
+        4. its _num_reset_register is 3.
+        5. its parameter_prefix is the same as the new parameter_prefix after setting a new value in it.
+        6. its _num_reset_register is 4.
         """
         tester = BaseParametrisedLayerNormalTester(
             num_state_qubits=2, parameter_prefix=parameter_prefix
@@ -161,68 +134,17 @@ class TestBaseParametrisedLayer:
         assert tester.parameter_prefix == parameter_prefix
         # 2. its _num_reset_register is 2.
         assert tester._num_reset_register == 2
-        # 3. its _num_reset_parameters is 2.
-        assert tester._num_reset_parameters == 2
-        # 4. its parameter_prefix is "" after settting None in it.
+        # 3. its parameter_prefix is "" after settting None in it.
         tester.parameter_prefix = None
         assert tester.parameter_prefix == ""
-        # 5. its _num_reset_register is 3.
+        # 4. its _num_reset_register is 3.
         assert tester._num_reset_register == 3
-        # 6. its _num_reset_parameters is 3.
-        assert tester._num_reset_parameters == 3
-        # 7. its parameter_prefix is the same as the new parameter_prefix after setting a new value in it.
+        # 5. its parameter_prefix is the same as the new parameter_prefix after setting a new value in it.
         new_parameter_prefix = parameter_prefix + "OK!"
         tester.parameter_prefix = new_parameter_prefix
         assert tester.parameter_prefix == new_parameter_prefix
-        # 8. its _num_reset_register is 4.
+        # 6. its _num_reset_register is 4.
         assert tester._num_reset_register == 4
-        # 9. its _num_reset_parameters is 4.
-        assert tester._num_reset_parameters == 4
-
-    @pytest.mark.layer
-    def test_parameters(self):
-        """Normal test;
-        call parameters property.
-
-        Check if
-        1. its parameters is None.
-        2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVector.
-        """
-        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
-        # 1. its parameters is None.
-        assert tester.parameters is None
-        # 2. its parameters is the given list after setting a new list of qiskit.circuit.ParameterVector.
-        parameters = [qiskit.circuit.ParameterVector("x", length=2)]
-        tester._parameters = parameters
-        assert tester.parameters == parameters
-
-    @pytest.mark.layer
-    def test_num_parameters(self):
-        """Normal test;
-        call num_parameters property.
-
-        Check if
-        1. its num_parameters is 0.
-        2. its num_parameters is a total number of elements in each list after setting a new _parameters.
-        """
-        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
-        # 1. its num_parameters is 0.
-        assert tester.num_parameters == 0
-
-        num_trials = 100
-        random.seed(901)
-        for index in range(num_trials):
-            num_parameter_vectors = random.randint(1, 100)
-            num_parameters = [
-                random.randint(1, 100) for _ in range(num_parameter_vectors)
-            ]
-            parameters = [
-                qiskit.circuit.ParameterVector(f"name_{index}", length=length)
-                for length in num_parameters
-            ]
-            # 2. its num_parameters is a total number of elements in each list after setting a new _parameters.
-            tester._parameters = parameters
-            assert tester.num_parameters == sum(num_parameters)
 
     @pytest.mark.layer
     def test_get_parameter_name(self):
@@ -244,45 +166,3 @@ class TestBaseParametrisedLayer:
         tester.parameter_prefix = prefix
         correct_name = f"{prefix}_{parameter_name}"
         assert tester._get_parameter_name(parameter_name=parameter_name) == correct_name
-
-    @pytest.mark.layer
-    def test_valid_check_configuration(self):
-        """Normal test;
-        run _build() method to see if _check_configuration works when parameters were set.
-
-        Check if
-        1. no error arises.
-        """
-        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
-        # 1. no error arises.
-        parameters = [qiskit.circuit.ParameterVector("x", length=2)]
-        tester._parameters = parameters
-        tester._build()
-
-    @pytest.mark.layer
-    def test_invalid_check_configuration(self):
-        """Abnormal test;
-        run _build() method to see if _check_configuration works when there is no parameters set.
-
-        Check if
-        1. AttributeError arises.
-        """
-        tester = BaseParametrisedLayerNormalTester(num_state_qubits=2)
-        # 1. AttributeError arises.
-        with pytest.raises(AttributeError):
-            tester._build()
-
-    @pytest.mark.layer
-    def test_without_reset_parameters(self):
-        """Abnormal test;
-        Create an instance of a child class of BaseParametrisedLayer without implementing _reset_parameters.
-
-        Check if
-        1. TypeError arises.
-        """
-        with pytest.raises(TypeError):
-            # 1. TypeError arises.
-            num_state_qubits = 2
-            BaseParametrisedLayerTesterWithoutResetParameters(
-                num_state_qubits=num_state_qubits
-            )

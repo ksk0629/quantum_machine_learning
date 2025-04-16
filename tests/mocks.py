@@ -147,7 +147,6 @@ class BaseParametrisedLayerNormalTester(BaseParametrisedLayer):
 
     def __init__(self, num_state_qubits, parameter_prefix=None, name=None):
         self._num_reset_register = 0
-        self._num_reset_parameters = 0
         super().__init__(
             num_state_qubits=num_state_qubits,
             parameter_prefix=parameter_prefix,
@@ -157,33 +156,8 @@ class BaseParametrisedLayerNormalTester(BaseParametrisedLayer):
     def _reset_register(self):
         self._num_reset_register += 1
 
-    def _reset_parameters(self):
-        self._num_reset_parameters += 1
-
     def _check_configuration(self, raise_on_failure=True):
         super()._check_configuration(raise_on_failure=raise_on_failure)
 
     def _build(self):
         super()._build()
-
-
-class BaseParametrisedLayerTesterWithoutResetParameters(BaseParametrisedLayer):
-    """This is an abnormal test class for BaseParametrisedLayer without implementing _reset_parameters method.
-    Thus, the docstrings will be omitted hereby.
-    """
-
-    def __init__(self, num_state_qubits, parameter_prefix=None, name=None):
-        super().__init__(
-            num_state_qubits=num_state_qubits,
-            parameter_prefix=parameter_prefix,
-            name=name,
-        )
-
-    def _reset_register(self):
-        pass
-
-    def _check_configuration(self, raise_on_failure=True):
-        pass
-
-    def _build(self):
-        pass
