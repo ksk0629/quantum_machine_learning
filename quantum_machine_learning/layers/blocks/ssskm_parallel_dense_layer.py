@@ -52,9 +52,9 @@ class SSSKMParallelDenseLayer:
 
         self._encoder = None
         self._dense_layers: list[SSSKMParallelDenseLayer] = []
-        self._trainable_parameters: (
-            list[qiskit.circuit.parametertable.ParameterView] | None
-        ) = None
+        self._trainable_parameters: list[
+            qiskit.circuit.parametertable.ParameterView
+        ] = []
 
         if build:
             self._build()
@@ -145,7 +145,7 @@ class SSSKMParallelDenseLayer:
         :return qiskit.circuit.parametertable.ParameterView: the parameters for encoding
         """
         if self._encoder is None:
-            return 0
+            return []
         else:
             return self._encoder.parameters
 
