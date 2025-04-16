@@ -23,8 +23,6 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
         :param str | None name: the name of this encoder, defaults to "SingleQubitUnitary"
         """
         self._qubits_applied = None
-        self._y_parameters = None
-        self._z_parameters = None
 
         super().__init__(
             num_state_qubits=num_state_qubits,
@@ -48,12 +46,11 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
 
     @qubits_applied.setter
     def qubits_applied(self, qubits_applied: list[int] | None):
-        """Set the qubits to be applied and reset the register and parameters.
+        """Set the qubits to be applied and reset the registe.
 
         :param list[int] | None qubits_applied: a new qubits to be applied
         """
         self._qubits_applied = qubits_applied
-        self._reset_parameters()
         self._reset_register()
 
     def _check_configuration(self, raise_on_failure=True) -> bool:
@@ -70,18 +67,6 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
         qreg = qiskit.QuantumRegister(self.num_state_qubits)
         self.qregs = [qreg]
 
-    def _reset_parameters(self) -> None:
-        """Reset the parameter vector."""
-        # Set the parameters.
-        length = len(self.qubits_applied)
-        self._y_parameters = qiskit.circuit.ParameterVector(
-            self._get_parameter_name("y"), length=length
-        )
-        self._z_parameters = qiskit.circuit.ParameterVector(
-            self._get_parameter_name("z"), length=length
-        )
-        self._parameters = [self._y_parameters, self._z_parameters]
-
     def _build(self) -> None:
         """Build the circuit."""
         super()._build()
@@ -91,7 +76,13 @@ class SingleQubitUnitaryLayer(BaseParametrisedLayer):
 
         # Add the encoding part: the rotation Y and Z.
         for index, qubit in enumerate(self.qubits_applied):
-            circuit.ry(self._y_parameters[index], qubit)
-            circuit.rz(self._z_parameters[index], qubit)
+            y_parameter = qiskit.circuit.Parameter(
+                self._get_parameter_name(f"y[{index}]")
+            )
+            z_parameter = qiskit.circuit.Parameter(
+                self._get_parameter_name(f"z[{index}]")
+            )
+            circuit.ry(y_parameter, qubit)
+            circuit.rz(z_parameter, qubit)
 
         self.append(circuit.to_gate(), self.qubits)
