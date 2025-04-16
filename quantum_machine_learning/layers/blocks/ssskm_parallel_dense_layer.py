@@ -40,19 +40,18 @@ class SSSKMParallelDenseLayer:
         :param list[list[float]] trainable_parameter_values: trainable parameter values to process data, defaults to None
         :param bool build: if each dense_layers must be built, defaults to True
         """
-        self._num_qubits: int | None = num_qubits
-        self._num_reputations: int | None = num_reputations
-        self._num_layers: int | None = num_layers
+        self._num_qubits: int = num_qubits
+        self._num_reputations: int = num_reputations
+        self._num_layers: int = num_layers
         self._parameter_prefix: str | None = parameter_prefix
-        self._encoder: BaseParametrisedLayer = encoder_class(
-            data_dimension=self.num_qubits
-        )
+        self._encoder_class: BaseParametrisedLayer = encoder_class
         self._transformer: Callable[[list[float]], list[float]] = transformer
         self._trainable_parameter_values: list[list[float]] | None = (
             trainable_parameter_values
         )
 
-        self._dense_layers: list[SSSKMParallelDenseLayer] | None = None
+        self._encoder = None
+        self._dense_layers: list[SSSKMParallelDenseLayer] = []
         self._trainable_parameters: (
             list[qiskit.circuit.parametertable.ParameterView] | None
         ) = None
@@ -66,16 +65,13 @@ class SSSKMParallelDenseLayer:
 
         :return int: the number of qubits
         """
-        if self._num_qubits is None:
-            return 0
-        else:
-            return self._num_qubits
+        return self._num_qubits
 
     @num_qubits.setter
-    def num_qubits(self, num_qubits: int | None) -> None:
+    def num_qubits(self, num_qubits: int) -> None:
         """Set a new number of qubits and re-build the dense layers.
 
-        :param int | None num_qubits: a new number of qubits
+        :param int num_qubits: a new number of qubits
         """
         self._num_qubits = num_qubits
         self._build()
@@ -86,16 +82,13 @@ class SSSKMParallelDenseLayer:
 
         :return int: the number of reputations
         """
-        if self._num_reputations is None:
-            return 0
-        else:
-            return self._num_reputations
+        return self._num_reputations
 
     @num_reputations.setter
-    def num_reputations(self, num_reputations: int | None) -> None:
+    def num_reputations(self, num_reputations: int) -> None:
         """Set the new number of reputations and re-build the dense layers.
 
-        :param int | None num_reputations: a new number of reputations
+        :param int num_reputations: a new number of reputations
         """
         self._num_reputations = num_reputations
         self._build()
@@ -106,16 +99,13 @@ class SSSKMParallelDenseLayer:
 
         :return int: the number of dense layers
         """
-        if self._num_layers is None:
-            return 0
-        else:
-            return self._num_layers
+        return self._num_layers
 
     @num_layers.setter
-    def num_layers(self, num_layers: int | None) -> None:
+    def num_layers(self, num_layers: int) -> None:
         """Set a new number of layers and re-build the dense layers.
 
-        :param int | None num_layers: a new number of layers
+        :param int num_layers: a new number of layers
         """
         self._num_layers = num_layers
         self._build()
@@ -154,29 +144,15 @@ class SSSKMParallelDenseLayer:
 
         :return qiskit.circuit.parametertable.ParameterView: the parameters for encoding
         """
-        return self._encoder.parameters
-
-    def _check_configuration(self, raise_on_failure=True) -> bool:
-        """Check if the current configuration is valid.
-
-        :param bool raise_on_failure: if raise an error or not, defaults to True
-        :raises AttributeError: if the number of dense layers is not positive
-        :return bool: if the configuration is valid
-        """
-        valid = True
-
-        if self.num_layers == 0:
-            valid = False
-            if raise_on_failure:
-                error_msg = f"The number of dense layers must be greater than 1, but {self.num_layers}."
-                raise AttributeError(error_msg)
-
-        return valid
+        if self._encoder is None:
+            return 0
+        else:
+            return self._encoder.parameters
 
     def _build(self) -> None:
         """Build the circuit."""
-        if not self._check_configuration():
-            return
+        # Create the encoder.
+        self._encoder = self._encoder_class(data_dimension=self.num_qubits)
 
         # Add dense layers.
         self._dense_layers = []
