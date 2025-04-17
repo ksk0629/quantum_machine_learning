@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "quantum machine learning package"
+name = "quantum-machine-learning"
 version = "0.1.0"
 description = "A small quantum machine learning package"
 authors = ["ksk0629 <neko.to.tomodachi.muse@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "example_package", from = "quantum_machine_learning" }]
+packages = [{ include = "quantum_machine_learning", from = "quantum_machine_learning" }]
 repository = "https://github.com/ksk0629/quantum_machine_leearning"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -26,7 +26,6 @@ pytest = "^8.3.5"
 qiskit-ibm-runtime = "^0.37.0"
 
 [tool.poetry.scripts]
-run_example = "src.example_package.example:main"
 
 
 [tool.poetry.group.dev.dependencies]
