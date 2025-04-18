@@ -179,19 +179,15 @@ class SSSKMParallelDenseLayer:
     def run(
         self,
         data: list[float],
-        backend: qiskit.providers.BackendV2,
-        estimator_class: BackendEstimatorV2,
-        shots: int,
-        seed: int,
+        backend_for_optimisation: qiskit.providers.BackendV2,
+        estimator: BackendEstimatorV2,
         optimisation_level: int,
     ) -> list[float]:
         """Run this layer to process a given data.
 
         :param list[float] data: a data to be processed
-        :param qiskit.providers.BackendV2 backend: a backend
-        :param qiskit.primitives.EstimatorV2 estimator_class: a class of estimator
-        :param int shots: the number of shots
-        :param int seed: a random seed
+        :param qiskit.providers.BackendV2 backend_for_optimisation: a backend to optimise the circuits
+        :param qiskit.primitives.EstimatorV2 estimator: an estimator, which must be set options as you wish
         :param int optimisation_level: an optimisation level
         :raises ValueError: if the length of the data and its total_qubits are not the same
         :return list[float]: a processed data
@@ -202,7 +198,7 @@ class SSSKMParallelDenseLayer:
 
         # Prepare the preset pass manager.
         pm = qiskit.transpiler.preset_passmanagers.generate_preset_pass_manager(
-            backend=backend, optimization_level=optimisation_level
+            backend=backend_for_optimisation, optimization_level=optimisation_level
         )
         # Process the data.
         processed_data = []
@@ -235,9 +231,6 @@ class SSSKMParallelDenseLayer:
             transpiled_dense_layer = pm.run(assined_dense_layer)
 
             # Get the expectation values.
-            estimator = estimator_class(
-                backend, options={"seed_estimator": seed, "default_shots": shots}
-            )
             for index in range(self.num_qubits):
                 # Define the observable.
                 pauli = ["I"] * self.num_qubits
